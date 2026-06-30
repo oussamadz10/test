@@ -1,36 +1,62 @@
-// استبدل هذا بالرابط الخاص بك على فيرسيل ex: https://your-app.vercel.app/api/analyze-devis
-const SERVER_URL = "https://your-backend-url.vercel.app/api/analyze-devis";
+const express = require('express');
+const cors = require('cors');
+const app = express();
 
-async function processAIStep3WithServer() {
-    const userDescription = document.getElementById('ai-description').value;
+// إعدادات CORS لضمان استقبال وإرسال البيانات مع المتصفح والمواقع دون أي حظر أمني
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-    if (!userDescription.trim()) {
-        alert("Veuillez détaillez vos travaux.");
-        return;
-    }
+app.use(express.json());
 
+// توثيق تشغيل السيرفر عند فتحه بالمتصفح مباشرة لمنع خطأ Not Found
+app.get('/', (req, res) => {
+    res.send("ChronoDevis AI Backend Cloud Server is running perfectly!");
+});
+
+app.post('/api/analyze-devis', async (req, res) => {
     try {
-        // محاولة الاتصال بالسيرفر الخارجي
-        const response = await fetch(SERVER_URL, {
+        const { description } = req.body;
+
+        // صياغة أمر هندسي صارم يضمن عودة البيانات كـ JSON سليم ومنطقي بالساعات الفعلية لفرنسا
+        const systemPrompt = `Tu es un métreur expert en plomberie et chauffage/CVC en France.
+        Analyse la demande du client et renvoie UNIQUEMENT un objet JSON strict, sans texte explicatif avant ou après.
+        Structure attendue :
+        {
+          "title": "Titre professionnel court de l'intervention",
+          "hours": 3,
+          "materials": 150,
+          "desc": "Description technique normée de la prestation en français."
+        }`;
+
+        // مخاطبة مستودعات الذكاء الاصطناعي الخارجية بشكل مباشر وآمن
+        const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1", {
+            headers: { 
+                Authorization: "Bearer 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",
+                "Content-Type": "application/json" 
+            },
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ description: userDescription })
+            body: JSON.stringify({ inputs: `<s>[SYS] ${systemPrompt} [/SYS] Client demande : ${description} </s>` }),
         });
 
-        // 1. إذا استجاب السيرفر ولكن برمز خطأ (مثل خطأ 500 للذكاء الاصطناعي)
-        if (!response.ok) {
-            throw new Error(`Le serveur a répondu avec un statut : ${response.status}`);
+        const result = await response.json();
+        const generatedText = result[0].generated_text;
+        
+        // استخراج كائن الـ JSON النظيف فقط لضمان عدم انهيار دالة Parse
+        const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            res.json(JSON.parse(jsonMatch[0]));
+        } else {
+            res.status(500).json({ error: "Format de réponse IA invalide." });
         }
 
-        const data = await response.json();
-        console.log("البيانات قادمة بنجاح من السيرفر الخارجي:", data);
-
-        // هنا يتم ملء الجدول بناءً على رد السيرفر الذكي...
-        goToStep(3);
-
     } catch (error) {
-        // 2. إذا فشل الاتصال تماماً (السيرفر مغلق أو الرابط خاطئ أو مشكلة CORS)
-        console.error("خطأ في الاتصال بالسيرفر:", error);
-        alert("❌ السيرفر الخارجي غير متصل أو واجه مشكلة! تفاصيل: " + error.message);
+        console.error(error);
+        res.status(500).json({ error: "Erreur interne du serveur cloud." });
     }
-}
+});
+
+// 🛠️ التعديل الجذري والإلزامي لمنصة Vercel لإنهاء الخطأ الأحمر:
+module.exports = app;
