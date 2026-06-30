@@ -10,88 +10,76 @@ app.use(cors({
 
 app.use(express.json());
 
-// دالة سحرية لتطهير النص ومحو أي همزات فرنسية (é, è, à, ç) لضمان مطابقة الكلمات بدقة
-function cleanAccents(text) {
-    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
 app.get('/', (req, res) => {
-    res.send("ChronoDevis Google Gemini Cloud Server is running perfectly!");
+    res.send("ChronoDevis Gemini Paid Stream Server is live!");
 });
 
 app.post('/api/analyze-devis', async (req, res) => {
+    // إعلام المتصفح بأن البيانات ستصل بشكل دفق مستمر (Streaming)
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
     try {
         const { description } = req.body;
-        
-        // تطهير النص وتحويله لأحرف صغيرة ومحو الهمزات تماماً
-        const textLower = description ? cleanAccents(description.toLowerCase()) : "";
 
-        const systemInstruction = `Tu es un métreur expert en plomberie et chauffage en France.
-        Analyse la demande du client et renvoie UNIQUEMENT un objet JSON strict.
-        Structure attendue :
+        const systemInstruction = `Tu es un métreur expert en plomberie, chauffage, sanitaire et VMC en France.
+        Analyse la demande du client et génère un chiffrage technique précis.
+        Tu dois évaluer de manière réaliste le temps de travail nécessaire (en heures) et le coût des fournitures/matériaux HT (en euros).
+        
+        Règles de calcul strictes à intégrer logiquement dans ton analyse :
+        - Remplacement flexible/douchette ou petit joint : 1 heure, matériel : 15€ à 30€.
+        - Remplacement mécanisme de chasse d'eau : 2 heures, matériel : 40€ à 60€.
+        - Pose d'un pack WC standard au sol : 3 à 4 heures, matériel : 150€ à 250€.
+        - Pose d'un WC suspendu (avec bâti-support) : 7 à 8 heures, matériel : 350€ à 500€.
+        - Pose d'un sèche-serviettes : 3 à 5 heures, matériel : 200€ à 400€.
+        - Changement de chaudière ou Pompe à Chaleur (PAC) : 14 à 20 heures, matériel : 2000€ à 4500€.
+        - Si plusieurs tâches, ADDITIONNE les heures et les matériels de manière logique.
+
+        Tu dois impérativement renvoyer UNIQUEMENT un objet JSON strict avec cette structure exacte :
         {
-          "title": "Titre court professionnel de l'intervention",
-          "hours": 3,
-          "materials": 150,
-          "desc": "Description technique normée de la prestation en français."
+          "title": "Un titre professionnel et court en français (ex: Remplacement de chaudière à gaz)",
+          "hours": (un nombre entier d'heures total calculé),
+          "materials": (un nombre entier pour le coût total des matériaux HT),
+          "desc": "Une description technique, détaillée, étape par étape selon les normes DTU en français de l'ensemble des prestations."
         }`;
 
         const geminiApiKey = "AQ.Ab8RN6KbEqIzSLisXYLnOTLiu5ECmNHovKf57fTGrS-0UkmIGw";
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+        // استخدام رابط البث الحي streamGenerateContent المدعوم الآن بحسابك المشحون
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key=${geminiApiKey}`;
 
-        let aiResponse = null;
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: `Voici la demande de travaux : ${description}` }]
+                }],
+                systemInstruction: {
+                    parts: [{ text: systemInstruction }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    temperature: 0.2
+                }
+            })
+        });
 
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: `Demande du client : ${description}` }] }],
-                    systemInstruction: { parts: [{ text: systemInstruction }] },
-                    generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
-                })
-            });
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
 
-            const data = await response.json();
-            
-            if (data.candidates && data.candidates[0].content.parts[0].text) {
-                const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
-                aiResponse = JSON.parse(cleanJsonText);
-            }
-        } catch (aiError) {
-            console.error("Gemini API Error, switching to fallback:", aiError);
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            // تمرير الكلمات فوراً إلى موقعك حية وثانية بثانية
+            res.write(chunk);
         }
-
-        // صمام الأمان الذكي والمطور (يفحص النصوص بعد تطهيرها من الهمزات تماماً)
-        if (!aiResponse) {
-            let exactHours = 3; let exactMaterials = 120; let internalTitle = "Intervention Technique Hydro-Sanitaire";
-            let fallbackDesc = "Installation et mise en conformité des réseaux selon les normes DTU en vigueur.";
-
-            if (textLower.includes('chaudiere') || textLower.includes('pac') || textLower.includes('chauffage') || textLower.includes('condensation')) {
-                exactHours = 16; 
-                exactMaterials = 2400; 
-                internalTitle = "Remplacement Chaudière à Condensation / PAC"; 
-                fallbackDesc = "Dépose de l'ancien générateur thermique, nettoyage du réseau par désembouage, pose de la nouvelle chaudière à condensation haute performance, raccordements ventouse et mise en service.";
-            }
-            else if (textLower.includes('flexible') || textLower.includes('pommeau')) { exactHours = 1; exactMaterials = 25; internalTitle = "Remplacement Flexible de Douche"; fallbackDesc = "Dépose du flexible défectueux et pose d'un flexible professionnel inox avec joints neufs."; }
-            else if (textLower.includes('joint') || textLower.includes('siphon')) { exactHours = 1; exactMaterials = 15; internalTitle = "Reprise d'étanchéité / Siphon"; fallbackDesc = "Nettoyage των filetages, remplacement des joints d'étanchéité et tests de mise en eau."; }
-            else if (textLower.includes('suspendu')) { exactHours = 7; exactMaterials = 420; internalTitle = "Installation Pack WC Suspendu"; fallbackDesc = "Fixation du bâti-support WC suspendu, raccordements encastrés et coffrage technique d'habillage."; }
-            else if (textLower.includes('wc') || textLower.includes('toilette')) { exactHours = 3; exactMaterials = 180; internalTitle = "Installation Pack WC Standard"; fallbackDesc = "Pose au sol d'un pack WC complet, raccordement eau propre et évacuation PVC."; }
-            else if (textLower.includes('seche serviette')) { exactHours = 4; exactMaterials = 250; internalTitle = "Pose Radiateur Sèche-Serviettes"; fallbackDesc = "Fixation murale, raccordement sur circuit de chauffage et mise en service avec purge."; }
-
-            aiResponse = { title: internalTitle, hours: exactHours, materials: exactMaterials, desc: fallbackDesc };
-        }
-
-        res.json(aiResponse);
+        res.end();
 
     } catch (error) {
         console.error(error);
-        res.json({
-            title: "Intervention Technique CVC",
-            hours: 14,
-            materials: 1800,
-            desc: "Travaux d'installation et ajustement thermique sous les normes NF."
-        });
+        res.end();
     }
 });
 
