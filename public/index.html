@@ -1,0 +1,498 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChronoDevis AI | Spécialiste Plomberie, Chauffage, Sanitaire & VMC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .step {
+            display: none;
+        }
+
+            .step.active {
+                display: block;
+            }
+
+        .blur-effect {
+            filter: blur(6px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .modal {
+            display: none;
+        }
+
+            .modal.active {
+                display: flex;
+            }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <div>
+        <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 py-4 px-6 md:px-12 flex justify-between items-center">
+            <div class="text-2xl font-bold text-slate-900 tracking-tight">
+                Chrono<span class="text-orange-500">Devis AI</span>
+                <span class="text-xs font-normal text-slate-400 block md:inline md:ml-2">Spécialiste CVC & Plomberie</span>
+            </div>
+            <span class="text-xs font-semibold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <span class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span> Zone Valence 100km Active
+            </span>
+        </header>
+
+        <main class="max-w-4xl mx-auto my-8 px-4">
+
+            <div id="progress-container" class="hidden mb-8 bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div id="progress-bar" class="bg-orange-500 h-full transition-all duration-500" style="width: 25%"></div>
+            </div>
+
+            <div id="hero-section" class="text-center py-16 px-4">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
+                    Simulateur de Devis Technique <br><span class="text-orange-500">Plomberie, Chauffage, Sanitaire & VMC</span>
+                </h1>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto mb-8">
+                    Calculateur intelligent dédié aux installations thermiques et sanitaires sur Valence et sa région. Estimation précise main d'œuvre, fournitures pros et planification.
+                </p>
+                <button onclick="startWizard()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-xl shadow-orange-500/20 transition-all transform hover:-translate-y-0.5">
+                    Lancer le calculateur technique
+                </button>
+            </div>
+
+            <div id="wizard-container" class="bg-white border border-slate-100 rounded-2xl shadow-xl p-6 md:p-10 hidden">
+
+                <div id="step-1" class="step active">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-1">1. Type d'intervention & Zone</h2>
+                    <p class="text-slate-500 text-sm mb-6">Définissons le cadre de votre projet thermique ou sanitaire.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div id="type-renov" onclick="selectType('Rénovation / Remplacement')" class="border-2 border-slate-200 hover:border-orange-500 rounded-xl p-5 cursor-pointer bg-slate-50 transition flex items-start gap-4">
+                            <div>
+                                <h3 class="font-bold text-slate-800">Rénovation & Remplacement</h3>
+                                <p class="text-xs text-slate-500 mt-1">Réfection de salle de bain, changement de chaudière/PAC, mise aux normes VMC.</p>
+                            </div>
+                        </div>
+                        <div id="type-neuf" onclick="selectType('Installation Neuve')" class="border-2 border-slate-200 hover:border-orange-500 rounded-xl p-5 cursor-pointer bg-slate-50 transition flex items-start gap-4">
+                            <div>
+                                <h3 class="font-bold text-slate-800">Création / Neuf</h3>
+                                <p class="text-xs text-slate-500 mt-1">Pose complète de réseau sur maison neuve ou extension (Plomberie, VMC, Chauffage).</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <label class="block font-semibold text-slate-700 mb-2">Distance du chantier par rapport à Valence (26000) :</label>
+                        <select id="geo-distance" class="w-full border border-slate-200 bg-slate-50 rounded-xl p-3.5 focus:outline-none focus:border-orange-500 focus:bg-white transition">
+                            <option value="zone1">Zone Proche (0 à 25 km) - ex: Bourg, Romans, Guilherand</option>
+                            <option value="zone2">Zone Moyenne (25 à 50 km) - ex: Montélimar, Privas, Tournon</option>
+                            <option value="zone3">Zone Éloignée (50 à 100 km) - ex: Grenoble, Sud Lyon</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="goToStep(2)" class="bg-slate-900 text-white font-semibold px-6 py-3 rounded-xl hover:bg-slate-800 transition">Suivant</button>
+                    </div>
+                </div>
+
+                <div id="step-2" class="step">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h2 class="text-2xl font-bold text-slate-900">2. Description technique de vos besoins</h2>
+                    </div>
+                    <p class="text-slate-500 text-sm mb-6">Précisez les équipements concernés (ex: pose pompe à chaleur, fuite cuivre, installation VMC double flux, pose suspendu...).</p>
+
+                    <div class="mb-6">
+                        <label class="block font-semibold text-slate-700 mb-2">Détaillez votre projet (Texte libre) :</label>
+                        <textarea id="ai-description" rows="4" placeholder="Ex: Je souhaite remplacer ma vieille chaudière par une pompe à chaleur..." class="w-full border border-slate-200 bg-slate-50 rounded-xl p-4 focus:outline-none focus:border-orange-500 focus:bg-white transition font-medium text-slate-700"></textarea>
+                    </div>
+
+                    <div class="mb-8">
+                        <label class="block font-semibold text-slate-700 mb-3">Gamme de matériel souhaitée :</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="border border-slate-200 rounded-xl p-4 text-center cursor-pointer block hover:bg-slate-50 transition">
+                                <input type="radio" name="investment" value="Intermédiaire" checked class="accent-orange-500 block mx-auto mb-2">
+                                <span class="font-bold text-sm block">Gamme Standard / Intermédiaire</span>
+                                <span class="text-xs text-slate-400">Fournitures pros certifiées NF (Taux horaire: 50€ HT)</span>
+                            </label>
+                            <label class="border border-slate-200 rounded-xl p-4 text-center cursor-pointer block hover:bg-slate-50 transition">
+                                <input type="radio" name="investment" value="Haut de Gamme" class="accent-orange-500 block mx-auto mb-2">
+                                <span class="font-bold text-sm block">Gamme Premium / Haute Performance</span>
+                                <span class="text-xs text-slate-400">Marques Leaders (Atlantic, Grohe...) (Taux horaire: 78€ HT)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <button onclick="goToStep(1)" class="text-slate-500 font-medium px-4 py-2 hover:text-slate-800 transition">Retour</button>
+                        <button id="btn-submit-ai" onclick="processAIStep3()" class="bg-slate-900 text-white font-semibold px-6 py-3 rounded-xl hover:bg-slate-800 transition">
+                            <span id="btn-text">Analyser mon projet</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="step-3" class="step">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-1">3. Planification technique de l'intervention</h2>
+                    <p class="text-slate-500 text-sm mb-4">La durée nécessaire estimée par l'IA externe pour garantir la conformité aux DTU.</p>
+
+                    <div class="bg-orange-50 border border-orange-100 rounded-xl p-4 mb-6 flex items-center justify-between">
+                        <span class="text-sm font-medium text-orange-800">Temps d'intervention requis :</span>
+                        <span id="calculated-days" class="text-lg font-bold text-orange-600">-- heures</span>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block font-semibold text-slate-700 mb-2">Date d'intervention souhaitée :</label>
+                        <input type="date" id="date-start" onchange="calculateEndProjectDate()" class="w-full border border-slate-200 bg-slate-50 rounded-xl p-3.5 focus:outline-none focus:border-orange-500 focus:bg-white transition">
+                    </div>
+
+                    <div class="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                        <span class="text-xs text-slate-400 font-medium block uppercase tracking-wider">Date de fin des essais de mise en service (hors week-end) :</span>
+                        <span id="date-end-display" class="text-lg font-bold text-slate-800">Sélectionnez une date de début</span>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <button onclick="goToStep(2)" class="text-slate-500 font-medium px-4 py-2 hover:text-slate-800 transition">Retour</button>
+                        <button onclick="renderAIDevis()" class="bg-orange-500 text-white font-bold px-8 py-3 rounded-xl hover:bg-orange-600 shadow-lg shadow-orange-500/10 transition flex items-center gap-2">
+                            <span>Générer l'estimation technique HT</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="result-wrapper" class="hidden relative">
+
+                <div id="email-gate" class="absolute inset-0 z-30 bg-slate-900/40 backdrop-blur-md rounded-2xl flex items-center justify-center p-4">
+                    <div class="bg-white p-8 rounded-2xl max-w-md w-full shadow-2xl text-center border border-slate-100">
+                        <h3 class="text-2xl font-bold text-slate-900 mb-1">Analyse Technique Prête</h3>
+                        <p class="text-slate-500 text-sm mb-6">Votre chiffrage spécialisé CVC / Plomberie est calculé. Entrez votre email pour débloquer le Devis.</p>
+
+                        <input type="email" id="auth-email" placeholder="votre@email.com" class="w-full border border-slate-200 rounded-xl p-3.5 mb-4 text-center focus:outline-none focus:border-orange-500 font-medium">
+                        <button onclick="unlockResults()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-orange-500/20">
+                            Voir le Devis Technique HT
+                        </button>
+                    </div>
+                </div>
+
+                <div id="devis-board" class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden blur-effect">
+                    <div class="bg-slate-900 text-white p-6 md:p-8 flex flex-col md:flex-row justify-between gap-4">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-widest text-orange-400">Étude Technique & Chiffrage Spécialisé</span>
+                            <h2 class="text-2xl font-bold mt-1" id="out-type">---</h2>
+                            <p class="text-xs text-slate-400 mt-1">Déplacement & Logistique : <span id="out-geo" class="text-white font-medium">---</span></p>
+                        </div>
+                        <div class="md:text-right bg-white/10 p-3.5 rounded-xl backdrop-blur-sm self-start">
+                            <span class="text-xs text-slate-300 block">Planning & Tests d'étanchéité :</span>
+                            <span class="text-sm font-bold block mt-0.5" id="out-dates">Du --/-- au --/--</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-slate-50 border-b border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-900 mb-3">Détails des postes techniques étudiés (Plomberie / Chauffage / Sanitaire / VMC) :</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-600 border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider">
+                                        <th class="pb-2 font-semibold">Poste de Travail</th>
+                                        <th class="pb-2 font-semibold">Description de la Prestation Normée</th>
+                                        <th class="pb-2 font-semibold text-right">Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ai-breakdown-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="p-6 md:p-8 space-y-6">
+                        <div class="flex justify-between items-start pb-4 border-b border-slate-100">
+                            <div>
+                                <h4 class="font-bold text-slate-800" id="out-labor-title">Main d'œuvre Spécialisée</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Calculé selon le barème horaire réel de l'activité.</p>
+                            </div>
+                            <span class="text-xl font-bold text-slate-900" id="out-labor">0,00 €</span>
+                        </div>
+
+                        <div class="flex justify-between items-start pb-4 border-b border-slate-100">
+                            <div>
+                                <h4 class="font-bold text-slate-800">Matériaux, Matériel Thermique & Tuyauteries</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">La valeur des fournitures pros est estimée en temps réel par le serveur.</p>
+                            </div>
+                            <span class="text-xl font-bold text-slate-900" id="out-materials">0,00 €</span>
+                        </div>
+
+                        <div class="flex justify-between items-start pb-4 border-b border-slate-100">
+                            <div>
+                                <h4 class="font-bold text-slate-800">Logistique, Approvisionnement et Transport</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Frais kilométriques réels calculés au départ de Valence.</p>
+                            </div>
+                            <span class="text-xl font-bold text-orange-600" id="out-travel">0,00 €</span>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-2">
+                            <div>
+                                <span class="text-base font-bold text-slate-900 block">Montant Total HT Estimé</span>
+                                <span class="text-xs text-emerald-600 font-medium">TVA non applicable, art. 293 B du CGI (Régime Micro-entreprise)</span>
+                            </div>
+                            <span class="text-3xl font-extrabold text-orange-500" id="out-total">0,00 €</span>
+                        </div>
+
+                        <div id="unlocked-actions" class="hidden pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+                            <button onclick="downloadPDFMock()" class="flex-1 bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2">
+                                Télécharger le Devis Technique PDF
+                            </button>
+                        </div>
+
+                        <div id="premium-box" class="hidden mt-4 p-5 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200/60 text-center">
+                            <h4 class="font-bold text-amber-900 text-base mb-1">Besoin de bloquer vos dates d'intervention ?</h4>
+                            <p class="text-xs text-amber-700/80 max-w-md mx-auto mb-4">Valisez cette simulation pour réserver le planning de l'artisan et déclencher la visite technique de conformité sur site.</p>
+                            <button onclick="triggerPremiumPayment()" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm px-6 py-3.5 rounded-xl shadow-md hover:from-amber-600 hover:to-orange-600 transition flex items-center justify-center gap-2 mx-auto">
+                                Bloquer mes dates & réserver la visite sur site
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 px-6 border-t border-slate-800 text-center mt-12">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                &copy; 2026 ChronoDevis AI. Tous droits réservés.
+            </div>
+            <div class="flex gap-6 font-medium">
+                <button onclick="openModal('modal-cgv')" class="hover:text-white transition underline">CGV / CGU & Protection Fraude</button>
+                <button onclick="openModal('modal-legal')" class="hover:text-white transition underline">Mentions Légales & RGPD</button>
+            </div>
+        </div>
+    </footer>
+
+    <div id="modal-cgv" class="modal fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-bold text-slate-900 text-lg">Conditions Générales (CGV/CGU) & Sécurité</h3>
+                <button onclick="closeModal('modal-cgv')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto text-sm text-slate-600 space-y-4">
+                <p class="text-xs text-slate-400"><em>En vigueur au 27 juin 2026</em></p>
+                <h4 class="font-bold text-slate-900">Article 1 : Objet du service</h4>
+                <p>Le site propose un outil de simulation basé sur l'IA pour estimer le coût des travaux de plomberie, chauffage, sanitaire et VMC dans un rayon de 100 km autour de Valence (26000). Les résultats fournis en ligne sont des estimations indicatives hors taxes (HT).</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-legal" class="modal fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-bold text-slate-900 text-lg">Mentions Légales & RGPD</h3>
+                <button onclick="closeModal('modal-legal')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto text-sm text-slate-600 space-y-4">
+                <p class="text-xs text-slate-400"><em>En vigueur au 27 juin 2026</em></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let dataStore = { type: '', zone: '', textDescription: '', investment: '', durationHours: 0, travelCostPerDay: 0, calculatedMatCost: 0, customGeneratedDesc: "", dynamicTitle: "" };
+        const DAYS_NEEDED_BEFORE_START = 7;
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function startWizard() {
+            document.getElementById('hero-section').classList.add('hidden');
+            document.getElementById('progress-container').classList.remove('hidden');
+            document.getElementById('wizard-container').classList.remove('hidden');
+        }
+
+        function selectType(selectedType) {
+            dataStore.type = selectedType;
+            document.getElementById('type-renov').className = "border-2 border-slate-200 hover:border-orange-500 rounded-xl p-5 cursor-pointer bg-slate-50 transition flex items-start gap-4";
+            document.getElementById('type-neuf').className = "border-2 border-slate-200 hover:border-orange-500 rounded-xl p-5 cursor-pointer bg-slate-50 transition flex items-start gap-4";
+
+            if (selectedType === 'Rénovation / Remplacement') {
+                document.getElementById('type-renov').classList.add('border-orange-500', 'bg-orange-50/30');
+            } else {
+                document.getElementById('type-neuf').classList.add('border-orange-500', 'bg-orange-50/30');
+            }
+        }
+
+        function goToStep(stepNum) {
+            if (stepNum === 2 && !dataStore.type) {
+                alert("Veuillez sélectionner le type d'intervention.");
+                return;
+            }
+            document.querySelectorAll('.step').forEach(element => element.classList.remove('active'));
+            document.getElementById('step-' + stepNum).classList.add('active');
+            document.getElementById('progress-bar').style.width = (stepNum * 25) + '%';
+        }
+
+        // [FETCH API ROUTE CONNECTED DIRECT TO VERCEL BACKEND CLOUD]
+        async function processAIStep3() {
+            const description = document.getElementById('ai-description')?.value || "";
+            if (!description.trim()) {
+                alert("Veuillez détailler vos travaux.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-ai');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Analyse Gemini en cours...";
+            }
+
+            try {
+                // 🛠️ التوجيه الصارم إلى السيرفر المشحون والنشط حالياً على Vercel لإنهاء رسالة الخطأ:
+                const response = await fetch('https://chronodevisteste.vercel.app/api/analyze-devis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description: description })
+                });
+
+                const rawText = await response.text();
+                console.log("Raw Text Received:", rawText);
+
+                // تنظيف واقتطاع كائن الـ JSON النظيف من محركات جوجل
+                const jsonStart = rawText.indexOf('{');
+                const jsonEnd = rawText.lastIndexOf('}') + 1;
+
+                if (jsonStart === -1 || jsonEnd === 0) {
+                    throw new Error("Format JSON introuvable");
+                }
+
+                const finalJson = JSON.parse(rawText.substring(jsonStart, jsonEnd));
+
+                // حفظ وتمرير البيانات للواجهة
+                if (typeof dataStore !== 'undefined') {
+                    dataStore.dynamicTitle = finalJson.title || "Intervention Technique";
+                    dataStore.durationHours = Number(finalJson.hours) || 16;
+                    dataStore.calculatedMatCost = Number(finalJson.materials) || 2400;
+                    dataStore.customGeneratedDesc = finalJson.desc || "Description technique.";
+                }
+
+                // تحديث الساعات حياً على الواجهة في المربع البرتقالي
+                const calculatedDaysElem = document.getElementById('calculated-days');
+                if (calculatedDaysElem) {
+                    calculatedDaysElem.innerText = `${finalJson.hours} Heure(s) `;
+                }
+
+                // عرض التقرير المالي والهندسي الحر لجيميناي في جدول المقايسة
+                const tableBody = document.getElementById('ai-breakdown-table-body');
+                if (tableBody) {
+                    tableBody.innerHTML = `
+                <tr class="border-b border-slate-100">
+                    <td class="py-3 font-semibold text-slate-800 pr-4">${finalJson.title}</td>
+                    <td class="py-3 text-slate-600 max-w-md pr-4 leading-relaxed whitespace-pre-line">${finalJson.desc}</td>
+                    <td class="py-3 text-right text-emerald-600 font-medium">${finalJson.materials} € HT</td>
+                </tr>
+            `;
+                }
+
+                goToStep(3);
+
+            } catch (error) {
+                console.error("Gemini Error:", error);
+                alert("Une erreur est survenue lors de l'analyse avec Google Gemini. Vérifiez la connexion du serveur.");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = "Analyser mon projet";
+                }
+            }
+        }
+
+        function calculateEndProjectDate() {
+            let startVal = document.getElementById('date-start').value;
+            if (!startVal) return;
+            let currentDate = new Date(startVal);
+            currentDate.setDate(currentDate.getDate() + Math.max(1, Math.ceil(dataStore.durationHours / 7)));
+            document.getElementById('date-end-display').innerText = currentDate.toLocaleDateString('fr-FR');
+            return currentDate;
+        }
+
+        function renderAIDevis() {
+            if (!document.getElementById('date-start').value) { alert("Sélectionnez la date."); return; }
+            document.getElementById('wizard-container').classList.add('hidden');
+            document.getElementById('progress-container').classList.add('hidden');
+            document.getElementById('result-wrapper').classList.remove('hidden');
+
+            let materialsCost = dataStore.calculatedMatCost;
+            if (dataStore.investment === 'Haut de Gamme') materialsCost = Math.ceil(materialsCost * 1.4);
+
+            let hourlyRate = dataStore.investment === 'Intermédiaire' ? 50 : 78;
+            let laborCost = dataStore.durationHours * hourlyRate;
+            let daysCount = Math.max(1, Math.ceil(dataStore.durationHours / 7));
+            let travelCost = dataStore.travelCostPerDay * daysCount;
+            let total = materialsCost + laborCost + travelCost;
+
+            dataStore.finalTotalCalculated = total.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
+
+            document.getElementById('out-type').innerText = dataStore.dynamicTitle;
+            document.getElementById('out-labor-title').innerText = `Main d'œuvre (${dataStore.durationHours}h à ${hourlyRate}€/h HT)`;
+            document.getElementById('out-geo').innerText = dataStore.zone === 'zone1' ? 'Zone Proche (<25km)' : dataStore.zone === 'zone2' ? 'Zone Moyenne (25-50km)' : 'Zone Éloignée (50-100km)';
+
+            document.getElementById('ai-breakdown-table-body').innerHTML = `
+                    <tr class="border-b border-slate-100">
+                        <td class="py-3 font-semibold text-slate-800 pr-4">${dataStore.dynamicTitle}</td>
+                        <td class="py-3 text-slate-500 max-w-md pr-4 leading-relaxed">${dataStore.customGeneratedDesc}</td>
+                        <td class="py-3 text-right text-emerald-600 font-medium">Inclus</td>
+                    </tr>
+                `;
+
+            document.getElementById('out-labor').innerText = laborCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
+            document.getElementById('out-materials').innerText = materialsCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
+            document.getElementById('out-travel').innerText = travelCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
+            document.getElementById('out-total').innerText = dataStore.finalTotalCalculated;
+
+            let startDateObj = new Date(document.getElementById('date-start').value);
+            let endDateObj = calculateEndProjectDate();
+            document.getElementById('out-dates').innerText = `Du ${startDateObj.toLocaleDateString('fr-FR')} au ${endDateObj.toLocaleDateString('fr-FR')}`;
+        }
+
+        function unlockResults() {
+            let email = document.getElementById('auth-email').value;
+            if (email && email.includes('@')) {
+                document.getElementById('email-gate').classList.add('hidden');
+                document.getElementById('devis-board').classList.remove('blur-effect');
+                document.getElementById('unlocked-actions').classList.remove('hidden');
+                document.getElementById('premium-box').classList.remove('hidden');
+                sendDevisEmail(email);
+            } else { alert("Email invalide."); }
+        }
+
+        function sendDevisEmail(clientEmail) {
+            const serviceID = "service_2o7qzy5";
+            const templateID = "template_9esnxmv";
+
+            const templateParams = {
+                client_email: clientEmail,
+                devis_type: dataStore.dynamicTitle,
+                devis_duration: document.getElementById('out-dates').innerText,
+                devis_description: document.getElementById('ai-description').value,
+                devis_details: `Analyse Real-Time AI Externe :\n${dataStore.customGeneratedDesc}\nTotal HT: ${dataStore.finalTotalCalculated}`,
+                devis_total: dataStore.finalTotalCalculated
+            };
+            emailjs.send(serviceID, templateID, templateParams);
+        }
+
+        function downloadPDFMock() { alert("Téléchargement du Devis Technique PDF réussi !"); }
+        function triggerPremiumPayment() { alert("Redirection sécurisée pour bloquer votre créneau d'intervention."); }
+    </script>
+</body>
+</html>
