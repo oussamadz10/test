@@ -1,18 +1,23 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
 
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
-// أضف هذا السطر في ملف server.js لحل مشكلة الـ OPTIONS نهائياً
-app.options('*', cors());
+// 🛠️ دالة مخصصة وصارمة للتحكم في الـ CORS والـ Preflight لضمان العمل على Netlify
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    // التعامل الفوري مع طلبات OPTIONS التمهيدية (Preflight) لمنع خطأ 404
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send("ChronoDevis Gemini Pure AI Server is Active!");
+    res.send("ChronoDevis Gemini Cloud Server is Active!");
 });
 
 app.post('/api/analyze-devis', async (req, res) => {
@@ -46,7 +51,7 @@ app.post('/api/analyze-devis', async (req, res) => {
         });
 
         const data = await response.json();
-
+        
         if (data.candidates && data.candidates[0].content.parts[0].text) {
             const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
             res.json(JSON.parse(cleanJsonText));
