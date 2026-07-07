@@ -359,7 +359,7 @@
 
             try {
                 // 🛠️ التوجيه الصارم إلى السيرفر المشحون والنشط حالياً على Vercel لإنهاء رسالة الخطأ:
-                const response = await fetch('https://chronodevisteste.vercel.app/api/analyze-devis', {
+                const response = await fetch('/api/analyze-devis', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ description: description })
