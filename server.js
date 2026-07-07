@@ -7,7 +7,8 @@ app.use(cors({
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
+// أضف هذا السطر في ملف server.js لحل مشكلة الـ OPTIONS نهائياً
+app.options('*', cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
