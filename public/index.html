@@ -363,7 +363,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ description: description })
                 });
-
                 const rawText = await response.text();
                 console.log("Raw Text Received:", rawText);
 
