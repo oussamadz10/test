@@ -11,22 +11,21 @@ app.use(cors({
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send("ChronoDevis Gemini Pure Freedom Server is Live!");
+    res.send("ChronoDevis Gemini Pure AI Server is Active!");
 });
 
 app.post('/api/analyze-devis', async (req, res) => {
     try {
         const { description } = req.body;
 
-        // طلب تقرير حر بالكامل من جوجل جيميناي دون التدخل في حساباته
-        const systemInstruction = `Tu es un métreur expert en plomberie et CVC en France.
-        Analyse la demande du client et estime LIBREMENT selon ton intelligence le nombre d'heures et le coût du matériel HT.
+        const systemInstruction = `Tu es un métreur expert en plomberie et chauffage en France.
+        Analyse la demande du client et génère un chiffrage technique précis.
         Tu dois impérativement renvoyer UNIQUEMENT un objet JSON strict avec cette structure exacte :
         {
-          "title": "Un titre professionnel court de la prestation",
-          "hours": (met ici ton estimation libre d'heures sous forme de NOMBRE ENTIER),
-          "materials": (met ici ton estimation libre du coût matériel HT sous forme de NOMBRE ENTIER),
-          "desc": "Rédige ici ton rapport d'expert complet, détaillé, étape par étape et ultra professionnel en français."
+          "title": "Un titre professionnel de la prestation (ex: Rénovation Salle de Bain)",
+          "hours": 16,
+          "materials": 2400,
+          "desc": "Une description technique détaillée, étape par étape selon les normes DTU en français."
         }`;
 
         const geminiApiKey = "AQ.Ab8RN6KbEqIzSLisXYLnOTLiu5ECmNHovKf57fTGrS-0UkmIGw";
@@ -36,17 +35,17 @@ app.post('/api/analyze-devis', async (req, res) => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: `Demande de travaux : ${description}` }] }],
+                contents: [{ parts: [{ text: description }] }],
                 systemInstruction: { parts: [{ text: systemInstruction }] },
                 generationConfig: {
                     responseMimeType: "application/json",
-                    temperature: 0.7 // درجة حرارة مرتفعة ليعطيك إجابة حرة وإبداعية تماماً كمنصة جيميناي الرسمية
+                    temperature: 0.3
                 }
             })
         });
 
         const data = await response.json();
-        
+
         if (data.candidates && data.candidates[0].content.parts[0].text) {
             const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
             res.json(JSON.parse(cleanJsonText));
@@ -55,7 +54,7 @@ app.post('/api/analyze-devis', async (req, res) => {
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ error: "Internal Error" });
     }
 });
 
