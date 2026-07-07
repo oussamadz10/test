@@ -1,30 +1,22 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 
 app.use(express.json());
 
-// دالة أمان إضافية لضمان مرور طلبات OPTIONS التمهيدية دون فحص
-app.options('/api/analyze-devis', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    return res.sendStatus(200);
-});
+// 1. جعل السيرفر يعرض ملفات الموقع تلقائياً من مجلد public
+app.use(express.static(path.join(__dirname, 'public')));
 
+// 2. استقبال طلبات تحليل المقايسة من جوجل جيميناي المدفوع والسريع
 app.post('/api/analyze-devis', async (req, res) => {
-    // 🛠️ زرع الـ Headers مباشرة داخل بداية دالة الاستقبال لمنع خطأ الـ CORS بشكل فوري
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
     try {
         const { description } = req.body;
 
         const systemInstruction = `Tu es un métreur expert en plomberie et chauffage en France.
         Analyse la demande du client et génère un chiffrage technique précis.
-        Tu devez renvoyer UNIQUEMENT un objet JSON strict avec cette structure exacte :
+        Tu dois impérativement renvoyer UNIQUEMENT un objet JSON strict :
         {
-          "title": "Un titre professionnel court de la prestation",
+          "title": "Un titre professionnel de la prestation",
           "hours": 16,
           "materials": 2400,
           "desc": "Une description technique détaillée, étape par étape selon les normes DTU en français."
@@ -47,19 +39,19 @@ app.post('/api/analyze-devis', async (req, res) => {
         
         if (data.candidates && data.candidates[0].content.parts[0].text) {
             const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
-            return res.json(JSON.parse(cleanJsonText));
+            res.json(JSON.parse(cleanJsonText));
         } else {
-            return res.status(500).json({ error: "Erreur Gemini" });
+            res.status(500).json({ error: "Erreur Gemini" });
         }
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ error: "Internal Error" });
     }
 });
 
-// استقبال الطلبات العامة للتأكد من عمل السيرفر حياً
-app.get('/', (req, res) => {
-    res.send("ChronoDevis Gemini Server is completely active!");
+// 3. 🛠️ توجيه النطاق الرئيسي لفتح ملف index.html المدمج فوراً بدلاً من النص القديم
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 module.exports = app;
