@@ -4,6 +4,10 @@
     {
       "source": "/api/analyze-devis",
       "destination": "/api/analyze-devis.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/public/$1"
     }
   ]
 }
