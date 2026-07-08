@@ -3,7 +3,7 @@ const app = express();
 
 app.use(express.json());
 
-// 🎯 ضبط استقبال الطلب على المسار الرئيسي للدالة السحابية مباشرة
+// استقبال الطلبات على المسار الرئيسي للدالة السحابية
 app.post(['/api/analyze-devis', '/'], async (req, res) => {
     try {
         const { description } = req.body;
@@ -20,7 +20,7 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
 
-        // 🚀 الاتصال بخوادم جوجل جيميناي
+        // 🚀 الاتصال الآمن والمباشر بخوادم جوجل جيميناي
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -32,15 +32,15 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
 
         const data = await response.json();
         
-        // فحص بنية رد جيميناي وفك التشفير بأمان
+        // فحص بنية رد جيميناي للتأكد من عدم وجود تداخل
         if (!data.candidates || !data.candidates[0].content.parts[0].text) {
-            throw new Error("Réponse Gemini invalide");
+            return res.status(500).json({ error: "Réponse Gemini vide" });
         }
 
         const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
         const finalJson = JSON.parse(cleanJsonText);
 
-        // إرسال كائن JSON حقيقي وموثق إلى المتصفح
+        // إرسال البيانات النظيفة للمتصفح
         return res.json(finalJson);
 
     } catch (error) {
@@ -49,5 +49,5 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
     }
 });
 
-// ⚠️ القاتل الصامت: يجب إزالة app.listen(3000) تماماً وتصدير الموديول فقط
+// تصدير التطبيق السحابي النظيف لـ Vercel
 module.exports = app;
