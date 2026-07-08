@@ -1,3 +1,21 @@
+const express = require('express');
+const cors = require('cors');
+const app = express();
+
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+// أضف هذا السطر في ملف server.js لحل مشكلة الـ OPTIONS نهائياً
+app.options('*', cors());
+
+app.use(express.json());
+
+app.get('/', (req, res) => {
+    res.send("ChronoDevis Gemini Pure AI Server is Active!");
+});
+
 // تأكد أن السيرفر يستقبل الطلب على المسار الرئيسي للدالة السحابية مباشرة
 app.post(['/api/analyze-devis', '/'], async (req, res) => {
     try {
