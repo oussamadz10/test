@@ -371,8 +371,12 @@
 
             try {
                 const systemInstruction = `Tu es un métreur expert en plomberie et chauffage en France. Analyse la demande et génère un chiffrage. Renvoyer UNIQUEMENT un objet JSON strict : {"title": "Titre", "hours": 16, "materials": 2400, "desc": "Description"}`;
-                const geminiApiKey = "AQ.Ab8RN6KbEqIzSLisXYLnOTLiu5ECmNHovKf57fTGrS-0UkmIGw";
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+                // 🔒 استدعاء المفتاح السري بأمان من بيئة السيرفر الخلفي
+const geminiApiKey = process.env.GEMINI_API_KEY; 
+
+const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+
+// ... باقي كود الـ fetch الخاص بك في السيرفر الخلفي لإرسال الطلب لجوجل
 
                 // الاتصال المباشر بخوادم جوجل جيميناي الرسمية
                 const response = await fetch('/api/analyze-devis', {
