@@ -385,12 +385,12 @@
             }
 
             try {
-                // اتصال نسبي محلي موحد وصارم لإنهاء جدران الحماية
-                const response = await fetch('/api/analyze-devis', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description: description })
-                });
+               // 🎯 اجعل السطر 362 يستهدف الدومين الذي تتصفحه حالياً بشكل صريح ومباشر:
+const response = await fetch('https://chronodevis.vercel.app/api/analyze-devis', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ description: description })
+});
                 
                 const rawText = await response.text();
                 console.log("Raw Text Received:", rawText);
