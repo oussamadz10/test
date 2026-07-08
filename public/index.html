@@ -378,15 +378,18 @@ const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-
 
 // ... باقي كود الـ fetch الخاص بك في السيرفر الخلفي لإرسال الطلب لجوجل
 
-                // الاتصال المباشر بخوادم جوجل جيميناي الرسمية
-                const response = await fetch('/api/analyze-devis', {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Instructions: ${systemInstruction}\n\nClient Demand: ${description}` }] }],
-                        generationConfig: { responseMimeType: "application/json", temperature: 0.3 }
-                    })
-                });
+                // ... كود جمع البيانات والـ Zone
+try {
+    // نرسل الطلب لسيرفرنا الداخلي فقط، وهو يتولى الباقي بأمان وحماية
+    const response = await fetch('/api/analyze-devis', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: description }) // نرسل النص فقط للسيرفر
+    });
+
+    const data = await response.json();
+    // ... باقي كود معالجة البيانات وتحديث الجداول
+}
 
                 const data = await response.json();
                 const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
