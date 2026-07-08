@@ -12,18 +12,15 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
 
         const geminiApiKey = process.env.GEMINI_API_KEY;
         if (!geminiApiKey) {
-            return res.status(500).json({ error: "Clé manquante" });
+            return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante" });
         }
 
-        // 🌍 الرابط نظيف تماماً بدون وضع الـ key بالداخل مثل الـ curl
-        const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+        // 🌍 تمرير المفتاح في الرابط المستقر المباشر v1 بناءً على تعليمات جوجل في شاشتك
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey.trim()}`;
 
         const response = await fetch(url, {
             method: "POST",
-            headers: { 
-                "Content-Type": "application/json",
-                "X-goog-api-key": geminiApiKey // 🔑 تمرير المفتاح هنا في الهيدر ليتوافق مع رمز AQ
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 contents: [{ 
                     parts: [{ 
@@ -36,7 +33,7 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            return res.status(500).json({ error: "Erreur Google", details: errorText });
+            return res.status(500).json({ error: "Erreur Google Gemini", details: errorText });
         }
 
         const data = await response.json();
