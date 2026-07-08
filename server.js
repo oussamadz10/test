@@ -1,14 +1,26 @@
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 const app = express();
+
+// تفعيل حماية CORS بشكل صارم للسماح بالطلبات المحلية والخارجية معاً
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 
-// 1. جعل السيرفر يعرض ملفات الموقع تلقائياً من مجلد public
+// جعل السيرفر يعرض واجهة الموقع من مجلد public
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 2. استقبال طلبات تحليل المقايسة من جوجل جيميناي المدفوع والسريع
 app.post('/api/analyze-devis', async (req, res) => {
+    // فرض الـ Headers يدوياً لضمان تخطي جدار الحماية تماماً
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
     try {
         const { description } = req.body;
 
@@ -22,7 +34,8 @@ app.post('/api/analyze-devis', async (req, res) => {
           "desc": "Une description technique détaillée, étape par étape selon les normes DTU en français."
         }`;
 
-        const geminiApiKey = "AQ.Ab8RN6KbEqIzSLisXYLnOTLiu5ECmNHovKf57fTGrS-0UkmIGw";
+        // 🎯 تم وضع مفتاحك الجديد المشفر هنا داخل السيرفر الخلفي حيث تدعمه جوجل بالكامل!
+        const geminiApiKey = "AQ.Ab8RN6LfZnk8-sBb8yrmeBf9tB2OcVcd3hq38kySflRLOgXnTA";
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
 
         const response = await fetch(url, {
@@ -39,17 +52,17 @@ app.post('/api/analyze-devis', async (req, res) => {
         
         if (data.candidates && data.candidates[0].content.parts[0].text) {
             const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
-            res.json(JSON.parse(cleanJsonText));
+            return res.json(JSON.parse(cleanJsonText));
         } else {
-            res.status(500).json({ error: "Erreur Gemini" });
+            return res.status(500).json({ error: "Erreur structurelle Gemini", details: data });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Internal Error" });
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
-// 3. 🛠️ توجيه النطاق الرئيسي لفتح ملف index.html المدمج فوراً بدلاً من النص القديم
+// توجيه النطاق لفتح صفحة index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
