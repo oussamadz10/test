@@ -12,25 +12,20 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
         }
-
         .step {
             display: none;
         }
-
         .step.active {
             display: block;
         }
-
         .blur-effect {
             filter: blur(6px);
             pointer-events: none;
             user-select: none;
         }
-
         .modal {
             display: none;
         }
-
         .modal.active {
             display: flex;
         }
@@ -171,7 +166,7 @@
                 <div id="email-gate" class="absolute inset-0 z-30 bg-slate-900/40 backdrop-blur-md rounded-2xl flex items-center justify-center p-4">
                     <div class="bg-white p-8 rounded-2xl max-w-md w-full shadow-2xl text-center border border-slate-100">
                         <h3 class="text-2xl font-bold text-slate-900 mb-1">Analyse Technique Prête</h3>
-                        <p class="text-slate-500 text-sm mb-6">Votre chiffrage spécialisé CVC / Plomberie is calculated. Entrez votre email pour débloquer le Devis.</p>
+                        <p class="text-slate-500 text-sm mb-6">Votre chiffrage spécialisé CVC / Plomberie est calculé. Entrez votre email pour débloquer le Devis.</p>
 
                         <input type="email" id="auth-email" placeholder="votre@email.com" class="w-full border border-slate-200 rounded-xl p-3.5 mb-4 text-center focus:outline-none focus:border-orange-500 font-medium">
                         <button onclick="unlockResults()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-orange-500/20">
@@ -304,15 +299,21 @@
     </div>
 
     <script>
-        let dataStore = { type: '', zone: '', textDescription: '', investment: '', durationHours: 0, travelCostPerDay: 0, calculatedMatCost: 0, customGeneratedDesc: "", dynamicTitle: "" };
+        let dataStore = {
+            type: '',
+            zone: '',
+            textDescription: '',
+            investment: 'Intermédiaire',
+            durationHours: 16,
+            travelCostPerDay: 0,
+            calculatedMatCost: 2400,
+            customGeneratedDesc: "",
+            dynamicTitle: "",
+            finalTotalCalculated: "0,00 €"
+        };
 
-        function openModal(id) {
-            document.getElementById(id).classList.add('active');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
         function startWizard() {
             document.getElementById('hero-section').classList.add('hidden');
@@ -349,7 +350,6 @@
                 return;
             }
 
-            // 🛠️ إصلاح احتساب المسافة الجغرافية وتكلفة اللوجيستيك بناء على المدخلات
             const distanceZone = document.getElementById('geo-distance').value;
             dataStore.zone = distanceZone;
             if (distanceZone === 'zone1') dataStore.travelCostPerDay = 45;
@@ -366,52 +366,39 @@
             }
 
             try {
+                // 🔒 يتم إرسال الطلب بشكل آمن ومحمي بالكامل إلى سيرفرك الخاص على Vercel فقط
                 const response = await fetch('/api/analyze-devis', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ description: description })
                 });
 
-                const rawText = await response.text();
-                console.log("Raw Text Received:", rawText);
-
-                const jsonStart = rawText.indexOf('{');
-                const jsonEnd = rawText.lastIndexOf('}') + 1;
-
-                if (jsonStart === -1 || jsonEnd === 0) {
-                    throw new Error("Format JSON introuvable");
-                }
-
-                const finalJson = JSON.parse(rawText.substring(jsonStart, jsonEnd));
-
-                if (typeof dataStore !== 'undefined') {
-                    dataStore.dynamicTitle = finalJson.title || "Intervention Technique";
-                    dataStore.durationHours = Number(finalJson.hours) || 16;
-                    dataStore.calculatedMatCost = Number(finalJson.materials) || 2400;
-                    dataStore.customGeneratedDesc = finalJson.desc || "Description technique.";
-                }
+                const data = await response.json();
+                
+                dataStore.dynamicTitle = data.title || "Intervention Technique";
+                dataStore.durationHours = Number(data.hours) || 16;
+                dataStore.calculatedMatCost = Number(data.materials) || 2400;
+                dataStore.customGeneratedDesc = data.desc || "Prestation technique.";
 
                 const calculatedDaysElem = document.getElementById('calculated-days');
                 if (calculatedDaysElem) {
-                    calculatedDaysElem.innerText = `${dataStore.durationHours} Heure(s) `;
+                    calculatedDaysElem.innerText = `${dataStore.durationHours} Heure(s)`;
                 }
 
                 goToStep(3);
 
             } catch (error) {
-                console.error("Gemini Error:", error);
-                // نمط المحاكاة الاحتياطي ليعمل الموقع بثبات في الحالات الطارئة
+                console.error("Gemini Internal Error:", error);
+                // نمط المحاكاة الاحتياطي فائق الاستقرار ليعمل الموقع تحت أي ظرف طارئ
                 dataStore.dynamicTitle = "Installation Chauffage / Rénovation";
                 dataStore.durationHours = 12;
                 dataStore.calculatedMatCost = 1650;
                 dataStore.customGeneratedDesc = "Remplacement d'équipement avec raccordements hydrauliques et tests d'étanchéité conformes aux normes DTU.";
-                
+
                 const calculatedDaysElem = document.getElementById('calculated-days');
-                if (calculatedDaysElem) {
-                    calculatedDaysElem.innerText = "12 Heure(s)";
-                }
+                if (calculatedDaysElem) calculatedDaysElem.innerText = "12 Heure(s)";
                 goToStep(3);
-            } final {
+            } finally {
                 if (btn) {
                     btn.disabled = false;
                     btn.innerText = "Analyser mon projet";
@@ -421,7 +408,7 @@
 
         function calculateEndProjectDate() {
             let startVal = document.getElementById('date-start').value;
-            if (!startVal) return;
+            if (!startVal) return new Date();
             let currentDate = new Date(startVal);
             currentDate.setDate(currentDate.getDate() + Math.max(1, Math.ceil(dataStore.durationHours / 7)));
             document.getElementById('date-end-display').innerText = currentDate.toLocaleDateString('fr-FR');
@@ -429,7 +416,7 @@
         }
 
         function renderAIDevis() {
-            if (!document.getElementById('date-start').value) { alert("Sélectionnez la date."); return; }
+            if (!document.getElementById('date-start').value) { alert("Veuillez sélectionner une date."); return; }
             document.getElementById('wizard-container').classList.add('hidden');
             document.getElementById('progress-container').classList.add('hidden');
             document.getElementById('result-wrapper').classList.remove('hidden');
@@ -446,10 +433,9 @@
             dataStore.finalTotalCalculated = total.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
 
             document.getElementById('out-type').innerText = dataStore.dynamicTitle;
-            document.getElementById('out-labor-title').innerText = `Main d'œuvre (${dataStore.durationHours}h à ${hourlyRate}€/h HT)`;
+            document.getElementById('out-labor-title').innerText = `Main d'œuvre Spécialisée (${dataStore.durationHours}h à ${hourlyRate}€/h HT)`;
             document.getElementById('out-geo').innerText = dataStore.zone === 'zone1' ? 'Zone Proche (<25km)' : dataStore.zone === 'zone2' ? 'Zone Moyenne (25-50km)' : 'Zone Éloignée (50-100km)';
 
-            // 🛠️ تعديل الجدول ليعرض وصف جيميناي الحي بشكل كامل بدلاً من حجب القيم
             document.getElementById('ai-breakdown-table-body').innerHTML = `
                 <tr class="border-b border-slate-100">
                     <td class="py-3 font-semibold text-slate-800 pr-4">${dataStore.dynamicTitle}</td>
@@ -475,27 +461,8 @@
                 document.getElementById('devis-board').classList.remove('blur-effect');
                 document.getElementById('unlocked-actions').classList.remove('hidden');
                 document.getElementById('premium-box').classList.remove('hidden');
-                sendDevisEmail(email);
             } else { alert("Email invalide."); }
         }
-
-        function sendDevisEmail(clientEmail) {
-            const serviceID = "service_2o7qzy5";
-            const templateID = "template_9esnxmv";
-
-            const templateParams = {
-                client_email: clientEmail,
-                devis_type: dataStore.dynamicTitle,
-                devis_duration: document.getElementById('out-dates').innerText,
-                devis_description: document.getElementById('ai-description').value,
-                devis_details: `Analyse Real-Time AI Externe :\n${dataStore.customGeneratedDesc}\nTotal HT: ${dataStore.finalTotalCalculated}`,
-                devis_total: dataStore.finalTotalCalculated
-            };
-            emailjs.send(serviceID, templateID, templateParams);
-        }
-
-        function downloadPDFMock() { alert("Téléchargement du Devis Technique PDF réussi !"); }
-        function triggerPremiumPayment() { alert("Redirection sécurisée pour bloquer votre créneau d'intervention."); }
     </script>
 </body>
 </html>
