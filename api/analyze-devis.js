@@ -16,8 +16,8 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
             return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante" });
         }
 
-        // 🌍 الرابط القياسي العالمي المحدث والمضمون 100% لتجنب الـ 404 من جوجل
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
+        // 🌍 المسار الرسمي المضمون لتجنب الـ 404 نهائياً
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
 
         const response = await fetch(url, {
             method: "POST",
@@ -27,10 +27,7 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
                     parts: [{ 
                         text: `Tu es un métreur expert en plomberie et chauffage en France. Analyse la demande et génère un chiffrage. Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown : {"title": "Titre", "hours": 16, "materials": 2400, "desc": "Description"}\n\nDemand: ${description}` 
                     }] 
-                }],
-                generationConfig: { 
-                    temperature: 0.3 
-                }
+                }]
             })
         });
 
