@@ -18,8 +18,8 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
             return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante dans Vercel Settings" });
         }
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
-
+       // 🌍 قم بتغيير v1beta إلى v1 ليصبح الرابط مستقراً ورسمياً
+const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
         // إرسال الطلب مع معالجة الأخطاء
         const response = await fetch(url, {
             method: "POST",
