@@ -1,22 +1,9 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
-
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
-// أضف هذا السطر في ملف server.js لحل مشكلة الـ OPTIONS نهائياً
-app.options('*', cors());
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.send("ChronoDevis Gemini Pure AI Server is Active!");
-});
-
-// تأكد أن السيرفر يستقبل الطلب على المسار الرئيسي للدالة السحابية مباشرة
+// 🎯 ضبط استقبال الطلب على المسار الرئيسي للدالة السحابية مباشرة
 app.post(['/api/analyze-devis', '/'], async (req, res) => {
     try {
         const { description } = req.body;
@@ -25,10 +12,15 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
             return res.status(400).json({ error: "Description manquante" });
         }
 
-        // كود الاتصال بجوجل جيميناي باستخدام المفتاح السري
+        // 🔒 استدعاء المفتاح السري بأمان من خزنة Vercel
         const geminiApiKey = process.env.GEMINI_API_KEY;
+        if (!geminiApiKey) {
+            return res.status(500).json({ error: "Configuration API manquante" });
+        }
+
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
 
+        // 🚀 الاتصال بخوادم جوجل جيميناي
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -40,17 +32,22 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
 
         const data = await response.json();
         
-        // فك تشفير النص العائد من جيميناي وإرساله للواجهة
+        // فحص بنية رد جيميناي وفك التشفير بأمان
+        if (!data.candidates || !data.candidates[0].content.parts[0].text) {
+            throw new Error("Réponse Gemini invalide");
+        }
+
         const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
         const finalJson = JSON.parse(cleanJsonText);
 
+        // إرسال كائن JSON حقيقي وموثق إلى المتصفح
         return res.json(finalJson);
 
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: "Internal Server Error" });
+        console.error("Server Error:", error);
+        return res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 });
 
-// تأكد أن السطر الأخير في الملف يصدّر app فقط بدون app.listen
+// ⚠️ القاتل الصامت: يجب إزالة app.listen(3000) تماماً وتصدير الموديول فقط
 module.exports = app;
