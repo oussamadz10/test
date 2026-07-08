@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/analyze-devis",
-      "destination": "/api/index.js"
+      "destination": "/api/analyze-devis"
     },
     {
       "source": "/(.*)",
