@@ -1,26 +1,26 @@
 const express = require('express');
 const app = express();
 
+// تفعيل قراءة الـ JSON القادم من المتصفح
 app.use(express.json());
 
-// استقبال الطلبات على المسار الرئيسي للدالة السحابية
 app.post(['/api/analyze-devis', '/'], async (req, res) => {
     try {
-        const { description } = req.body;
+        // تأكد من استقبال المتغير
+        const description = req.body?.description;
 
         if (!description) {
-            return res.status(400).json({ error: "Description manquante" });
+            return res.status(400).json({ error: "Description manquante dans le body" });
         }
 
-        // 🔒 استدعاء المفتاح السري بأمان من خزنة Vercel
         const geminiApiKey = process.env.GEMINI_API_KEY;
         if (!geminiApiKey) {
-            return res.status(500).json({ error: "Configuration API manquante" });
+            return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante dans Vercel Settings" });
         }
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
 
-        // 🚀 الاتصال الآمن والمباشر بخوادم جوجل جيميناي
+        // إرسال الطلب مع معالجة الأخطاء
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -30,24 +30,26 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
             })
         });
 
+        if (!response.ok) {
+            const errorText = await response.text();
+            return res.status(500).json({ error: "Erreur réponse Google Gemini", details: errorText });
+        }
+
         const data = await response.json();
         
-        // فحص بنية رد جيميناي للتأكد من عدم وجود تداخل
-        if (!data.candidates || !data.candidates[0].content.parts[0].text) {
-            return res.status(500).json({ error: "Réponse Gemini vide" });
+        if (!data.candidates || !data.candidates[0]?.content?.parts[0]?.text) {
+            return res.status(500).json({ error: "Réponse vide de Gemini" });
         }
 
         const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
         const finalJson = JSON.parse(cleanJsonText);
 
-        // إرسال البيانات النظيفة للمتصفح
         return res.json(finalJson);
 
     } catch (error) {
-        console.error("Server Error:", error);
-        return res.status(500).json({ error: "Internal Server Error", details: error.message });
+        // منع السيرفر من الانهيار وإرجاع تفاصيل الخطأ في المتصفح لرؤيتها فوراً
+        return res.status(500).json({ error: "Catch Error", message: error.message });
     }
 });
 
-// تصدير التطبيق السحابي النظيف لـ Vercel
 module.exports = app;
