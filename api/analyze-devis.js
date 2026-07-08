@@ -1,12 +1,10 @@
 const express = require('express');
 const app = express();
 
-// تفعيل قراءة الـ JSON القادم من المتصفح
 app.use(express.json());
 
 app.post(['/api/analyze-devis', '/'], async (req, res) => {
     try {
-        // تأكد من استقبال المتغير
         const description = req.body?.description;
 
         if (!description) {
@@ -15,18 +13,26 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
 
         const geminiApiKey = process.env.GEMINI_API_KEY;
         if (!geminiApiKey) {
-            return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante dans Vercel Settings" });
+            return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante" });
         }
 
-       // 🌍 قم بتغيير v1beta إلى v1 ليصبح الرابط مستقراً ورسمياً
-const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
-        // إرسال الطلب مع معالجة الأخطاء
+        // 🌍 الرابط المستقر v1
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+
+        // 🚀 إرسال الطلب بالصيغة المعتمدة رسمياً
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: `Tu es un métreur expert en plomberie et chauffage en France. Analyse la demande et génère un chiffrage. Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown : {"title": "Titre", "hours": 16, "materials": 2400, "desc": "Description"}\n\nDemand: ${description}` }] }],
-                generationConfig: { responseMimeType: "application/json", temperature: 0.3 }
+                contents: [{ 
+                    parts: [{ 
+                        text: `Tu es un métreur expert en plomberie et chauffage en France. Analyse la demande et génère un chiffrage. Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown : {"title": "Titre", "hours": 16, "materials": 2400, "desc": "Description"}\n\nDemand: ${description}` 
+                    }] 
+                }],
+                generationConfig: { 
+                    response_mime_type: "application/json", 
+                    temperature: 0.3 
+                }
             })
         });
 
@@ -47,7 +53,6 @@ const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flas
         return res.json(finalJson);
 
     } catch (error) {
-        // منع السيرفر من الانهيار وإرجاع تفاصيل الخطأ في المتصفح لرؤيتها فوراً
         return res.status(500).json({ error: "Catch Error", message: error.message });
     }
 });
