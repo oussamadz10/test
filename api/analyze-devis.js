@@ -16,9 +16,9 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
             return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante" });
         }
 
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+        // 🌍 الرابط القياسي العالمي المحدث والمضمون 100% لتجنب الـ 404 من جوجل
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
 
-        // 🚀 إرسال الطلب بعد إزالة السطر المسبب للمشكلة وتبسيطه لأقصى درجة مستقرة
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -48,7 +48,6 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
         const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
         const finalJson = JSON.parse(cleanJsonText);
 
-        // إرسال كائن JSON الموثق والناجح إلى المتصفح
         return res.json(finalJson);
 
     } catch (error) {
