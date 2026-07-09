@@ -10,45 +10,47 @@ app.post(['/api/analyze-devis', '/'], (req, res) => {
         return res.status(400).json({ error: "Description manquante" });
     }
 
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-    if (!geminiApiKey) {
-        return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante dans Vercel" });
+    // 🔒 سنستخدم نفس اسم المتغير لكي لا تضطر لتغييره، فقط سنضع فيه مفتاح Groq الجديد
+    const groqApiKey = process.env.GEMINI_API_KEY;
+    if (!groqApiKey) {
+        return res.status(500).json({ error: "Le clé API est manquante dans Vercel" });
     }
 
     const payload = JSON.stringify({
-        contents: [{ 
-            parts: [{ 
-                text: `Tu es un métreur expert en plomberie et chauffage en France. Analyse le texte du client et décide TOI-MÊME de manière totalement libre, logique et réaliste du nombre d'heures requises (hours) et du coût des fournitures (materials HT). Sois ultra-précis selon le contexte. Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown, sans texte explicatif avant ou après : {"title": "Nom du projet", "hours": 0, "materials": 0, "desc": "Explication technique complète du chiffrage"}\n\nDemand: ${description}` 
-            }] 
+        // استخدام موديل Llama 3 70B القوي والسريع جداً على Groq
+        model: "llama3-70b-8192",
+        messages: [{
+            role: "user",
+            content: `Tu es un métreur expert en plomberie et chauffage en France. Analyse le texte du client et décide du nombre d'heures requises (hours) et du coût des fournitures (materials HT). Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown, sans texte explicatif avant ou après : {"title": "Nom du projet", "hours": 0, "materials": 0, "desc": "Explication technique complète"}\n\nDemand: ${description}`
         }],
-        generationConfig: { 
-            temperature: 0.2, 
-            responseMimeType: "application/json" 
-        }
+        temperature: 0.2,
+        // إجبار الموديل على إخراج كود JSON صافي
+        response_format: { type: "json_object" }
     });
 
     const options = {
-        hostname: 'generativelanguage.googleapis.com',
-        // 🌍 التحديث هنا: تم تعديل المسار بدقة ليتوافق مع الموديل المستقر والمفتاح الجديد
-        path: `/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey.trim()}`,
+        hostname: 'api.groq.com',
+        path: '/openapi/v1/chat/completions',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${groqApiKey.trim()}`,
             'Content-Length': Buffer.byteLength(payload)
         }
     };
 
-    const googleReq = https.request(options, (googleRes) => {
+    const groqReq = https.request(options, (groqRes) => {
         let data = '';
-        googleRes.on('data', (chunk) => { data += chunk; });
-        googleRes.on('end', () => {
+        groqRes.on('data', (chunk) => { data += chunk; });
+        groqRes.on('end', () => {
             try {
-                if (googleRes.statusCode === 200) {
+                if (groqRes.statusCode === 200) {
                     const parsedData = JSON.parse(data);
-                    const aiText = parsedData.candidates[0].content.parts[0].text.trim();
+                    // Groq يعيد النتيجة داخل choices[0].message.content
+                    const aiText = parsedData.choices[0].message.content.trim();
                     return res.json(JSON.parse(aiText));
                 } else {
-                    return res.status(googleRes.statusCode).json({ error: "Google Gemini Error", details: data });
+                    return res.status(groqRes.statusCode).json({ error: "Groq API Error", details: data });
                 }
             } catch (e) {
                 return res.status(500).json({ error: "JSON Parse Error", details: data });
@@ -56,12 +58,12 @@ app.post(['/api/analyze-devis', '/'], (req, res) => {
         });
     });
 
-    googleReq.on('error', (error) => {
+    groqReq.on('error', (error) => {
         return res.status(500).json({ error: "HTTP Request Error", message: error.message });
     });
 
-    googleReq.write(payload);
-    googleReq.end();
+    groqReq.write(payload);
+    groqReq.end();
 });
 
 module.exports = app;
