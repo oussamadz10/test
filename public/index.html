@@ -366,18 +366,23 @@
             }
 
             try {
-                // 🔒 يتم إرسال الطلب بشكل آمن ومحمي بالكامل إلى سيرفرك الخاص على Vercel فقط
+                // 🔒 الاتصال بالسيرفر الخلفي
                 const response = await fetch('/api/analyze-devis', {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ description: description })
                 });
 
+                // 🚨 فحص نجاح الاستجابة: إذا رد السيرفر بـ 403 أو غيره، نتوقف فوراً
+                if (!response.ok) {
+                    throw new Error(`Erreur Serveur: ${response.status}`);
+                }
+
                 const data = await response.json();
                 
                 dataStore.dynamicTitle = data.title || "Intervention Technique";
-                dataStore.durationHours = Number(data.hours) || 16;
-                dataStore.calculatedMatCost = Number(data.materials) || 2400;
+                dataStore.durationHours = Number(data.hours);
+                dataStore.calculatedMatCost = Number(data.materials);
                 dataStore.customGeneratedDesc = data.desc || "Prestation technique.";
 
                 const calculatedDaysElem = document.getElementById('calculated-days');
@@ -389,15 +394,18 @@
 
             } catch (error) {
                 console.error("Gemini Internal Error:", error);
-                // نمط المحاكاة الاحتياطي فائق الاستقرار ليعمل الموقع تحت أي ظرف طارئ
-                dataStore.dynamicTitle = "Installation Chauffage / Rénovation";
-                dataStore.durationHours = 12;
-                dataStore.calculatedMatCost = 1650;
-                dataStore.customGeneratedDesc = "Remplacement d'équipement avec raccordements hydrauliques et tests d'étanchéité conformes aux normes DTU.";
-
+                
+                // 🛑 تصفير الأرقام تماماً ومنع عرض أي قيمة افتراضية لخداع الزبون عند حدوث خطأ
+                dataStore.durationHours = 0;
+                dataStore.calculatedMatCost = 0;
+                
                 const calculatedDaysElem = document.getElementById('calculated-days');
-                if (calculatedDaysElem) calculatedDaysElem.innerText = "12 Heure(s)";
-                goToStep(3);
+                if (calculatedDaysElem) {
+                    calculatedDaysElem.innerText = "0 Heure (Erreur)";
+                }
+                
+                // إظهار تنبيه شفاف للمستخدم
+                alert("Désolé, impossible de générer l'estimation pour le moment. Erreur de connexion avec l'IA.");
             } finally {
                 if (btn) {
                     btn.disabled = false;
