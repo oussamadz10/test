@@ -1,6 +1,7 @@
 const express = require('express');
-const app = express();
+const { GoogleGenAI } = require('@google/generative-ai');
 
+const app = express();
 app.use(express.json());
 
 app.post(['/api/analyze-devis', '/'], async (req, res) => {
@@ -12,33 +13,25 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
 
         const geminiApiKey = process.env.GEMINI_API_KEY;
         if (!geminiApiKey) {
-            return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante" });
+            return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante dans Vercel" });
         }
 
-        // 🌍 تمرير المفتاح في الرابط المستقر المباشر v1 بناءً على تعليمات جوجل في شاشتك
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey.trim()}`;
-
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [{ 
-                    parts: [{ 
-                        text: `Tu es un métreur expert en plomberie et chauffage en France. Analyse la demande et génère un chiffrage. Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown : {"title": "Titre", "hours": 16, "materials": 2400, "desc": "Description"}\n\nDemand: ${description}` 
-                    }] 
-                }],
-                generationConfig: { temperature: 0.3 }
-            })
+        // 🚀 تهيئة مكتبة جوجل الرسمية بالمفتاح الخاص بك (تدعم الـ AQ تلقائياً)
+        const ai = new GoogleGenAI({ apiKey: geminiApiKey.trim() });
+        
+        // استدعاء النموذج المستقر
+        const model = ai.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            generationConfig: { responseMimeType: "application/json", temperature: 0.3 }
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            return res.status(500).json({ error: "Erreur Google Gemini", details: errorText });
-        }
+        const prompt = `Tu es un métreur expert en plomberie et chauffage en France. Analyse la demande et génère un chiffrage. Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown : {"title": "Titre", "hours": 16, "materials": 2400, "desc": "Description"}\n\nDemand: ${description}`;
 
-        const data = await response.json();
-        const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
-        return res.json(JSON.parse(cleanJsonText));
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text().trim();
+
+        // فك وتمرير الـ JSON الناجح للمتصفح
+        return res.json(JSON.parse(responseText));
 
     } catch (error) {
         return res.status(500).json({ error: "Catch Error", message: error.message });
