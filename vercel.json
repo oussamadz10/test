@@ -1,8 +1,17 @@
 {
-  "rewrites": [
+  "version": 2,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "api/analyze-devis.js", "use": "@vercel/node" }
+  ],
+  "routes": [
     {
-      "source": "/api/analyze-devis",
-      "destination": "/api/analyze-devis.js"
+      "src": "/api/analyze-devis",
+      "dest": "/api/analyze-devis.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
