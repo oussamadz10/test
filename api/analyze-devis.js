@@ -15,11 +15,10 @@ app.post(['/api/analyze-devis', '/'], (req, res) => {
         return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante dans Vercel" });
     }
 
-    // 🌍 إرسال البيانات مباشرة لعقل جيميناي ليقرر الساعات والمواد بحرية تامة
     const payload = JSON.stringify({
         contents: [{ 
             parts: [{ 
-                text: `Tu es un métreur expert en plomberie et chauffage en France. Analyse le texte du client et décide TOI-MÊME de manière totalement libre, logique et réaliste du nombre d'heures requises (hours) et du coût des fournitures (materials HT). Sois ultra-précis selon le contexte (par exemple, une fuite sur une PAC prend juste 2-3 heures, alors qu'un remplacement complet prend plusieurs jours). Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown, sans texte explicatif avant ou après : {"title": "Nom du projet", "hours": 0, "materials": 0, "desc": "Explication technique complète du chiffrage"}\n\nDemand: ${description}` 
+                text: `Tu es un métreur expert en plomberie et chauffage en France. Analyse le texte du client et décide TOI-MÊME de manière totalement libre, logique et réaliste du nombre d'heures requises (hours) et du coût des fournitures (materials HT). Sois ultra-précis selon le contexte. Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown, sans texte explicatif avant ou après : {"title": "Nom du projet", "hours": 0, "materials": 0, "desc": "Explication technique complète du chiffrage"}\n\nDemand: ${description}` 
             }] 
         }],
         generationConfig: { 
@@ -30,7 +29,8 @@ app.post(['/api/analyze-devis', '/'], (req, res) => {
 
     const options = {
         hostname: 'generativelanguage.googleapis.com',
-        path: `/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey.trim()}`,
+        // 🌍 التحديث هنا: تم تعديل المسار بدقة ليتوافق مع الموديل المستقر والمفتاح الجديد
+        path: `/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey.trim()}`,
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -46,7 +46,6 @@ app.post(['/api/analyze-devis', '/'], (req, res) => {
                 if (googleRes.statusCode === 200) {
                     const parsedData = JSON.parse(data);
                     const aiText = parsedData.candidates[0].content.parts[0].text.trim();
-                    // إرسال النتيجة الصافية القادمة من الذكاء الاصطناعي للمتصفح
                     return res.json(JSON.parse(aiText));
                 } else {
                     return res.status(googleRes.statusCode).json({ error: "Google Gemini Error", details: data });
