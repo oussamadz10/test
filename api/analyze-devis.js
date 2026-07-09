@@ -15,7 +15,6 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
             return res.status(500).json({ error: "La clé GEMINI_API_KEY est manquante dans Vercel" });
         }
 
-        // 🌍 الرابط المباشر للاتصال بالذكاء الاصطناعي الفعلي
         const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
         
         const response = await fetch(url, {
@@ -27,11 +26,11 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
             body: JSON.stringify({
                 contents: [{ 
                     parts: [{ 
-                        text: `Tu es un métreur expert en plomberie et chauffage en France. Analyse la demande suivante et génère un chiffrage réel. Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown ni texte autour : {"title": "Titre du projet", "hours": 12, "materials": 1500, "desc": "Explication technique détaillée du chiffrage"}\n\nDemand: ${description}` 
+                        text: `Tu es un métreur expert en plomberie et chauffage (CVC) en France. Calcule de manière totalement libre et réaliste le temps de travail total nécessaire (en heures) et le coût estimé des fournitures (en euros HT) pour la demande suivante. Sois cohérent avec les tarifs du marché français. Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown, sans texte explicatif avant ou après. L'objet doit avoir exactement cette structure : {"title": "Nom du projet", "hours": 0, "materials": 0, "desc": "Explication technique complète du chiffrage"}\n\nDemand: ${description}` 
                     }] 
                 }],
                 generationConfig: { 
-                    temperature: 0.2,
+                    temperature: 0.4,
                     responseMimeType: "application/json"
                 }
             })
@@ -43,14 +42,7 @@ app.post(['/api/analyze-devis', '/'], async (req, res) => {
         }
 
         const data = await response.json();
-        
-        if (!data.candidates || !data.candidates[0]?.content?.parts[0]?.text) {
-            return res.status(500).json({ error: "Réponse vide de Gemini" });
-        }
-
         const aiText = data.candidates[0].content.parts[0].text.trim();
-        
-        // إرسال النتيجة الحقيقية القادمة من الذكاء الاصطناعي فوراً للمتصفح
         return res.json(JSON.parse(aiText));
 
     } catch (error) {
