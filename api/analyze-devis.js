@@ -5,14 +5,16 @@ const app = express();
 app.use(express.json());
 
 app.post(['/api/analyze-devis', '/'], (req, res) => {
-    const description = req.body?.description || "";
-    if (!description) {
-        return res.status(400).json({ error: "Description manquante" });
+    // 🧠 قراءة مرنة ومحسنة لتفادي خطأ 400 تحت أي ظرف
+    const description = req.body?.description || req.body?.textDescription || req.body?.text || "";
+    
+    if (!description || description.trim() === "") {
+        return res.status(400).json({ error: "Description manquante ou mal formee dans le body" });
     }
 
     const groqApiKey = process.env.GEMINI_API_KEY;
     if (!groqApiKey) {
-        return res.status(500).json({ error: "Le clé API est manquante dans Vercel" });
+        return res.status(500).json({ error: "La cle API est manquante dans Vercel" });
     }
 
     const payload = JSON.stringify({
@@ -27,7 +29,6 @@ app.post(['/api/analyze-devis', '/'], (req, res) => {
 
     const options = {
         hostname: 'api.groq.com',
-        // 🌍 التعديل هنا: تم تصحيح المسار إلى openai بدلاً من openapi
         path: '/openai/v1/chat/completions',
         method: 'POST',
         headers: {
