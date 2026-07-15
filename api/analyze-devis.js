@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { GoogleGenAI } = require('@google/generative-ai'); // استدعاء المكتبة الرسمية
 const app = express();
 
 app.use(cors({
@@ -12,7 +13,7 @@ app.options('*', cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send("ChronoDevis Gemini Server is Active!");
+    res.send("ChronoDevis Gemini SDK Server is Active!");
 });
 
 app.post('/api/analyze-devis', async (req, res) => {
@@ -35,38 +36,32 @@ app.post('/api/analyze-devis', async (req, res) => {
             return res.status(500).json({ error: "Configuration Error", message: "GEMINI_API_KEY is missing in Vercel settings." });
         }
 
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+        // تهيئة اتصال Google AI باستخدام المكتبة الرسمية والمفتاح الآمن
+        const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 
-        // تعديل أسماء الحقول لتطابق معايير v1 الصارمة (snake_case)
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: description }] }],
-                system_instruction: { parts: [{ text: systemInstruction }] }, // تم التعديل إلى system_instruction
-                generation_config: {
-                    response_mime_type: "application/json", // تم التعديل إلى response_mime_type
-                    temperature: 0.35
-                }
-            })
+        // استدعاء النموذج مع التكوين المناسب وإجبار مخرجات الـ JSON
+        const response = await ai.models.generateContent({
+            model: 'gemini-1.5-flash',
+            contents: description,
+            config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: 'application/json',
+                temperature: 0.35
+            }
         });
 
-        const data = await response.json();
+        const resultText = response.text;
 
-        if (data.error) {
-            console.error("Gemini API Error Detail:", data.error);
-            return res.status(500).json({ error: "Gemini API Error", details: data.error.message });
-        }
-
-        if (data.candidates && data.candidates[0].content.parts[0].text) {
-            const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
+        if (resultText) {
+            const cleanJsonText = resultText.trim();
             res.json(JSON.parse(cleanJsonText));
         } else {
-            res.status(500).json({ error: "Erreur Gemini", details: "No valid response format returned." });
+            res.status(500).json({ error: "Erreur Gemini", details: "No valid response text returned." });
         }
     } catch (error) {
         console.error("Server Error:", error);
         res.status(500).json({ error: "Internal Error", message: error.message });
     }
 });
+
 module.exports = app;
