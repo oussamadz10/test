@@ -33,7 +33,7 @@ app.post('/api/analyze-devis', async (req, res) => {
         }`;
 
         // إعدادات الاتصال بـ RapidAPI (Claude 3)
-        const rapidApiKey = "d22dc61c97mshee25a9065e8cb83p1e39afjsn092d6941ac14"; // المفتاح الخاص بك
+        const rapidApiKey = process.env.RAPIDAPI_KEY || "d22dc61c97mshee25a9065e8cb83p1e39afjsn092d6941ac14"; // المفتاح الخاص بك
         const url = "https://claude-3.p.rapidapi.com/messages";
 
         const response = await fetch(url, {
