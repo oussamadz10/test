@@ -1,67 +1,78 @@
 const express = require('express');
-const https = require('https');
+const cors = require('cors');
 const app = express();
+
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// حل مشكلة الـ OPTIONS نهائياً لعمليات الـ CORS Cross-Origin
+app.options('*', cors());
 
 app.use(express.json());
 
-app.post(['/api/analyze-devis', '/'], (req, res) => {
-    // 🧠 قراءة مرنة ومحسنة لتفادي خطأ 400 تحت أي ظرف
-    const description = req.body?.description || req.body?.textDescription || req.body?.text || "";
-    
-    if (!description || description.trim() === "") {
-        return res.status(400).json({ error: "Description manquante ou mal formee dans le body" });
-    }
+app.get('/', (req, res) => {
+    res.send("ChronoDevis Claude 3 API Server is Active!");
+});
 
-    const groqApiKey = process.env.GEMINI_API_KEY;
-    if (!groqApiKey) {
-        return res.status(500).json({ error: "La cle API est manquante dans Vercel" });
-    }
+app.post('/api/analyze-devis', async (req, res) => {
+    try {
+        const { description } = req.body;
 
-    const payload = JSON.stringify({
-        model: "llama3-70b-8192",
-        messages: [{
-            role: "user",
-            content: `Tu es un métreur expert en plomberie et chauffage en France. Analyse le texte du client et décide du nombre d'heures requises (hours) et du coût des fournitures (materials HT). Renvoyer UNIQUEMENT un objet JSON strict sans balises markdown, sans texte explicatif avant ou après : {"title": "Nom du projet", "hours": 0, "materials": 0, "desc": "Explication technique complète"}\n\nDemand: ${description}`
-        }],
-        temperature: 0.2,
-        response_format: { type: "json_object" }
-    });
+        // هندسة الأوامر الموجهة لـ Claude بالفرنسية للحصول على أدق النتائج
+        const systemInstruction = `Tu es un métreur expert en plomberie et chauffage en France.
+        Analyse la demande du client et génère un chiffrage technique précis.
+        Tu dois impérativement renvoyer UNIQUEMENT un objet JSON strict avec cette structure exacte :
+        {
+          "title": "Un titre professionnel de la prestation (ex: Rénovation Salle de Bain)",
+          "hours": 16,
+          "materials": 2400,
+          "desc": "Une description technique détaillée, étape par étape selon les normes DTU en français."
+        }`;
 
-    const options = {
-        hostname: 'api.groq.com',
-        path: '/openai/v1/chat/completions',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${groqApiKey.trim()}`,
-            'Content-Length': Buffer.byteLength(payload)
-        }
-    };
+        // إعدادات الاتصال بـ RapidAPI (Claude 3)
+        const rapidApiKey = "d22dc61c97mshee25a9065e8cb83p1e39afjsn092d6941ac14"; // المفتاح الخاص بك
+        const url = "https://claude-3.p.rapidapi.com/messages";
 
-    const groqReq = https.request(options, (groqRes) => {
-        let data = '';
-        groqRes.on('data', (chunk) => { data += chunk; });
-        groqRes.on('end', () => {
-            try {
-                if (groqRes.statusCode === 200) {
-                    const parsedData = JSON.parse(data);
-                    const aiText = parsedData.choices[0].message.content.trim();
-                    return res.json(JSON.parse(aiText));
-                } else {
-                    return res.status(groqRes.statusCode).json({ error: "Groq API Error", details: data });
-                }
-            } catch (e) {
-                return res.status(500).json({ error: "JSON Parse Error", details: data });
-            }
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-rapidapi-key": rapidApiKey,
+                "x-rapidapi-host": "claude-3.p.rapidapi.com"
+            },
+            body: JSON.stringify({
+                model: "claude-3-opus-20240229", // أو "claude-3-sonnet" حسب اشتراكك
+                max_tokens: 4000,
+                temperature: 0.3,
+                system: systemInstruction, // تمرير تعليمات النظام لـ Claude
+                messages: [
+                    {
+                        role: "user",
+                        content: description
+                    }
+                ]
+            })
         });
-    });
 
-    groqReq.on('error', (error) => {
-        return res.status(500).json({ error: "HTTP Request Error", message: error.message });
-    });
+        const data = await response.json();
 
-    groqReq.write(payload);
-    groqReq.end();
+        // التأكد من استلام النص بشكل صحيح من هيكلية استجابة Claude
+        if (data.content && data.content[0] && data.content[0].text) {
+            const cleanJsonText = data.content[0].text.trim();
+            
+            // تحويل النص المستلم إلى كائن JSON حقيقي وإرساله للفرونت إند
+            res.json(JSON.parse(cleanJsonText));
+        } else {
+            console.error("Claude API Error Response:", data);
+            res.status(500).json({ error: "Erreur Claude API" });
+        }
+    } catch (error) {
+        console.error("Internal Server Error:", error);
+        res.status(500).json({ error: "Internal Error" });
+    }
 });
 
 module.exports = app;
