@@ -35,17 +35,17 @@ app.post('/api/analyze-devis', async (req, res) => {
             return res.status(500).json({ error: "Configuration Error", message: "GEMINI_API_KEY is missing in Vercel settings." });
         }
 
-        // تم التحديث إلى الإصدار المستقر v1 لضمان دعم موديل gemini-1.5-flash بدون مشاكل
         const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
 
+        // تعديل أسماء الحقول لتطابق معايير v1 الصارمة (snake_case)
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: description }] }],
-                systemInstruction: { parts: [{ text: systemInstruction }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
+                system_instruction: { parts: [{ text: systemInstruction }] }, // تم التعديل إلى system_instruction
+                generation_config: {
+                    response_mime_type: "application/json", // تم التعديل إلى response_mime_type
                     temperature: 0.35
                 }
             })
@@ -53,7 +53,6 @@ app.post('/api/analyze-devis', async (req, res) => {
 
         const data = await response.json();
 
-        // فحص الأخطاء القادمة من جوجل وطباعتها
         if (data.error) {
             console.error("Gemini API Error Detail:", data.error);
             return res.status(500).json({ error: "Gemini API Error", details: data.error.message });
@@ -63,12 +62,11 @@ app.post('/api/analyze-devis', async (req, res) => {
             const cleanJsonText = data.candidates[0].content.parts[0].text.trim();
             res.json(JSON.parse(cleanJsonText));
         } else {
-            res.status(500).json({ error: "Erreur Gemini", details: "No valid response format returned from server." });
+            res.status(500).json({ error: "Erreur Gemini", details: "No valid response format returned." });
         }
     } catch (error) {
         console.error("Server Error:", error);
         res.status(500).json({ error: "Internal Error", message: error.message });
     }
 });
-
 module.exports = app;
