@@ -473,6 +473,7 @@
                 if (data.outOfScope) { notify(data.message + "\n\nNous intervenons en plomberie, chauffage, sanitaire, climatisation et VMC."); return; }
 
                 dataStore.ai = data;
+                console.info('[ChronoDevis] Estimation générée par ' + data.engine + ' en ' + data.ms + ' ms');
                 dataStore.durationHours = Number(data.hours) || 0;
                 dataStore.calculatedMatCost = Number(data.materials) || 0;
 

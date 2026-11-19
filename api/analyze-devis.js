@@ -89,7 +89,7 @@ async function askGroq(key, user) {
             })
         });
         const text = await r.text();
-        if (r.ok) return parseJson(JSON.parse(text).choices[0].message.content);
+        if (r.ok) return { ai: parseJson(JSON.parse(text).choices[0].message.content), engine: 'groq/' + model };
         last = new Error('Groq ' + r.status + ' (' + model + '): ' + text.slice(0, 200));
         if (r.status === 401 || r.status === 403) throw last;          // mauvaise clé : inutile d'insister
     }
@@ -111,7 +111,7 @@ async function askGemini(key, user) {
         const text = await r.text();
         if (r.ok) {
             const parts = (((JSON.parse(text).candidates || [])[0] || {}).content || {}).parts || [];
-            return parseJson(parts.map((p) => p.text || '').join(''));
+            return { ai: parseJson(parts.map((p) => p.text || '').join('')), engine: 'google/' + model };
         }
         last = new Error('Gemini ' + r.status + ' (' + model + '): ' + text.slice(0, 200));
         if (r.status === 400 && /API key/i.test(text)) throw last;
@@ -169,7 +169,14 @@ module.exports = async (req, res) => {
     const errors = [];
     for (const [name, fn, key] of [['groq', askGroq, groqKey], ['gemini', askGemini, geminiKey]]) {
         if (!key) continue;
-        try { return res.status(200).json(clean(await fn(key.trim(), user))); }
+        try {
+            const t0 = Date.now();
+            const out = await fn(key.trim(), user);
+            const ms = Date.now() - t0;
+            console.log('[analyze-devis] answered by ' + out.engine + ' in ' + ms + ' ms');
+            res.setHeader('X-AI-Engine', out.engine);
+            return res.status(200).json(Object.assign(clean(out.ai), { engine: out.engine, ms }));
+        }
         catch (e) { errors.push(e.message); console.error('[analyze-devis] ' + name + ': ' + e.message); }
     }
     return res.status(502).json({ error: "Le service d'analyse est momentanément indisponible.", detail: errors.join(' | ').slice(0, 400) });
