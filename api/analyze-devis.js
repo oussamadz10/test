@@ -159,9 +159,11 @@ module.exports = async (req, res) => {
     ].filter(Boolean).join('\n');
     const user = (context ? context + '\n' : '') + 'Demande du client : ' + description;
 
-    const groqKey = process.env.GROQ_API_KEY || (/^gsk_/.test(process.env.GEMINI_API_KEY || '') ? process.env.GEMINI_API_KEY : '');
-    const geminiKey = /^AIza/.test(process.env.GEMINI_API_KEY || '') ? process.env.GEMINI_API_KEY : '';
-    if (!groqKey && !geminiKey) return res.status(500).json({ error: 'Clé IA manquante (GROQ_API_KEY ou GEMINI_API_KEY) dans Vercel.' });
+    const tidyKey = (k) => String(k || '').trim().replace(/^["']|["']$/g, '');
+    const gem = tidyKey(process.env.GEMINI_API_KEY);
+    const groqKey = tidyKey(process.env.GROQ_API_KEY) || (gem && !/^AIza/.test(gem) ? gem : '');   // clé Groq rangée sous GEMINI_API_KEY
+    const geminiKey = /^AIza/.test(gem) ? gem : '';
+    if (!groqKey && !geminiKey) return res.status(500).json({ error: 'Clé IA manquante : ajoutez GROQ_API_KEY (ou GEMINI_API_KEY) dans Vercel > Settings > Environment Variables.' });
 
     const errors = [];
     for (const [name, fn, key] of [['groq', askGroq, groqKey], ['gemini', askGemini, geminiKey]]) {
