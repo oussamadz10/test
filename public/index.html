@@ -154,12 +154,12 @@
                             <label class="border border-slate-200 rounded-xl p-4 text-center cursor-pointer block hover:bg-slate-50 transition">
                                 <input type="radio" name="investment" value="Intermédiaire" checked class="accent-orange-500 block mx-auto mb-2">
                                 <span class="font-bold text-sm block">Gamme Standard / Intermédiaire</span>
-                                <span class="text-xs text-slate-400">Fournitures pros certifiées NF (Taux horaire: 50€ HT)</span>
+                                <span class="text-xs text-slate-400">Fournitures pros certifiées NF</span>
                             </label>
                             <label class="border border-slate-200 rounded-xl p-4 text-center cursor-pointer block hover:bg-slate-50 transition">
                                 <input type="radio" name="investment" value="Haut de Gamme" class="accent-orange-500 block mx-auto mb-2">
                                 <span class="font-bold text-sm block">Gamme Premium / Haute Performance</span>
-                                <span class="text-xs text-slate-400">Marques Leaders (Atlantic, Grohe...) (Taux horaire: 78€ HT)</span>
+                                <span class="text-xs text-slate-400">Marques leaders (Atlantic, Grohe…)</span>
                             </label>
                         </div>
                     </div>
@@ -285,7 +285,7 @@
                         <div class="flex justify-between items-start pb-4 border-b border-slate-100">
                             <div>
                                 <h4 class="font-bold text-slate-800" id="out-labor-title">Main d'œuvre Spécialisée</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Calculé selon le barème horaire réel de l'activité.</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Taux horaire fixé selon la technicité du chantier et la gamme choisie.</p>
                             </div>
                             <span class="text-xl font-bold text-slate-900" id="out-labor">0,00 €</span>
                         </div>
@@ -301,7 +301,7 @@
                         <div class="flex justify-between items-start pb-4 border-b border-slate-100">
                             <div>
                                 <h4 class="font-bold text-slate-800">Logistique, Approvisionnement et Transport</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Forfait déplacement par jour d'intervention, au départ de Valence.</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Déplacements sur toute la durée du chantier, au départ de Valence.</p>
                             </div>
                             <span class="text-xl font-bold text-orange-600" id="out-travel">0,00 €</span>
                         </div>
@@ -419,9 +419,7 @@
             insurance: "[Assureur et n° de contrat]",
             mediator: "[Nom et site du médiateur de la consommation]"
         };
-        const RATES = { 'Intermédiaire': 50, 'Haut de Gamme': 78 };            // € HT / heure
-        const PREMIUM_MATERIALS = 1.4;                                         // fournitures haut de gamme
-        const TRAVEL_PER_DAY = { zone1: 45, zone2: 90, zone3: 150 };           // € HT / jour
+        // Taux horaire, déplacement et fournitures sont fixés par l'IA pour chaque chantier.
         const ZONE_LABEL = { zone1: 'Zone proche (0–25 km)', zone2: 'Zone moyenne (25–50 km)', zone3: 'Zone éloignée (50–100 km)' };
         const HOURS_PER_DAY = 7;
 
@@ -521,7 +519,6 @@
 
             dataStore.description = description;
             dataStore.zone = $('geo-distance').value;
-            dataStore.travelCostPerDay = TRAVEL_PER_DAY[dataStore.zone] || 45;
             dataStore.investment = document.querySelector('input[name="investment"]:checked')?.value || 'Intermédiaire';
 
             const btn = $('btn-submit-ai');
@@ -532,7 +529,7 @@
                 const response = await fetch('/api/analyze-devis', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description, type: dataStore.type, investment: dataStore.investment, images: photos })
+                    body: JSON.stringify({ description, type: dataStore.type, investment: dataStore.investment, zone: ZONE_LABEL[dataStore.zone], images: photos })
                 });
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(data.error || ('Erreur serveur ' + response.status));
@@ -594,14 +591,12 @@
             if (!$('date-start').value) { notify('Veuillez sélectionner une date.'); return; }
             calculateEndProjectDate();
             const ai = dataStore.ai;
-            const premium = dataStore.investment === 'Haut de Gamme';
-            const hourlyRate = RATES[dataStore.investment] || 50;
-            const factor = premium ? PREMIUM_MATERIALS : 1;
-            const lines = (ai.materialsList || []).map((m) => ({ ...m, unitPrice: Math.round(m.unitPrice * factor * 100) / 100 }));
-            const materialsCost = lines.length ? lines.reduce((s, m) => s + m.qty * m.unitPrice, 0) : Math.ceil(dataStore.calculatedMatCost * factor);
+            const hourlyRate = Number(ai.hourlyRate) || 55;
+            const lines = ai.materialsList || [];
+            const materialsCost = lines.length ? lines.reduce((s, m) => s + m.qty * m.unitPrice, 0) : Number(dataStore.calculatedMatCost) || 0;
             const laborCost = dataStore.durationHours * hourlyRate;
             const days = Math.max(1, Math.ceil(dataStore.durationHours / HOURS_PER_DAY));
-            const travelCost = dataStore.travelCostPerDay * days;
+            const travelCost = Number(ai.travelCost) || 0;
             const total = materialsCost + laborCost + travelCost;
             dataStore.totals = { materialsCost, laborCost, travelCost, total, hourlyRate, days };
             dataStore.ref = 'CD-' + new Date().toISOString().slice(2, 10).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();

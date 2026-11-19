@@ -11,9 +11,11 @@ const GROQ_VISION_MODELS = ['meta-llama/llama-4-scout-17b-16e-instruct', 'meta-l
 const GEMINI_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
 
 const SYSTEM_PROMPT = `Tu es un métreur-économiste expert en plomberie, chauffage, sanitaire, climatisation et VMC, qui chiffre
-pour un artisan indépendant basé à Valence (Drôme, 26). C'est toi qui détermines, selon ton expertise et les prix
-actuels du marché français, le temps de main d'œuvre nécessaire et le prix HT de chaque fourniture (prix professionnels
-de négoce). Sois réaliste : ni sous-estimé, ni gonflé.
+pour un artisan indépendant basé à Valence (Drôme, 26). C'est toi qui fixes tout le prix, selon ton expertise et les prix
+actuels du marché français : le temps de main d'œuvre, le taux horaire HT de l'artisan, les frais de déplacement et le
+prix HT de chaque fourniture (prix professionnels de négoce). Tiens compte de la gamme demandée (standard ou premium),
+de la technicité du chantier (dépannage, installation, PAC, gaz…) et de la distance depuis Valence.
+Sois réaliste : ni sous-estimé, ni gonflé.
 
 Si des photos sont jointes, analyse-les attentivement : type d'équipement, marque/modèle si lisible, âge et état apparent,
 matériaux (cuivre, PER, multicouche, PVC…), fuites, corrosion, accessibilité, contraintes de pose. Sers-t'en pour affiner
@@ -23,6 +25,9 @@ Règles :
 - Adapte à la description et aux photos (surface, nombre d'équipements, accès, état existant). Si l'information manque,
   prends une hypothèse moyenne et indique-la dans "assumptions".
 - "hours" = heures de main d'œuvre totales sur site (tests d'étanchéité et mise en service compris).
+- "hourlyRate" = taux horaire HT appliqué pour ce chantier dans la Drôme pour la gamme choisie.
+- "travelCost" = total HT des déplacements pour toute la durée du chantier, selon la distance indiquée.
+- Fournitures : en gamme premium, choisis des marques et modèles haut de gamme et chiffre-les à leur prix réel.
 - Liste les fournitures principales avec quantité et prix unitaire HT. Pas de main d'œuvre dans les fournitures.
 - Les étapes suivent les DTU (60.1, 60.11, 65.x, 68.3) et la réglementation (gaz, fluides frigorigènes, électricité) quand c'est pertinent.
 - Si la demande ne concerne pas la plomberie, le chauffage, le sanitaire, la climatisation ou la VMC, renvoie
@@ -35,6 +40,8 @@ Format exact :
   "summary": "2 à 3 phrases claires pour le client",
   "photoFindings": ["Ce que montrent les photos …"],
   "hours": 0,
+  "hourlyRate": 0,
+  "travelCost": 0,
   "steps": ["Étape 1 …", "Étape 2 …"],
   "materials": [{"label": "Fourniture", "qty": 1, "unit": "u", "unitPrice": 0}],
   "assumptions": ["Hypothèse retenue …"],
@@ -129,6 +136,8 @@ function clean(ai) {
         title: str(ai.title, 120) || 'Intervention technique',
         summary: str(ai.summary, 600),
         hours: Math.round(num(ai.hours, 1, 400, 8) * 2) / 2,
+        hourlyRate: Math.round(num(ai.hourlyRate, 20, 200, 55)),
+        travelCost: Math.round(num(ai.travelCost, 0, 5000, 0)),
         photoFindings: (Array.isArray(ai.photoFindings) ? ai.photoFindings : []).slice(0, 8).map((x) => str(x, 300)).filter(Boolean),
         steps: (Array.isArray(ai.steps) ? ai.steps : []).slice(0, 15).map((s) => str(s, 300)).filter(Boolean),
         materialsList: materials,
@@ -156,7 +165,8 @@ module.exports = async (req, res) => {
 
     const context = [
         body.type ? 'Type : ' + str(body.type, 60) : '',
-        body.investment ? 'Gamme souhaitée : ' + str(body.investment, 40) : ''
+        body.investment ? 'Gamme souhaitée : ' + str(body.investment, 40) : '',
+        body.zone ? 'Distance du chantier depuis Valence : ' + str(body.zone, 60) : ''
     ].filter(Boolean).join('\n');
     const user = (context ? context + '\n' : '') + 'Demande du client : ' + (description || '(aucune description, se baser sur les photos)') +
         (images.length ? '\n' + images.length + ' photo(s) jointe(s) du chantier.' : '');
