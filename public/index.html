@@ -127,8 +127,25 @@
                     <p class="text-slate-500 text-sm mb-6">Précisez les équipements concernés (ex: pose pompe à chaleur, fuite cuivre, installation VMC double flux, pose suspendu...).</p>
 
                     <div class="mb-6">
-                        <label class="block font-semibold text-slate-700 mb-2">Détaillez votre projet (Texte libre) :</label>
+                        <label class="block font-semibold text-slate-700 mb-2">Détaillez votre projet :</label>
                         <textarea id="ai-description" rows="4" placeholder="Ex: Je souhaite remplacer ma vieille chaudière par une pompe à chaleur..." class="w-full border border-slate-200 bg-slate-50 rounded-xl p-4 focus:outline-none focus:border-orange-500 focus:bg-white transition font-medium text-slate-700"></textarea>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block font-semibold text-slate-700 mb-1">Photos du chantier <span class="font-normal text-slate-400">(facultatif, jusqu'à 3)</span></label>
+                        <p class="text-xs text-slate-500 mb-3">L'IA analyse vos photos (équipement, état, accès) pour affiner le prix.</p>
+                        <div class="flex flex-wrap gap-3">
+                            <label class="cursor-pointer inline-flex items-center gap-2 bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 font-semibold text-sm px-4 py-3 rounded-xl transition">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                Prendre une photo
+                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="addPhotos(this)">
+                            </label>
+                            <label class="cursor-pointer inline-flex items-center gap-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 font-semibold text-sm px-4 py-3 rounded-xl transition">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                                Choisir des photos
+                                <input type="file" accept="image/*" multiple class="hidden" onchange="addPhotos(this)">
+                            </label>
+                        </div>
+                        <div id="photo-list" class="flex flex-wrap gap-3 mt-3"></div>
                     </div>
 
                     <div class="mb-8">
@@ -164,6 +181,7 @@
                             <span id="ai-confidence" class="text-[11px] font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-600 whitespace-nowrap"></span>
                         </div>
                         <p id="ai-summary" class="text-sm text-slate-600"></p>
+                        <ul id="ai-photo-findings" class="hidden mt-3 list-disc ps-5 space-y-1 text-xs text-slate-600"></ul>
                     </div>
 
                     <div class="bg-orange-50 border border-orange-100 rounded-xl p-4 mb-6 flex items-center justify-between">
@@ -229,6 +247,13 @@
 
                     <div class="p-6 bg-slate-50 border-b border-slate-100">
                         <p id="out-summary" class="text-sm text-slate-600 mb-4"></p>
+                        <div id="out-photos-box" class="hidden mb-5">
+                            <h3 class="text-sm font-bold text-slate-900 mb-2">Analyse de vos photos</h3>
+                            <div class="flex gap-4 items-start">
+                                <div id="out-photos" class="flex gap-2 shrink-0"></div>
+                                <ul id="out-photo-findings" class="list-disc ps-5 space-y-1 text-xs text-slate-600"></ul>
+                            </div>
+                        </div>
                         <h3 class="text-sm font-bold text-slate-900 mb-3">Fournitures principales prévues</h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-xs text-slate-600 border-collapse">
@@ -402,6 +427,46 @@
 
         document.querySelectorAll('[data-cfg]').forEach((el) => { el.textContent = CONFIG[el.dataset.cfg] || ''; });
 
+        // ===== Photos : compressées dans le navigateur avant l'envoi =====
+        const MAX_PHOTOS = 3;
+        let photos = [];   // dataURL JPEG
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const url = URL.createObjectURL(file);
+                const img = new Image();
+                img.onload = () => {
+                    const max = 1280, k = Math.min(1, max / Math.max(img.width, img.height));
+                    const c = document.createElement('canvas');
+                    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+                    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                    URL.revokeObjectURL(url);
+                    resolve(c.toDataURL('image/jpeg', 0.8));
+                };
+                img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image illisible')); };
+                img.src = url;
+            });
+        }
+        async function addPhotos(input) {
+            const files = Array.from(input.files || []).filter((f) => /^image\//.test(f.type));
+            input.value = '';
+            for (const f of files) {
+                if (photos.length >= MAX_PHOTOS) { notify('3 photos maximum.'); break; }
+                try { photos.push(await compressImage(f)); } catch (e) { notify("Impossible de lire cette image (format non pris en charge)."); }
+            }
+            renderPhotos();
+        }
+        function removePhoto(i) { photos.splice(i, 1); renderPhotos(); }
+        function renderPhotos() {
+            const box = $('photo-list'); box.innerHTML = '';
+            photos.forEach((src, i) => {
+                const w = el('div', 'relative');
+                const im = el('img', 'w-24 h-24 object-cover rounded-xl border border-slate-200'); im.src = src; im.alt = 'Photo ' + (i + 1);
+                const x = el('button', 'absolute -top-2 -right-2 w-7 h-7 rounded-full bg-slate-900 text-white text-sm leading-none', '×');
+                x.type = 'button'; x.setAttribute('aria-label', 'Retirer la photo'); x.onclick = () => removePhoto(i);
+                w.append(im, x); box.append(w);
+            });
+        }
+
         let dataStore = {
             type: '', zone: 'zone1', description: '', investment: 'Intermédiaire',
             ai: null, durationHours: 0, calculatedMatCost: 0, travelCostPerDay: 0,
@@ -429,6 +494,7 @@
         function restartWizard() {
             $('result-wrapper').classList.add('hidden');
             $('ai-description').value = '';
+            photos = []; renderPhotos();
             dataStore.ai = null;
             startWizard();
         }
@@ -451,7 +517,7 @@
 
         async function processAIStep3() {
             const description = ($('ai-description').value || '').trim();
-            if (description.length < 8) { notify("Décrivez vos travaux en quelques mots (équipement, pièce, problème…)."); return; }
+            if (description.length < 8 && !photos.length) { notify("Décrivez vos travaux en quelques mots ou ajoutez une photo."); return; }
 
             dataStore.description = description;
             dataStore.zone = $('geo-distance').value;
@@ -460,13 +526,13 @@
 
             const btn = $('btn-submit-ai');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Analyse en cours…';
+            btn.innerHTML = '<span class="spinner"></span> ' + (photos.length ? 'Analyse des photos…' : 'Analyse en cours…');
 
             try {
                 const response = await fetch('/api/analyze-devis', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description, type: dataStore.type, investment: dataStore.investment })
+                    body: JSON.stringify({ description, type: dataStore.type, investment: dataStore.investment, images: photos })
                 });
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(data.error || ('Erreur serveur ' + response.status));
@@ -483,6 +549,9 @@
                 $('ai-summary').textContent = data.summary || '';
                 $('ai-confidence').textContent = 'Fiabilité ' + data.confidence;
                 $('ai-summary-box').classList.remove('hidden');
+                const pf = $('ai-photo-findings'); pf.innerHTML = '';
+                (data.photoFindings || []).forEach((t) => pf.append(el('li', '', t)));
+                pf.classList.toggle('hidden', !(data.photoFindings || []).length);
 
                 const start = $('date-start');
                 const min = addWorkingDays(new Date(), 2);
@@ -559,6 +628,13 @@
             }
             const fill = (id, arr, empty) => { const ul = $(id); ul.innerHTML = ''; (arr && arr.length ? arr : [empty]).forEach((t) => ul.append(el('li', '', t))); };
             fill('out-steps', ai.steps, 'Déroulé précisé lors de la visite technique.');
+            const hasPhotos = photos.length && (ai.photoFindings || []).length;
+            $('out-photos-box').classList.toggle('hidden', !hasPhotos);
+            if (hasPhotos) {
+                fill('out-photo-findings', ai.photoFindings, '');
+                const op = $('out-photos'); op.innerHTML = '';
+                photos.forEach((src) => { const im = el('img', 'w-16 h-16 object-cover rounded-lg border border-slate-200'); im.src = src; op.append(im); });
+            }
             fill('out-assumptions', ai.assumptions, 'Accès normal au chantier, installation existante en état standard.');
 
             $('out-labor').textContent = eur(laborCost);
@@ -581,7 +657,7 @@
                 title: dataStore.ai?.title, type: dataStore.type, zone: ZONE_LABEL[dataStore.zone], investment: dataStore.investment,
                 dates: dataStore.startDate ? `${dataStore.startDate.toLocaleDateString('fr-FR')} → ${dataStore.endDate.toLocaleDateString('fr-FR')}` : '',
                 labor: eur(t.laborCost), materials: eur(t.materialsCost), travel: eur(t.travelCost), total: eur(t.total),
-                description: dataStore.description + '\n\nRéf. ' + dataStore.ref
+                description: (dataStore.description || '(décrit par photos)') + (photos.length ? '\n\n' + photos.length + ' photo(s) analysée(s) : ' + (dataStore.ai?.photoFindings || []).join(' / ') : '') + '\n\nRéf. ' + dataStore.ref
             };
         }
         function sendLead(kind) {

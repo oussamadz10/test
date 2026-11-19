@@ -7,29 +7,23 @@
 'use strict';
 
 const GROQ_MODELS = ['llama-3.3-70b-versatile', 'openai/gpt-oss-120b', 'llama-3.1-8b-instant'];
+const GROQ_VISION_MODELS = ['meta-llama/llama-4-scout-17b-16e-instruct', 'meta-llama/llama-4-maverick-17b-128e-instruct'];
 const GEMINI_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
 
-const SYSTEM_PROMPT = `Tu es un métreur-économiste expert en plomberie, chauffage, sanitaire et VMC, qui chiffre pour un artisan
-indépendant basé à Valence (Drôme, 26). Tu estimes de façon réaliste le temps de main d'œuvre et les fournitures HT
-aux prix professionnels constatés en France (négoce type Cedeo, Point P, Richardson).
+const SYSTEM_PROMPT = `Tu es un métreur-économiste expert en plomberie, chauffage, sanitaire, climatisation et VMC, qui chiffre
+pour un artisan indépendant basé à Valence (Drôme, 26). C'est toi qui détermines, selon ton expertise et les prix
+actuels du marché français, le temps de main d'œuvre nécessaire et le prix HT de chaque fourniture (prix professionnels
+de négoce). Sois réaliste : ni sous-estimé, ni gonflé.
 
-Repères indicatifs (fournitures HT / main d'œuvre) pour rester cohérent :
-- Remplacement chauffe-eau électrique 200 L : 450–750 € / 3–4 h
-- Remplacement chaudière gaz à condensation : 2 200–3 500 € / 8–12 h
-- Pompe à chaleur air/eau 8–11 kW (remplacement chaudière) : 6 000–9 500 € / 16–28 h
-- Climatisation / PAC air/air monosplit : 900–1 600 € / 6–8 h
-- VMC simple flux hygro B (maison) : 250–500 € / 4–6 h ; VMC double flux : 2 500–4 500 € / 16–24 h
-- Recherche et réparation de fuite accessible : 20–90 € / 1–3 h
-- Remplacement WC (posé ou suspendu) : 200–650 € / 2–5 h
-- Plomberie + sanitaires d'une salle de bain complète (hors carrelage) : 2 500–5 500 € / 24–40 h
-- Désembouage circuit de chauffage (8 radiateurs) : 150–300 € / 4–6 h
-- Remplacement d'un radiateur : 150–500 € / 2–3 h
+Si des photos sont jointes, analyse-les attentivement : type d'équipement, marque/modèle si lisible, âge et état apparent,
+matériaux (cuivre, PER, multicouche, PVC…), fuites, corrosion, accessibilité, contraintes de pose. Sers-t'en pour affiner
+le chiffrage et décris ce que tu vois dans "photoFindings". Si une photo ne montre rien d'utile, dis-le.
 
 Règles :
-- Adapte à la description (surface, nombre d'équipements, accès, état existant). Si l'information manque,
+- Adapte à la description et aux photos (surface, nombre d'équipements, accès, état existant). Si l'information manque,
   prends une hypothèse moyenne et indique-la dans "assumptions".
 - "hours" = heures de main d'œuvre totales sur site (tests d'étanchéité et mise en service compris).
-- Liste les fournitures principales avec quantité et prix unitaire HT réalistes. Pas de main d'œuvre dans les fournitures.
+- Liste les fournitures principales avec quantité et prix unitaire HT. Pas de main d'œuvre dans les fournitures.
 - Les étapes suivent les DTU (60.1, 60.11, 65.x, 68.3) et la réglementation (gaz, fluides frigorigènes, électricité) quand c'est pertinent.
 - Si la demande ne concerne pas la plomberie, le chauffage, le sanitaire, la climatisation ou la VMC, renvoie
   {"outOfScope": true, "message": "explication courte"}.
@@ -39,6 +33,7 @@ Format exact :
 {
   "title": "Intitulé professionnel de la prestation",
   "summary": "2 à 3 phrases claires pour le client",
+  "photoFindings": ["Ce que montrent les photos …"],
   "hours": 0,
   "steps": ["Étape 1 …", "Étape 2 …"],
   "materials": [{"label": "Fourniture", "qty": 1, "unit": "u", "unitPrice": 0}],
@@ -77,15 +72,16 @@ function parseJson(text) {
     throw new Error('Réponse IA illisible');
 }
 
-async function askGroq(key, user) {
+async function askGroq(key, user, images) {
     let last;
-    for (const model of GROQ_MODELS) {
+    const content = images.length ? [{ type: 'text', text: user }, ...images.map((im) => ({ type: 'image_url', image_url: { url: 'data:' + im.mime + ';base64,' + im.data } }))] : user;
+    for (const model of (images.length ? GROQ_VISION_MODELS : GROQ_MODELS)) {
         const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
             body: JSON.stringify({
                 model, temperature: 0.2, response_format: { type: 'json_object' },
-                messages: [{ role: 'system', content: SYSTEM_PROMPT }, { role: 'user', content: user }]
+                messages: [{ role: 'system', content: SYSTEM_PROMPT }, { role: 'user', content }]
             })
         });
         const text = await r.text();
@@ -96,7 +92,7 @@ async function askGroq(key, user) {
     throw last;
 }
 
-async function askGemini(key, user) {
+async function askGemini(key, user, images) {
     let last;
     for (const model of GEMINI_MODELS) {
         const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent', {
@@ -104,7 +100,7 @@ async function askGemini(key, user) {
             headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
             body: JSON.stringify({
                 systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                contents: [{ role: 'user', parts: [{ text: user }] }],
+                contents: [{ role: 'user', parts: [{ text: user }, ...images.map((im) => ({ inline_data: { mime_type: im.mime, data: im.data } }))] }],
                 generationConfig: { temperature: 0.2, responseMimeType: 'application/json' }
             })
         });
@@ -133,6 +129,7 @@ function clean(ai) {
         title: str(ai.title, 120) || 'Intervention technique',
         summary: str(ai.summary, 600),
         hours: Math.round(num(ai.hours, 1, 400, 8) * 2) / 2,
+        photoFindings: (Array.isArray(ai.photoFindings) ? ai.photoFindings : []).slice(0, 8).map((x) => str(x, 300)).filter(Boolean),
         steps: (Array.isArray(ai.steps) ? ai.steps : []).slice(0, 15).map((s) => str(s, 300)).filter(Boolean),
         materialsList: materials,
         materials: matTotal || Math.round(num(ai.materials, 0, 150000, 0)),
@@ -151,13 +148,18 @@ module.exports = async (req, res) => {
 
     const body = await readBody(req);
     const description = str(body.description || body.textDescription || body.text, 2000);
-    if (description.length < 8) return res.status(400).json({ error: 'Décrivez vos travaux en quelques mots.' });
+    const images = (Array.isArray(body.images) ? body.images : []).slice(0, 3).map((im) => {
+        const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(im || ''));
+        return m && m[2].length < 2.8e6 ? { mime: m[1], data: m[2] } : null;
+    }).filter(Boolean);
+    if (description.length < 8 && !images.length) return res.status(400).json({ error: 'Décrivez vos travaux en quelques mots ou ajoutez une photo.' });
 
     const context = [
         body.type ? 'Type : ' + str(body.type, 60) : '',
         body.investment ? 'Gamme souhaitée : ' + str(body.investment, 40) : ''
     ].filter(Boolean).join('\n');
-    const user = (context ? context + '\n' : '') + 'Demande du client : ' + description;
+    const user = (context ? context + '\n' : '') + 'Demande du client : ' + (description || '(aucune description, se baser sur les photos)') +
+        (images.length ? '\n' + images.length + ' photo(s) jointe(s) du chantier.' : '');
 
     const tidyKey = (k) => String(k || '').trim().replace(/^["']|["']$/g, '');
     const gem = tidyKey(process.env.GEMINI_API_KEY);
@@ -167,11 +169,12 @@ module.exports = async (req, res) => {
     if (!groqKey && !geminiKey) return res.status(500).json({ error: 'Clé IA manquante : ajoutez GROQ_API_KEY (ou GEMINI_API_KEY) dans Vercel > Settings > Environment Variables.' });
 
     const errors = [];
-    for (const [name, fn, key] of [['groq', askGroq, groqKey], ['gemini', askGemini, geminiKey]]) {
+    const order = [['gemini', askGemini, geminiKey], ['groq', askGroq, groqKey]];
+    for (const [name, fn, key] of order) {
         if (!key) continue;
         try {
             const t0 = Date.now();
-            const out = await fn(key.trim(), user);
+            const out = await fn(key.trim(), user, images);
             const ms = Date.now() - t0;
             console.log('[analyze-devis] answered by ' + out.engine + ' in ' + ms + ' ms');
             res.setHeader('X-AI-Engine', out.engine);
