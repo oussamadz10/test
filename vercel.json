@@ -7,17 +7,22 @@
     },
     {
       "src": "api/*.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "lib/**"
+        ]
+      }
     }
   ],
   "routes": [
     {
-      "src": "/api/analyze-devis",
-      "dest": "/api/analyze-devis.js"
+      "src": "/api/stripe-webhook",
+      "dest": "/api/stripe-webhook.js"
     },
     {
-      "src": "/api/lead",
-      "dest": "/api/lead.js"
+      "src": "/api/([a-z-]+)",
+      "dest": "/api/$1.js"
     },
     {
       "src": "/sw.js",
@@ -28,12 +33,24 @@
       "dest": "/public/sw.js"
     },
     {
-      "src": "/manifest.webmanifest",
+      "src": "/(.*)\\.webmanifest",
       "headers": {
         "Content-Type": "application/manifest+json",
         "Cache-Control": "no-cache"
       },
-      "dest": "/public/manifest.webmanifest"
+      "dest": "/public/$1.webmanifest"
+    },
+    {
+      "src": "/app/?",
+      "dest": "/public/app/index.html"
+    },
+    {
+      "src": "/p/([a-z0-9-]+)/?",
+      "dest": "/public/p/index.html"
+    },
+    {
+      "src": "/(en|es|ar)/?",
+      "dest": "/public/$1/index.html"
     },
     {
       "src": "/",

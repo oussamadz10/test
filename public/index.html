@@ -1,757 +1,127 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devis plomberie & chauffage en ligne à Valence (26) | ChronoDevis AI</title>
-    <meta name="description" content="Estimez gratuitement en 2 minutes le prix de vos travaux de plomberie, chauffage, pompe à chaleur, sanitaire et VMC à Valence et dans un rayon de 100 km : main d'œuvre, fournitures et déplacement détaillés.">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://chronodevisia.fr/">
-    <meta name="theme-color" content="#0f172a">
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="fr_FR">
-    <meta property="og:site_name" content="ChronoDevis AI">
-    <meta property="og:title" content="Devis plomberie & chauffage en ligne à Valence | ChronoDevis AI">
-    <meta property="og:description" content="Estimation gratuite et détaillée de vos travaux de plomberie, chauffage, sanitaire et VMC autour de Valence (26).">
-    <meta property="og:url" content="https://chronodevisia.fr/">
-    <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="ChronoDevis">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"HomeAndConstructionBusiness","name":"ChronoDevis AI","url":"https://chronodevisia.fr/","description":"Plomberie, chauffage, pompe à chaleur, sanitaire et VMC à Valence et dans un rayon de 100 km. Estimation de devis en ligne.","areaServed":[{"@type":"City","name":"Valence"},{"@type":"AdministrativeArea","name":"Drôme"},{"@type":"AdministrativeArea","name":"Ardèche"}],"address":{"@type":"PostalAddress","addressLocality":"Valence","postalCode":"26000","addressCountry":"FR"},"priceRange":"€€"}</script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
-        }
-        .step {
-            display: none;
-        }
-        .step.active {
-            display: block;
-        }
-        .blur-effect {
-            filter: blur(6px);
-            pointer-events: none;
-            user-select: none;
-        }
-        .modal {
-            display: none;
-        }
-        .modal.active {
-            display: flex;
-        }
-        .spinner { width: 18px; height: 18px; border: 3px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; display: inline-block; vertical-align: -4px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .print-only { display: none; }
-        .pwa-bar{position:fixed;left:12px;right:12px;bottom:12px;z-index:60;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;background:#0f172a;color:#fff;border-radius:18px;box-shadow:0 14px 40px rgba(15,23,42,.35);transform:translateY(150%);transition:transform .35s ease;padding-bottom:max(12px,env(safe-area-inset-bottom))}
-        .pwa-bar.on{transform:none}
-        .pwa-bar img{width:42px;height:42px;border-radius:11px;flex:0 0 auto}
-        .pwa-bar .t{flex:1;min-width:0;line-height:1.25}.pwa-bar b{display:block;font-size:14px}.pwa-bar small{display:block;font-size:12px;color:#94a3b8}
-        .pwa-bar .go{border:0;border-radius:12px;padding:10px 16px;font-weight:700;font-size:14px;background:#f97316;color:#fff;cursor:pointer}
-        .pwa-bar .x{border:0;background:none;color:#94a3b8;font-size:22px;padding:4px 6px;cursor:pointer}
-        .pwa-sheet{position:fixed;inset:0;z-index:70;background:rgba(15,23,42,.55);display:flex;align-items:flex-end;justify-content:center;padding:12px}
-        .pwa-card{width:100%;max-width:420px;background:#fff;border-radius:20px;padding:22px;color:#0f172a}
-        .pwa-card h3{margin:0 0 12px;font-size:18px;font-weight:700}.pwa-card ol{margin:0 0 18px;padding-left:22px;line-height:1.9;color:#334155;list-style:decimal}
-        .pwa-card button{width:100%;border:0;border-radius:12px;padding:13px;font-weight:700;font-size:15px;background:#f97316;color:#fff}
-        @media print {
-            @page { margin: 14mm; }
-            body { background: #fff !important; }
-            .pwa-bar, .pwa-sheet, header, footer, #hero-section, #wizard-container, #progress-container, #email-gate, #unlocked-actions, #premium-box, .no-print, .modal { display: none !important; }
-            main { margin: 0 !important; max-width: none !important; padding: 0 !important; }
-            #devis-board { box-shadow: none !important; border: 1px solid #cbd5e1 !important; filter: none !important; }
-            .print-only { display: block !important; }
-            .bg-slate-900 { background: #0f172a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChronoDevis – Devis artisan en 2 minutes avec l&#x27;IA | Logiciel de devis BTP</title>
+<meta name="description" content="Logiciel de devis pour artisans de tous les métiers : l&#x27;IA chiffre main d&#x27;œuvre, fournitures et déplacement à partir d&#x27;une description ou d&#x27;une photo. Devis conformes, page client, 7 jours gratuits sans carte.">
+<link rel="canonical" href="https://chronodevisia.fr/">
+<link rel="alternate" hreflang="fr" href="https://chronodevisia.fr/">
+<link rel="alternate" hreflang="en" href="https://chronodevisia.fr/en/">
+<link rel="alternate" hreflang="es" href="https://chronodevisia.fr/es/">
+<link rel="alternate" hreflang="ar" href="https://chronodevisia.fr/ar/">
+<link rel="alternate" hreflang="x-default" href="https://chronodevisia.fr/">
+<meta name="theme-color" content="#0f172a">
+<meta property="og:type" content="website"><meta property="og:site_name" content="ChronoDevis"><meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="ChronoDevis – Devis artisan en 2 minutes avec l&#x27;IA | Logiciel de devis BTP"><meta property="og:description" content="Logiciel de devis pour artisans de tous les métiers : l&#x27;IA chiffre main d&#x27;œuvre, fournitures et déplacement à partir d&#x27;une description ou d&#x27;une photo. Devis conformes, page client, 7 jours gratuits sans carte."><meta property="og:url" content="https://chronodevisia.fr/">
+<meta property="og:image" content="https://chronodevisia.fr/icons/og.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png"><link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="ChronoDevis">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css?v=3">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ChronoDevis", "applicationCategory": "BusinessApplication", "operatingSystem": "Web, Android, iOS", "inLanguage": "fr", "url": "https://chronodevisia.fr/", "description": "Logiciel de devis pour artisans de tous les métiers : l'IA chiffre main d'œuvre, fournitures et déplacement à partir d'une description ou d'une photo. Devis conformes, page client, 7 jours gratuits sans carte.", "offers": [{"@type": "Offer", "name": "Essentiel", "price": "19.00", "priceCurrency": "EUR"}, {"@type": "Offer", "name": "Pro", "price": "39.00", "priceCurrency": "EUR"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "inLanguage": "fr", "mainEntity": [{"@type": "Question", "name": "Que se passe-t-il après les 7 jours ?", "acceptedAnswer": {"@type": "Answer", "text": "Rien n'est prélevé : aucune carte n'est demandée. Vous choisissez une formule pour continuer, sinon votre compte passe en lecture seule et vos devis restent consultables."}}, {"@type": "Question", "name": "Les prix proposés par l'IA sont-ils fiables ?", "acceptedAnswer": {"@type": "Answer", "text": "L'IA s'appuie sur les prix du marché français et sur votre description. C'est une base de travail : vous pouvez modifier chaque ligne et indiquer votre propre taux horaire."}}, {"@type": "Question", "name": "Mes devis sont-ils conformes ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui : numéro, date, durée de validité, identité de l'entreprise (SIRET, RCS/RM, TVA), assurance, détail des prestations, totaux HT/TVA/TTC, conditions de paiement et zone « bon pour accord »."}}, {"@type": "Question", "name": "Puis-je résilier à tout moment ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, en un clic depuis votre espace. L'abonnement s'arrête à la fin de la période payée."}}, {"@type": "Question", "name": "Où sont stockées mes données ?", "acceptedAnswer": {"@type": "Answer", "text": "Dans une base sécurisée en Europe. Vos données et celles de vos clients ne sont ni revendues ni utilisées à d'autres fins."}}]}</script>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
-
-    <div>
-        <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 py-4 px-6 md:px-12 flex justify-between items-center">
-            <div class="text-2xl font-bold text-slate-900 tracking-tight">
-                Chrono<span class="text-orange-500">Devis AI</span>
-                <span class="text-xs font-normal text-slate-400 block md:inline md:ml-2">Spécialiste CVC & Plomberie</span>
-            </div>
-            <span class="text-xs font-semibold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                <span class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span> Zone Valence 100km Active
-            </span>
-        </header>
-
-        <main class="max-w-4xl mx-auto my-8 px-4">
-
-            <div id="progress-container" class="hidden mb-8 bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div id="progress-bar" class="bg-orange-500 h-full transition-all duration-500" style="width: 25%"></div>
-            </div>
-
-            <div id="hero-section" class="text-center py-16 px-4">
-                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-                    Simulateur de Devis Technique <br><span class="text-orange-500">Plomberie, Chauffage, Sanitaire & VMC</span>
-                </h1>
-                <p class="text-lg text-slate-600 max-w-2xl mx-auto mb-8">
-                    Calculateur intelligent dédié aux installations thermiques et sanitaires sur Valence et sa région. Estimation précise main d'œuvre, fournitures pros et planification.
-                </p>
-                <button onclick="startWizard()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-xl shadow-orange-500/20 transition-all transform hover:-translate-y-0.5">
-                    Lancer le calculateur technique
-                </button>
-            </div>
-
-            <div id="wizard-container" class="bg-white border border-slate-100 rounded-2xl shadow-xl p-6 md:p-10 hidden">
-
-                <div id="step-1" class="step active">
-                    <h2 class="text-2xl font-bold text-slate-900 mb-1">1. Type d'intervention & Zone</h2>
-                    <p class="text-slate-500 text-sm mb-6">Définissons le cadre de votre projet thermique ou sanitaire.</p>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div id="type-renov" onclick="selectType('Rénovation / Remplacement')" class="border-2 border-slate-200 hover:border-orange-500 rounded-xl p-5 cursor-pointer bg-slate-50 transition flex items-start gap-4">
-                            <div>
-                                <h3 class="font-bold text-slate-800">Rénovation & Remplacement</h3>
-                                <p class="text-xs text-slate-500 mt-1">Réfection de salle de bain, changement de chaudière/PAC, mise aux normes VMC.</p>
-                            </div>
-                        </div>
-                        <div id="type-neuf" onclick="selectType('Installation Neuve')" class="border-2 border-slate-200 hover:border-orange-500 rounded-xl p-5 cursor-pointer bg-slate-50 transition flex items-start gap-4">
-                            <div>
-                                <h3 class="font-bold text-slate-800">Création / Neuf</h3>
-                                <p class="text-xs text-slate-500 mt-1">Pose complète de réseau sur maison neuve ou extension (Plomberie, VMC, Chauffage).</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-8">
-                        <label class="block font-semibold text-slate-700 mb-2">Distance du chantier par rapport à Valence (26000) :</label>
-                        <select id="geo-distance" class="w-full border border-slate-200 bg-slate-50 rounded-xl p-3.5 focus:outline-none focus:border-orange-500 focus:bg-white transition">
-                            <option value="zone1">Zone Proche (0 à 25 km) - ex: Bourg, Romans, Guilherand</option>
-                            <option value="zone2">Zone Moyenne (25 à 50 km) - ex: Montélimar, Privas, Tournon</option>
-                            <option value="zone3">Zone Éloignée (50 à 100 km) - ex: Grenoble, Sud Lyon</option>
-                        </select>
-                    </div>
-
-                    <div class="flex justify-end">
-                        <button onclick="goToStep(2)" class="bg-slate-900 text-white font-semibold px-6 py-3 rounded-xl hover:bg-slate-800 transition">Suivant</button>
-                    </div>
-                </div>
-
-                <div id="step-2" class="step">
-                    <div class="flex items-center gap-2 mb-1">
-                        <h2 class="text-2xl font-bold text-slate-900">2. Description technique de vos besoins</h2>
-                    </div>
-                    <p class="text-slate-500 text-sm mb-6">Précisez les équipements concernés (ex: pose pompe à chaleur, fuite cuivre, installation VMC double flux, pose suspendu...).</p>
-
-                    <div class="mb-6">
-                        <label class="block font-semibold text-slate-700 mb-2">Détaillez votre projet :</label>
-                        <textarea id="ai-description" rows="4" placeholder="Ex: Je souhaite remplacer ma vieille chaudière par une pompe à chaleur..." class="w-full border border-slate-200 bg-slate-50 rounded-xl p-4 focus:outline-none focus:border-orange-500 focus:bg-white transition font-medium text-slate-700"></textarea>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block font-semibold text-slate-700 mb-1">Photos du chantier <span class="font-normal text-slate-400">(facultatif, jusqu'à 3)</span></label>
-                        <p class="text-xs text-slate-500 mb-3">L'IA analyse vos photos (équipement, état, accès) pour affiner le prix.</p>
-                        <div class="flex flex-wrap gap-3">
-                            <label class="cursor-pointer inline-flex items-center gap-2 bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 font-semibold text-sm px-4 py-3 rounded-xl transition">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                                Prendre une photo
-                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="addPhotos(this)">
-                            </label>
-                            <label class="cursor-pointer inline-flex items-center gap-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 font-semibold text-sm px-4 py-3 rounded-xl transition">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                                Choisir des photos
-                                <input type="file" accept="image/*" multiple class="hidden" onchange="addPhotos(this)">
-                            </label>
-                        </div>
-                        <div id="photo-list" class="flex flex-wrap gap-3 mt-3"></div>
-                    </div>
-
-                    <div class="mb-8">
-                        <label class="block font-semibold text-slate-700 mb-3">Gamme de matériel souhaitée :</label>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="border border-slate-200 rounded-xl p-4 text-center cursor-pointer block hover:bg-slate-50 transition">
-                                <input type="radio" name="investment" value="Intermédiaire" checked class="accent-orange-500 block mx-auto mb-2">
-                                <span class="font-bold text-sm block">Gamme Standard / Intermédiaire</span>
-                                <span class="text-xs text-slate-400">Fournitures pros certifiées NF</span>
-                            </label>
-                            <label class="border border-slate-200 rounded-xl p-4 text-center cursor-pointer block hover:bg-slate-50 transition">
-                                <input type="radio" name="investment" value="Haut de Gamme" class="accent-orange-500 block mx-auto mb-2">
-                                <span class="font-bold text-sm block">Gamme Premium / Haute Performance</span>
-                                <span class="text-xs text-slate-400">Marques leaders (Atlantic, Grohe…)</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between">
-                        <button onclick="goToStep(1)" class="text-slate-500 font-medium px-4 py-2 hover:text-slate-800 transition">Retour</button>
-                        <button id="btn-submit-ai" onclick="processAIStep3()" class="bg-slate-900 text-white font-semibold px-6 py-3 rounded-xl hover:bg-slate-800 transition">
-                            <span id="btn-text">Analyser mon projet</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div id="step-3" class="step">
-                    <h2 class="text-2xl font-bold text-slate-900 mb-1">3. Planification technique de l'intervention</h2>
-                    <p class="text-slate-500 text-sm mb-4">Durée estimée pour une exécution conforme aux DTU, tests d'étanchéité et mise en service compris.</p>
-                    <div id="ai-summary-box" class="hidden mb-4 p-4 rounded-xl border border-slate-200 bg-white">
-                        <div class="flex items-center justify-between gap-3 mb-1">
-                            <h3 id="ai-title" class="font-bold text-slate-900"></h3>
-                            <span id="ai-confidence" class="text-[11px] font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-600 whitespace-nowrap"></span>
-                        </div>
-                        <p id="ai-summary" class="text-sm text-slate-600"></p>
-                        <ul id="ai-photo-findings" class="hidden mt-3 list-disc ps-5 space-y-1 text-xs text-slate-600"></ul>
-                    </div>
-
-                    <div class="bg-orange-50 border border-orange-100 rounded-xl p-4 mb-6 flex items-center justify-between">
-                        <span class="text-sm font-medium text-orange-800">Temps d'intervention requis :</span>
-                        <span id="calculated-days" class="text-lg font-bold text-orange-600">-- heures</span>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block font-semibold text-slate-700 mb-2">Date d'intervention souhaitée :</label>
-                        <input type="date" id="date-start" onchange="calculateEndProjectDate()" class="w-full border border-slate-200 bg-slate-50 rounded-xl p-3.5 focus:outline-none focus:border-orange-500 focus:bg-white transition">
-                    </div>
-
-                    <div class="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-200/60">
-                        <span class="text-xs text-slate-400 font-medium block uppercase tracking-wider">Fin prévisionnelle des essais et mise en service (jours ouvrés) :</span>
-                        <span id="date-end-display" class="text-lg font-bold text-slate-800">Sélectionnez une date de début</span>
-                    </div>
-
-                    <div class="flex justify-between">
-                        <button onclick="goToStep(2)" class="text-slate-500 font-medium px-4 py-2 hover:text-slate-800 transition">Retour</button>
-                        <button onclick="renderAIDevis()" class="bg-orange-500 text-white font-bold px-8 py-3 rounded-xl hover:bg-orange-600 shadow-lg shadow-orange-500/10 transition flex items-center gap-2">
-                            <span>Générer l'estimation technique HT</span>
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-
-            <div id="result-wrapper" class="hidden relative">
-
-                <div id="email-gate" class="absolute inset-0 z-30 bg-slate-900/40 backdrop-blur-md rounded-2xl flex items-center justify-center p-4">
-                    <div class="bg-white p-8 rounded-2xl max-w-md w-full shadow-2xl text-center border border-slate-100">
-                        <h3 class="text-2xl font-bold text-slate-900 mb-1">Analyse Technique Prête</h3>
-                        <p class="text-slate-500 text-sm mb-6">Votre chiffrage est calculé. Indiquez votre email pour l'afficher : l'artisan pourra vous recontacter pour affiner le devis.</p>
-
-                        <form onsubmit="event.preventDefault(); unlockResults();" class="space-y-3 text-left">
-                            <input type="email" id="auth-email" required autocomplete="email" placeholder="votre@email.com" class="w-full border border-slate-200 rounded-xl p-3.5 text-center focus:outline-none focus:border-orange-500 font-medium">
-                            <input type="tel" id="auth-phone" autocomplete="tel" placeholder="Téléphone (facultatif)" class="w-full border border-slate-200 rounded-xl p-3.5 text-center focus:outline-none focus:border-orange-500 font-medium">
-                            <input type="text" id="auth-website" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
-                            <label class="flex items-start gap-2 text-xs text-slate-500 leading-snug">
-                                <input type="checkbox" id="auth-consent" required class="mt-0.5 accent-orange-500">
-                                <span>J'accepte d'être recontacté au sujet de ce projet. Mes données ne sont ni revendues ni utilisées à d'autres fins (<button type="button" onclick="openModal('modal-legal')" class="underline">RGPD</button>).</span>
-                            </label>
-                            <button id="btn-unlock" type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-orange-500/20">
-                                Voir mon estimation détaillée
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <div id="devis-board" class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden blur-effect">
-                    <div class="print-only p-6 pb-0 text-xs text-slate-500">ChronoDevis AI · Estimation n° <span id="print-ref"></span> · éditée le <span id="print-date"></span></div>
-                    <div class="bg-slate-900 text-white p-6 md:p-8 flex flex-col md:flex-row justify-between gap-4">
-                        <div>
-                            <span class="text-xs font-bold uppercase tracking-widest text-orange-400">Estimation technique indicative</span>
-                            <h2 class="text-2xl font-bold mt-1" id="out-type">---</h2>
-                            <p class="text-xs text-slate-400 mt-1">Déplacement & Logistique : <span id="out-geo" class="text-white font-medium">---</span></p>
-                        </div>
-                        <div class="md:text-right bg-white/10 p-3.5 rounded-xl backdrop-blur-sm self-start">
-                            <span class="text-xs text-slate-300 block">Planning & Tests d'étanchéité :</span>
-                            <span class="text-sm font-bold block mt-0.5" id="out-dates">Du --/-- au --/--</span>
-                        </div>
-                    </div>
-
-                    <div class="p-6 bg-slate-50 border-b border-slate-100">
-                        <p id="out-summary" class="text-sm text-slate-600 mb-4"></p>
-                        <div id="out-photos-box" class="hidden mb-5">
-                            <h3 class="text-sm font-bold text-slate-900 mb-2">Analyse de vos photos</h3>
-                            <div class="flex gap-4 items-start">
-                                <div id="out-photos" class="flex gap-2 shrink-0"></div>
-                                <ul id="out-photo-findings" class="list-disc ps-5 space-y-1 text-xs text-slate-600"></ul>
-                            </div>
-                        </div>
-                        <h3 class="text-sm font-bold text-slate-900 mb-3">Fournitures principales prévues</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs text-slate-600 border-collapse">
-                                <thead>
-                                    <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider">
-                                        <th class="pb-2 font-semibold">Fourniture</th>
-                                        <th class="pb-2 font-semibold text-right">Qté</th>
-                                        <th class="pb-2 font-semibold text-right">PU HT</th>
-                                        <th class="pb-2 font-semibold text-right">Total HT</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="ai-breakdown-table-body">
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="grid md:grid-cols-2 gap-6 mt-6">
-                            <div>
-                                <h3 class="text-sm font-bold text-slate-900 mb-2">Déroulé de l'intervention</h3>
-                                <ol id="out-steps" class="list-decimal ps-5 space-y-1 text-xs text-slate-600"></ol>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-bold text-slate-900 mb-2">Hypothèses retenues</h3>
-                                <ul id="out-assumptions" class="list-disc ps-5 space-y-1 text-xs text-slate-600"></ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-6 md:p-8 space-y-6">
-                        <div class="flex justify-between items-start pb-4 border-b border-slate-100">
-                            <div>
-                                <h4 class="font-bold text-slate-800" id="out-labor-title">Main d'œuvre Spécialisée</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Taux horaire fixé selon la technicité du chantier et la gamme choisie.</p>
-                            </div>
-                            <span class="text-xl font-bold text-slate-900" id="out-labor">0,00 €</span>
-                        </div>
-
-                        <div class="flex justify-between items-start pb-4 border-b border-slate-100">
-                            <div>
-                                <h4 class="font-bold text-slate-800">Matériaux, Matériel Thermique & Tuyauteries</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Prix professionnels HT estimés pour la gamme choisie.</p>
-                            </div>
-                            <span class="text-xl font-bold text-slate-900" id="out-materials">0,00 €</span>
-                        </div>
-
-                        <div class="flex justify-between items-start pb-4 border-b border-slate-100">
-                            <div>
-                                <h4 class="font-bold text-slate-800">Logistique, Approvisionnement et Transport</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Déplacements sur toute la durée du chantier, au départ de Valence.</p>
-                            </div>
-                            <span class="text-xl font-bold text-orange-600" id="out-travel">0,00 €</span>
-                        </div>
-
-                        <div class="flex justify-between items-center pt-2">
-                            <div>
-                                <span class="text-base font-bold text-slate-900 block">Montant Total HT Estimé</span>
-                                <span class="text-xs text-emerald-600 font-medium">TVA non applicable, art. 293 B du CGI (Régime Micro-entreprise)</span>
-                            </div>
-                            <span class="text-3xl font-extrabold text-orange-500" id="out-total">0,00 €</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">Estimation indicative générée automatiquement à partir de votre description. Elle ne constitue pas un devis contractuel : le prix définitif est fixé après visite technique ou échange avec l'artisan.</p>
-
-                        <div id="unlocked-actions" class="hidden pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
-                            <button onclick="downloadPDF()" class="flex-1 bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2">
-                                Télécharger l'estimation (PDF)
-                            </button>
-                            <button onclick="restartWizard()" class="flex-1 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold py-3.5 rounded-xl transition text-sm">
-                                Nouvelle estimation
-                            </button>
-                        </div>
-
-                        <div id="premium-box" class="hidden mt-4 p-5 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200/60 text-center">
-                            <h4 class="font-bold text-amber-900 text-base mb-1">Besoin de bloquer vos dates d'intervention ?</h4>
-                            <p class="text-xs text-amber-700/80 max-w-md mx-auto mb-4">Validez cette simulation : l'artisan vous recontacte pour confirmer les dates et organiser la visite technique gratuite sur site.</p>
-                            <button id="btn-visit" onclick="requestVisit()" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm px-6 py-3.5 rounded-xl shadow-md hover:from-amber-600 hover:to-orange-600 transition flex items-center justify-center gap-2 mx-auto">
-                                Demander la visite technique
-                            </button>
-                            <p id="visit-done" class="hidden mt-3 text-sm font-semibold text-emerald-700">✓ Demande envoyée. Vous serez recontacté rapidement.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-            </div>
-
-        </main>
-    </div>
-
-    <footer class="bg-slate-900 text-slate-400 text-xs py-6 px-6 border-t border-slate-800 text-center mt-12">
-        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div>
-                &copy; 2026 ChronoDevis AI. Tous droits réservés.
-            </div>
-            <div class="flex gap-6 font-medium">
-                <button onclick="openModal('modal-cgv')" class="hover:text-white transition underline">CGV / CGU & Protection Fraude</button>
-                <button onclick="openModal('modal-legal')" class="hover:text-white transition underline">Mentions Légales & RGPD</button>
-            </div>
-        </div>
-    </footer>
-
-    <div id="modal-cgv" class="modal fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4" onclick="if(event.target===this)closeModal('modal-cgv')">
-        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-slate-900 text-lg">Conditions générales d'utilisation</h3>
-                <button onclick="closeModal('modal-cgv')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto text-sm text-slate-600 space-y-4">
-                <p class="text-xs text-slate-400"><em>En vigueur au 19 novembre 2026</em></p>
-                <h4 class="font-bold text-slate-900">1. Objet</h4>
-                <p>Le site propose un outil gratuit de simulation, assisté par intelligence artificielle, pour estimer le coût de travaux de plomberie, chauffage, sanitaire, climatisation et VMC dans un rayon d'environ 100 km autour de Valence (26000).</p>
-                <h4 class="font-bold text-slate-900">2. Valeur des estimations</h4>
-                <p>Les montants affichés sont des estimations indicatives hors taxes, calculées automatiquement à partir de la description saisie. Ils ne constituent ni un devis ni une offre contractuelle. Seul un devis écrit, établi par l'entreprise après visite ou échange technique et accepté par le client, engage les parties.</p>
-                <h4 class="font-bold text-slate-900">3. Utilisation du service</h4>
-                <p>L'utilisateur s'engage à fournir des informations exactes et à ne pas utiliser le service de façon abusive (envois automatisés, contenus illicites). Le service peut être suspendu sans préavis pour maintenance.</p>
-                <h4 class="font-bold text-slate-900">4. Demande de visite</h4>
-                <p>La demande de visite technique est gratuite et sans engagement. Les dates indiquées sont souhaitées et seront confirmées par l'entreprise.</p>
-                <h4 class="font-bold text-slate-900">5. Responsabilité</h4>
-                <p>L'entreprise ne saurait être tenue responsable d'une décision prise sur la seule base d'une estimation en ligne, ni d'une indisponibilité temporaire du service.</p>
-                <h4 class="font-bold text-slate-900">6. Droit applicable</h4>
-                <p>Les présentes conditions sont soumises au droit français. En cas de litige, le consommateur peut recourir gratuitement à un médiateur de la consommation : <span data-cfg="mediator"></span>.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-legal" class="modal fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4" onclick="if(event.target===this)closeModal('modal-legal')">
-        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-slate-900 text-lg">Mentions légales & protection des données</h3>
-                <button onclick="closeModal('modal-legal')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto text-sm text-slate-600 space-y-4">
-                <p class="text-xs text-slate-400"><em>En vigueur au 19 novembre 2026</em></p>
-                <h4 class="font-bold text-slate-900">Éditeur du site</h4>
-                <p><span data-cfg="company"></span> – <span data-cfg="legalForm"></span><br>
-                   Dirigeant et directeur de la publication : <span data-cfg="owner"></span><br>
-                   SIRET : <span data-cfg="siret"></span><br>
-                   Adresse : <span data-cfg="address"></span><br>
-                   Téléphone : <span data-cfg="phone"></span> – Email : <span data-cfg="email"></span><br>
-                   Assurance décennale : <span data-cfg="insurance"></span><br>
-                   TVA non applicable, art. 293 B du CGI.</p>
-                <h4 class="font-bold text-slate-900">Hébergement</h4>
-                <p>Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis – vercel.com</p>
-                <h4 class="font-bold text-slate-900">Données personnelles (RGPD)</h4>
-                <p><strong>Données collectées :</strong> description des travaux, email, téléphone (facultatif), zone et dates souhaitées.</p>
-                <p><strong>Finalité :</strong> établir votre estimation et vous recontacter au sujet de votre projet (base légale : votre consentement et les mesures précontractuelles prises à votre demande).</p>
-                <p><strong>Destinataire :</strong> uniquement l'entreprise éditrice. La description des travaux est transmise, sans vos coordonnées, à un service d'intelligence artificielle (Groq ou Google) pour calculer l'estimation.</p>
-                <p><strong>Durée de conservation :</strong> 3 ans à compter du dernier contact.</p>
-                <p><strong>Vos droits :</strong> accès, rectification, effacement, opposition et portabilité, sur simple demande à <span data-cfg="email"></span>. Vous pouvez saisir la CNIL (cnil.fr).</p>
-                <p>Le site n'utilise aucun cookie publicitaire ni de suivi.</p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // ===== Informations de l'entreprise (à compléter : elles s'affichent dans les mentions légales) =====
-        const CONFIG = {
-            company: "[Nom de l'entreprise]",
-            legalForm: "Entreprise individuelle (micro-entreprise)",
-            owner: "[Prénom Nom]",
-            siret: "[SIRET]",
-            address: "[Adresse], 26000 Valence",
-            phone: "[Téléphone]",
-            email: "[Email de contact]",
-            insurance: "[Assureur et n° de contrat]",
-            mediator: "[Nom et site du médiateur de la consommation]"
-        };
-        // Taux horaire, déplacement et fournitures sont fixés par l'IA pour chaque chantier.
-        const ZONE_LABEL = { zone1: 'Zone proche (0–25 km)', zone2: 'Zone moyenne (25–50 km)', zone3: 'Zone éloignée (50–100 km)' };
-        const HOURS_PER_DAY = 7;
-
-        document.querySelectorAll('[data-cfg]').forEach((el) => { el.textContent = CONFIG[el.dataset.cfg] || ''; });
-
-        // ===== Photos : compressées dans le navigateur avant l'envoi =====
-        const MAX_PHOTOS = 3;
-        let photos = [];   // dataURL JPEG
-        function compressImage(file) {
-            return new Promise((resolve, reject) => {
-                const url = URL.createObjectURL(file);
-                const img = new Image();
-                img.onload = () => {
-                    const max = 1280, k = Math.min(1, max / Math.max(img.width, img.height));
-                    const c = document.createElement('canvas');
-                    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
-                    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-                    URL.revokeObjectURL(url);
-                    resolve(c.toDataURL('image/jpeg', 0.8));
-                };
-                img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image illisible')); };
-                img.src = url;
-            });
-        }
-        async function addPhotos(input) {
-            const files = Array.from(input.files || []).filter((f) => /^image\//.test(f.type));
-            input.value = '';
-            for (const f of files) {
-                if (photos.length >= MAX_PHOTOS) { notify('3 photos maximum.'); break; }
-                try { photos.push(await compressImage(f)); } catch (e) { notify("Impossible de lire cette image (format non pris en charge)."); }
-            }
-            renderPhotos();
-        }
-        function removePhoto(i) { photos.splice(i, 1); renderPhotos(); }
-        function renderPhotos() {
-            const box = $('photo-list'); box.innerHTML = '';
-            photos.forEach((src, i) => {
-                const w = el('div', 'relative');
-                const im = el('img', 'w-24 h-24 object-cover rounded-xl border border-slate-200'); im.src = src; im.alt = 'Photo ' + (i + 1);
-                const x = el('button', 'absolute -top-2 -right-2 w-7 h-7 rounded-full bg-slate-900 text-white text-sm leading-none', '×');
-                x.type = 'button'; x.setAttribute('aria-label', 'Retirer la photo'); x.onclick = () => removePhoto(i);
-                w.append(im, x); box.append(w);
-            });
-        }
-
-        let dataStore = {
-            type: '', zone: 'zone1', description: '', investment: 'Intermédiaire',
-            ai: null, durationHours: 0, calculatedMatCost: 0, travelCostPerDay: 0,
-            totals: null, startDate: null, endDate: null, email: '', phone: '', ref: ''
-        };
-
-        const $ = (id) => document.getElementById(id);
-        const eur = (n) => Number(n || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-        const frDate = (d) => d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-        function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-        function notify(msg) { alert(msg); }
-
-        function openModal(id) { $(id).classList.add('active'); }
-        function closeModal(id) { $(id).classList.remove('active'); }
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal.active').forEach((m) => m.classList.remove('active')); });
-
-        function startWizard() {
-            $('hero-section').classList.add('hidden');
-            $('progress-container').classList.remove('hidden');
-            $('wizard-container').classList.remove('hidden');
-            goToStep(1);
-            $('wizard-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function restartWizard() {
-            $('result-wrapper').classList.add('hidden');
-            $('ai-description').value = '';
-            photos = []; renderPhotos();
-            dataStore.ai = null;
-            startWizard();
-        }
-
-        function selectType(selectedType) {
-            dataStore.type = selectedType;
-            const base = "border-2 border-slate-200 hover:border-orange-500 rounded-xl p-5 cursor-pointer bg-slate-50 transition flex items-start gap-4";
-            $('type-renov').className = base;
-            $('type-neuf').className = base;
-            $(selectedType === 'Rénovation / Remplacement' ? 'type-renov' : 'type-neuf').classList.add('border-orange-500', 'bg-orange-50/30');
-        }
-
-        function goToStep(stepNum) {
-            if (stepNum === 2 && !dataStore.type) { notify("Veuillez sélectionner le type d'intervention."); return; }
-            if (stepNum === 3 && !dataStore.ai) { notify("Lancez d'abord l'analyse de votre projet."); return; }
-            document.querySelectorAll('.step').forEach((s) => s.classList.remove('active'));
-            $('step-' + stepNum).classList.add('active');
-            $('progress-bar').style.width = (stepNum * 25) + '%';
-        }
-
-        async function processAIStep3() {
-            const description = ($('ai-description').value || '').trim();
-            if (description.length < 8 && !photos.length) { notify("Décrivez vos travaux en quelques mots ou ajoutez une photo."); return; }
-
-            dataStore.description = description;
-            dataStore.zone = $('geo-distance').value;
-            dataStore.investment = document.querySelector('input[name="investment"]:checked')?.value || 'Intermédiaire';
-
-            const btn = $('btn-submit-ai');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> ' + (photos.length ? 'Analyse des photos…' : 'Analyse en cours…');
-
-            try {
-                const response = await fetch('/api/analyze-devis', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description, type: dataStore.type, investment: dataStore.investment, zone: ZONE_LABEL[dataStore.zone], images: photos })
-                });
-                const data = await response.json().catch(() => ({}));
-                if (!response.ok) throw new Error(data.error || ('Erreur serveur ' + response.status));
-                if (data.outOfScope) { notify(data.message + "\n\nNous intervenons en plomberie, chauffage, sanitaire, climatisation et VMC."); return; }
-
-                dataStore.ai = data;
-                console.info('[ChronoDevis] Estimation générée par ' + data.engine + ' en ' + data.ms + ' ms');
-                dataStore.durationHours = Number(data.hours) || 0;
-                dataStore.calculatedMatCost = Number(data.materials) || 0;
-
-                const days = Math.max(1, Math.ceil(dataStore.durationHours / HOURS_PER_DAY));
-                $('calculated-days').textContent = `${dataStore.durationHours} h · ${days} jour${days > 1 ? 's' : ''}`;
-                $('ai-title').textContent = data.title;
-                $('ai-summary').textContent = data.summary || '';
-                $('ai-confidence').textContent = 'Fiabilité ' + data.confidence;
-                $('ai-summary-box').classList.remove('hidden');
-                const pf = $('ai-photo-findings'); pf.innerHTML = '';
-                (data.photoFindings || []).forEach((t) => pf.append(el('li', '', t)));
-                pf.classList.toggle('hidden', !(data.photoFindings || []).length);
-
-                const start = $('date-start');
-                const min = addWorkingDays(new Date(), 2);
-                start.min = `${min.getFullYear()}-${String(min.getMonth() + 1).padStart(2, '0')}-${String(min.getDate()).padStart(2, '0')}`;
-                if (!start.value || start.value < start.min) start.value = start.min;
-                calculateEndProjectDate();
-                goToStep(3);
-            } catch (error) {
-                console.error('Analyse impossible :', error);
-                notify("Désolé, l'estimation automatique est momentanément indisponible. Réessayez dans un instant.\n(" + error.message + ")");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<span id="btn-text">Analyser mon projet</span>';
-            }
-        }
-
-        // jours ouvrés : on saute samedi et dimanche
-        function addWorkingDays(date, n) {
-            const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-            while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
-            let left = n;
-            while (left > 0) { d.setDate(d.getDate() + 1); if (d.getDay() !== 0 && d.getDay() !== 6) left--; }
-            return d;
-        }
-
-        function calculateEndProjectDate() {
-            const v = $('date-start').value;
-            if (!v) return null;
-            const [y, m, d] = v.split('-').map(Number);
-            let start = new Date(y, m - 1, d);
-            while (start.getDay() === 0 || start.getDay() === 6) start.setDate(start.getDate() + 1);
-            const days = Math.max(1, Math.ceil(dataStore.durationHours / HOURS_PER_DAY));
-            const end = addWorkingDays(start, days - 1);
-            dataStore.startDate = start; dataStore.endDate = end;
-            $('date-end-display').textContent = frDate(end);
-            return end;
-        }
-
-        function renderAIDevis() {
-            if (!$('date-start').value) { notify('Veuillez sélectionner une date.'); return; }
-            calculateEndProjectDate();
-            const ai = dataStore.ai;
-            const hourlyRate = Number(ai.hourlyRate) || 55;
-            const lines = ai.materialsList || [];
-            const materialsCost = lines.length ? lines.reduce((s, m) => s + m.qty * m.unitPrice, 0) : Number(dataStore.calculatedMatCost) || 0;
-            const laborCost = dataStore.durationHours * hourlyRate;
-            const days = Math.max(1, Math.ceil(dataStore.durationHours / HOURS_PER_DAY));
-            const travelCost = Number(ai.travelCost) || 0;
-            const total = materialsCost + laborCost + travelCost;
-            dataStore.totals = { materialsCost, laborCost, travelCost, total, hourlyRate, days };
-            dataStore.ref = 'CD-' + new Date().toISOString().slice(2, 10).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
-
-            $('out-type').textContent = ai.title;
-            $('out-summary').textContent = ai.summary || '';
-            $('out-geo').textContent = ZONE_LABEL[dataStore.zone];
-            $('out-labor-title').textContent = `Main d'œuvre spécialisée (${dataStore.durationHours} h × ${hourlyRate} € HT)`;
-            $('out-dates').textContent = `Du ${dataStore.startDate.toLocaleDateString('fr-FR')} au ${dataStore.endDate.toLocaleDateString('fr-FR')}`;
-
-            const body = $('ai-breakdown-table-body');
-            body.innerHTML = '';
-            if (lines.length) {
-                lines.forEach((m) => {
-                    const tr = el('tr', 'border-b border-slate-100');
-                    tr.append(el('td', 'py-2 pe-4 text-slate-800', m.label),
-                        el('td', 'py-2 text-right whitespace-nowrap', `${m.qty} ${m.unit}`),
-                        el('td', 'py-2 text-right whitespace-nowrap', eur(m.unitPrice)),
-                        el('td', 'py-2 text-right whitespace-nowrap font-semibold text-slate-800', eur(m.qty * m.unitPrice)));
-                    body.append(tr);
-                });
-            } else {
-                const tr = el('tr'); const td = el('td', 'py-2 text-slate-500', 'Fournitures selon prescription technique'); td.colSpan = 4; tr.append(td); body.append(tr);
-            }
-            const fill = (id, arr, empty) => { const ul = $(id); ul.innerHTML = ''; (arr && arr.length ? arr : [empty]).forEach((t) => ul.append(el('li', '', t))); };
-            fill('out-steps', ai.steps, 'Déroulé précisé lors de la visite technique.');
-            const hasPhotos = photos.length && (ai.photoFindings || []).length;
-            $('out-photos-box').classList.toggle('hidden', !hasPhotos);
-            if (hasPhotos) {
-                fill('out-photo-findings', ai.photoFindings, '');
-                const op = $('out-photos'); op.innerHTML = '';
-                photos.forEach((src) => { const im = el('img', 'w-16 h-16 object-cover rounded-lg border border-slate-200'); im.src = src; op.append(im); });
-            }
-            fill('out-assumptions', ai.assumptions, 'Accès normal au chantier, installation existante en état standard.');
-
-            $('out-labor').textContent = eur(laborCost);
-            $('out-materials').textContent = eur(materialsCost);
-            $('out-travel').textContent = eur(travelCost);
-            $('out-total').textContent = eur(total);
-            $('print-ref').textContent = dataStore.ref;
-            $('print-date').textContent = new Date().toLocaleDateString('fr-FR');
-
-            $('wizard-container').classList.add('hidden');
-            $('progress-container').classList.add('hidden');
-            $('result-wrapper').classList.remove('hidden');
-            $('result-wrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function leadPayload(kind) {
-            const t = dataStore.totals || {};
-            return {
-                kind, email: dataStore.email, phone: dataStore.phone, consent: true, website: $('auth-website').value,
-                title: dataStore.ai?.title, type: dataStore.type, zone: ZONE_LABEL[dataStore.zone], investment: dataStore.investment,
-                dates: dataStore.startDate ? `${dataStore.startDate.toLocaleDateString('fr-FR')} → ${dataStore.endDate.toLocaleDateString('fr-FR')}` : '',
-                labor: eur(t.laborCost), materials: eur(t.materialsCost), travel: eur(t.travelCost), total: eur(t.total),
-                description: (dataStore.description || '(décrit par photos)') + (photos.length ? '\n\n' + photos.length + ' photo(s) analysée(s) : ' + (dataStore.ai?.photoFindings || []).join(' / ') : '') + '\n\nRéf. ' + dataStore.ref
-            };
-        }
-        function sendLead(kind) {
-            return fetch('/api/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(leadPayload(kind)) })
-                .then((r) => r.json()).catch(() => ({ ok: false }));
-        }
-
-        async function unlockResults() {
-            const email = $('auth-email').value.trim();
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { notify('Adresse email invalide.'); return; }
-            if (!$('auth-consent').checked) { notify('Merci de cocher la case de consentement.'); return; }
-            dataStore.email = email;
-            dataStore.phone = $('auth-phone').value.trim();
-            const btn = $('btn-unlock'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
-            await Promise.race([sendLead('estimate'), new Promise((r) => setTimeout(r, 4000))]);   // jamais bloquant
-            $('email-gate').classList.add('hidden');
-            $('devis-board').classList.remove('blur-effect');
-            $('unlocked-actions').classList.remove('hidden');
-            $('premium-box').classList.remove('hidden');
-        }
-
-        async function requestVisit() {
-            const btn = $('btn-visit');
-            btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Envoi…';
-            const r = await sendLead('visit');
-            if (r && r.ok) { btn.classList.add('hidden'); $('visit-done').classList.remove('hidden'); }
-            else { btn.disabled = false; btn.textContent = 'Demander la visite technique'; notify("L'envoi a échoué. Réessayez dans un instant."); }
-        }
-
-        function downloadPDF() {
-            const old = document.title;
-            document.title = 'Estimation ' + dataStore.ref;
-            window.print();
-            setTimeout(() => { document.title = old; }, 500);
-        }
-    </script>
-    <script>
-        // ===== Application installable (Android, iPhone, ordinateur) =====
-        (function () {
-            if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
-            const q = new URLSearchParams(location.search).get('start');      // raccourcis de l'icône
-            if (q) window.addEventListener('DOMContentLoaded', () => {
-                startWizard();
-                if (q === 'photo') { selectType('Rénovation / Remplacement'); goToStep(2); }
-            });
-            const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-            if (standalone) return;
-            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-            const KEY = 'cdInstallHidden';
-            const hidden = () => { try { return Date.now() - Number(localStorage.getItem(KEY) || 0) < 7 * 864e5; } catch (e) { return false; } };
-            const remember = () => { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} };
-            let deferred = null, bar = null;
-            const SHARE = '<svg viewBox="0 0 24 24" width="18" height="18" style="display:inline;vertical-align:-3px"><path fill="currentColor" d="M12 2l4 4h-3v9h-2V6H8l4-4zm-7 9h3v2H6v7h12v-7h-2v-2h3a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1v-9a1 1 0 011-1z"/></svg>';
-            function iosHelp() {
-                const o = document.createElement('div'); o.className = 'pwa-sheet';
-                o.innerHTML = '<div class="pwa-card" role="dialog" aria-modal="true"><h3>Installer sur iPhone / iPad</h3><ol>' +
-                    '<li>Touchez le bouton Partager ' + SHARE + ' en bas de Safari</li><li>Choisissez « Sur l\'écran d\'accueil »</li><li>Touchez « Ajouter »</li></ol><button type="button">J\'ai compris</button></div>';
-                const close = () => o.remove();
-                o.querySelector('button').onclick = close; o.onclick = (e) => { if (e.target === o) close(); };
-                document.body.append(o);
-            }
-            function show() {
-                if (bar || hidden() || (!deferred && !isIOS)) return;
-                bar = document.createElement('div'); bar.className = 'pwa-bar';
-                bar.innerHTML = '<img src="/icons/icon-192.png" alt=""><div class="t"><b>Installer l\'app ChronoDevis</b><small>Vos devis en 2 min, depuis l\'écran d\'accueil</small></div>' +
-                    '<button type="button" class="go"></button><button type="button" class="x" aria-label="Fermer">×</button>';
-                const go = bar.querySelector('.go');
-                go.textContent = deferred ? 'Installer' : 'Comment ?';
-                go.onclick = () => {
-                    if (!deferred) return iosHelp();
-                    deferred.prompt();
-                    deferred.userChoice.finally(() => { bar && bar.remove(); bar = null; });
-                    deferred = null;
-                };
-                bar.querySelector('.x').onclick = () => { remember(); bar.remove(); bar = null; };
-                document.body.append(bar);
-                requestAnimationFrame(() => bar.classList.add('on'));
-            }
-            addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; setTimeout(show, 3000); });
-            addEventListener('appinstalled', () => { remember(); if (bar) { bar.remove(); bar = null; } });
-            if (isIOS) setTimeout(show, 4000);
-        })();
-    </script>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><img src="/icons/icon-192.png" alt="">Chrono<b>Devis</b></a>
+  <nav class="nav">
+    <a class="lnk" href="#features">Fonctionnalités</a><a class="lnk" href="#pricing">Tarifs</a><a class="lnk" href="#faq">FAQ</a>
+    <select class="lang" aria-label="Langue" onchange="location.href=this.value"><option value="/" selected>Français</option><option value="/en/">English</option><option value="/es/">Español</option><option value="/ar/">العربية</option></select>
+    <a class="btn btn-g btn-sm" href="/app/?lang=fr">Connexion</a><a class="btn btn-p btn-sm" href="/app/?lang=fr&signup=1">Essai gratuit</a>
+  </nav>
+</div></header>
+
+<section class="hero"><div class="wrap grid g2" style="align-items:center;gap:40px">
+  <div>
+    <span class="pill acc"><span class="dot"></span> Pour tous les artisans et toutes les entreprises en France</span>
+    <h1 style="margin-top:16px">Vos devis en <em>2 minutes</em>, chiffrés par l'intelligence artificielle</h1>
+    <p class="lead">Décrivez le chantier ou prenez une photo : ChronoDevis estime la main d&#x27;œuvre, les fournitures et le déplacement, puis génère un devis conforme à votre nom. Plombier, électricien, maçon, peintre… micro-entreprise, SARL ou SAS.</p>
+    <div class="row" style="margin-top:22px"><a class="btn btn-p btn-lg" href="/app/?lang=fr&signup=1">Commencer gratuitement – 7 jours</a></div>
+    <p class="xs muted" style="margin-top:10px">Sans carte bancaire · Sans engagement</p>
+  </div>
+  <div class="card pad-lg" id="demo">
+    <h3>Essayez tout de suite</h3><p class="muted small">Décrivez des travaux, l&#x27;IA les chiffre en quelques secondes.</p>
+    <textarea class="in" id="demo-text" placeholder="Ex : repeindre un salon de 25 m², murs et plafond, avec préparation des fissures"></textarea>
+    <div id="demo-photo" style="margin:10px 0"></div>
+    <button class="btn btn-d btn-block" id="demo-go">Estimer</button>
+    <div id="demo-out" style="margin-top:14px"></div>
+  </div>
+</div></section>
+
+<section class="sec" id="features"><div class="wrap">
+  <h2 class="center">Tout pour chiffrer, envoyer et signer plus vite</h2>
+  <div class="grid g4" style="margin-top:28px"><div class="card feat"><div class="ic">🤖</div><h3>Chiffrage par IA</h3><p class="muted small">Heures, taux horaire, fournitures avec quantités et prix, déplacement : l&#x27;IA propose, vous ajustez.</p></div><div class="card feat"><div class="ic">📷</div><h3>Analyse de photos</h3><p class="muted small">Photographiez l&#x27;équipement ou le chantier : l&#x27;IA identifie le matériel, l&#x27;état et les contraintes.</p></div><div class="card feat"><div class="ic">📄</div><h3>Devis conformes</h3><p class="muted small">Numérotation, mentions légales, TVA (20 %, 10 %, 5,5 % ou franchise 293 B), assurance, bon pour accord.</p></div><div class="card feat"><div class="ic">🔗</div><h3>Votre page client</h3><p class="muted small">Un lien à partager : vos clients obtiennent une estimation et vous envoient leur demande directement.</p></div><div class="card feat"><div class="ic">🧰</div><h3>Tous les métiers</h3><p class="muted small">Plomberie, électricité, maçonnerie, peinture, menuiserie, couverture, carrelage, paysagisme et plus.</p></div><div class="card feat"><div class="ic">🏢</div><h3>Toutes les structures</h3><p class="muted small">Micro-entreprise, EI, EURL, SARL, SASU, SAS : vos mentions et votre régime de TVA s&#x27;adaptent.</p></div><div class="card feat"><div class="ic">📱</div><h3>Application mobile</h3><p class="muted small">Installez ChronoDevis sur Android et iPhone et faites vos devis directement sur le chantier.</p></div><div class="card feat"><div class="ic">🌍</div><h3>4 langues</h3><p class="muted small">Interface en français, anglais, espagnol et arabe. Devis toujours édités en français, conformes au droit français.</p></div></div>
+</div></section>
+
+<section class="sec" style="background:#fff"><div class="wrap">
+  <h2 class="center">Comment ça marche</h2>
+  <div class="grid g3" style="margin-top:28px"><div class="card"><div class="pill acc">1</div><h3 style="margin-top:10px">Décrivez ou photographiez</h3><p class="muted small">Quelques mots ou une photo du chantier suffisent.</p></div><div class="card"><div class="pill acc">2</div><h3 style="margin-top:10px">L&#x27;IA chiffre</h3><p class="muted small">Main d&#x27;œuvre, fournitures, déplacement et TVA en quelques secondes.</p></div><div class="card"><div class="pill acc">3</div><h3 style="margin-top:10px">Ajustez et envoyez</h3><p class="muted small">Modifiez les lignes, éditez le PDF et faites-le signer.</p></div></div>
+</div></section>
+
+<section class="sec" id="pricing"><div class="wrap">
+  <h2 class="center">Des tarifs simples</h2><p class="center muted">7 jours d&#x27;essai gratuit avec toutes les fonctionnalités Pro. Sans carte bancaire.</p>
+  <div class="center" style="margin:18px 0 28px"><div class="tog" id="tog"><button class="on" data-i="m">Mensuel</button><button data-i="y">Annuel <span class="pill ok">-20 %</span></button></div></div>
+  <div class="grid g2 narrow" style="margin:0 auto"><div class="card pad-lg price">
+  
+  <h3>Essentiel</h3><p class="muted small">Pour l&#x27;artisan qui démarre.</p>
+  <div><span class="amt" data-m="19" data-y="182">19</span> <span class="muted small per" data-m="€ HT / mois" data-y="€ HT / an">€ HT / mois</span></div>
+  <div class="xs muted yr hidden">soit 15 € HT / mois, facturé annuellement</div>
+  <ul><li>40 estimations IA par mois</li><li>Devis illimités et conformes (PDF)</li><li>Votre page client</li><li>30 demandes clients par mois</li><li>Toutes les mentions légales et régimes de TVA</li></ul>
+  <a class="btn btn-d btn-block" href="/app/?lang=fr&signup=1&plan=essentiel">Essayer 7 jours gratuits</a></div><div class="card pad-lg price best">
+  <span class="pill acc" style="position:absolute;top:-12px;inset-inline-end:20px">Le plus choisi</span>
+  <h3>Pro</h3><p class="muted small">Pour chiffrer plus et convertir vos visiteurs.</p>
+  <div><span class="amt" data-m="39" data-y="374">39</span> <span class="muted small per" data-m="€ HT / mois" data-y="€ HT / an">€ HT / mois</span></div>
+  <div class="xs muted yr hidden">soit 31 € HT / mois, facturé annuellement</div>
+  <ul><li>400 estimations IA par mois</li><li>Analyse de photos par l&#x27;IA</li><li>Demandes clients illimitées</li><li>Votre logo et vos couleurs</li><li>Support prioritaire</li></ul>
+  <a class="btn btn-p btn-block" href="/app/?lang=fr&signup=1&plan=pro">Essayer 7 jours gratuits</a></div></div>
+</div></section>
+
+<section class="sec" id="faq"><div class="wrap narrow">
+  <h2 class="center">Questions fréquentes</h2><div style="margin-top:24px"><details class="faq"><summary>Que se passe-t-il après les 7 jours ?</summary><p class="muted" style="margin:10px 0 0">Rien n&#x27;est prélevé : aucune carte n&#x27;est demandée. Vous choisissez une formule pour continuer, sinon votre compte passe en lecture seule et vos devis restent consultables.</p></details><details class="faq"><summary>Les prix proposés par l&#x27;IA sont-ils fiables ?</summary><p class="muted" style="margin:10px 0 0">L&#x27;IA s&#x27;appuie sur les prix du marché français et sur votre description. C&#x27;est une base de travail : vous pouvez modifier chaque ligne et indiquer votre propre taux horaire.</p></details><details class="faq"><summary>Mes devis sont-ils conformes ?</summary><p class="muted" style="margin:10px 0 0">Oui : numéro, date, durée de validité, identité de l&#x27;entreprise (SIRET, RCS/RM, TVA), assurance, détail des prestations, totaux HT/TVA/TTC, conditions de paiement et zone « bon pour accord ».</p></details><details class="faq"><summary>Puis-je résilier à tout moment ?</summary><p class="muted" style="margin:10px 0 0">Oui, en un clic depuis votre espace. L&#x27;abonnement s&#x27;arrête à la fin de la période payée.</p></details><details class="faq"><summary>Où sont stockées mes données ?</summary><p class="muted" style="margin:10px 0 0">Dans une base sécurisée en Europe. Vos données et celles de vos clients ne sont ni revendues ni utilisées à d&#x27;autres fins.</p></details></div>
+</div></section>
+
+<footer class="foot"><div class="wrap row between">
+  <div>© 2026 ChronoDevis. Tous droits réservés.</div>
+  <div class="row"><a href="/legal.html#mentions">Mentions légales</a><a href="/legal.html#cgv">CGV / CGU</a><a href="/legal.html#confidentialite">Confidentialité</a><a href="/legal.html#contact">Contact</a></div>
+</div></footer>
+
+<script src="/assets/i18n.js?v=3"></script>
+<script src="/assets/core.js?v=3"></script>
+<script>
+CD.setLang("fr");
+document.getElementById('tog').addEventListener('click', function (ev) {
+  var b = ev.target.closest('button'); if (!b) return;
+  this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+  var y = b.dataset.i === 'y';
+  document.querySelectorAll('.amt').forEach(function (a) { a.textContent = y ? a.dataset.y : a.dataset.m; });
+  document.querySelectorAll('.per').forEach(function (a) { a.textContent = y ? a.dataset.y : a.dataset.m; });
+  document.querySelectorAll('.yr').forEach(function (a) { a.classList.toggle('hidden', !y); });
+});
+(function () {
+  var picker = CD.photoPicker(document.getElementById('demo-photo'), 1);
+  var out = document.getElementById('demo-out'), go = document.getElementById('demo-go');
+  go.onclick = async function () {
+    var text = document.getElementById('demo-text').value.trim(), photos = picker.get();
+    if (text.length < 8 && !photos.length) { CD.toast(CD.T('err.describe')); return; }
+    go.disabled = true; go.innerHTML = '<span class="spin"></span> ' + CD.T('analyzing');
+    out.innerHTML = '';
+    try {
+      var est = await CD.api('analyze-devis', { description: text, images: photos, lang: CD.lang });
+      if (est.outOfScope) { out.append(CD.el('div', { class: 'alert info', text: est.message })); return; }
+      var lines = CD.buildLines(est), t = CD.totals(lines, 0);
+      var tb = CD.el('table', { class: 'tbl' });
+      lines.forEach(function (l) { tb.append(CD.el('tr', {}, CD.el('td', { text: l.label }), CD.el('td', { class: 'r', text: l.qty + ' ' + l.unit }), CD.el('td', { class: 'r', text: CD.eur(l.qty * l.unitPrice) }))); });
+      out.append(CD.el('div', { class: 'est-head' }, CD.el('div', { class: 'k', text: "Estimation" }), CD.el('h3', { text: est.title, style: 'margin:4px 0 0' })),
+        CD.el('div', { class: 'est-body' }, CD.el('p', { class: 'small muted', text: est.summary }), tb,
+          CD.el('div', { class: 'sum-row tot' }, CD.el('span', { text: "Total estim\u00e9 HT" }), CD.el('span', { text: CD.eur(t.ht) })),
+          CD.el('p', { class: 'small muted', text: "Cr\u00e9ez votre compte pour \u00e9diter ce devis, ajouter vos mentions et l'envoyer." }),
+          CD.el('a', { class: 'btn btn-p btn-block', href: "/app/?lang=fr&signup=1", text: "Cr\u00e9er mon compte gratuit" })));
+    } catch (e) {
+      out.append(CD.el('div', { class: 'alert err' }, e.message, e.code === 'demo_limit' ? CD.el('div', {}, CD.el('a', { href: "/app/?lang=fr&signup=1", text: "Cr\u00e9er mon compte gratuit" })) : ''));
+    } finally { go.disabled = false; go.textContent = "Estimer"; }
+  };
+})();
+CD.installBanner();
+</script>
 </body>
 </html>
