@@ -7,7 +7,7 @@
 'use strict';
 
 const GROQ_MODELS = ['llama-3.3-70b-versatile', 'openai/gpt-oss-120b', 'llama-3.1-8b-instant'];
-const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash'];
+const GEMINI_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
 
 const SYSTEM_PROMPT = `Tu es un métreur-économiste expert en plomberie, chauffage, sanitaire et VMC, qui chiffre pour un artisan
 indépendant basé à Valence (Drôme, 26). Tu estimes de façon réaliste le temps de main d'œuvre et les fournitures HT
