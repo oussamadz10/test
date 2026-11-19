@@ -3,7 +3,7 @@
 //
 // Clé IA (variables d'environnement Vercel) :
 //   GROQ_API_KEY   – clé Groq (gsk_...)        – gratuit, très rapide
-//   GEMINI_API_KEY – clé Google AI (AIza...)   – ou une clé Groq, détectée automatiquement
+//   GEMINI_API_KEY – clé Google AI Studio (AIza... ou AQ....) – ou une clé Groq (gsk_), détectée automatiquement
 'use strict';
 
 const GROQ_MODELS = ['llama-3.3-70b-versatile', 'openai/gpt-oss-120b', 'llama-3.1-8b-instant'];
@@ -99,9 +99,9 @@ async function askGroq(key, user) {
 async function askGemini(key, user) {
     let last;
     for (const model of GEMINI_MODELS) {
-        const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key), {
+        const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
             body: JSON.stringify({
                 systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
                 contents: [{ role: 'user', parts: [{ text: user }] }],
@@ -161,8 +161,9 @@ module.exports = async (req, res) => {
 
     const tidyKey = (k) => String(k || '').trim().replace(/^["']|["']$/g, '');
     const gem = tidyKey(process.env.GEMINI_API_KEY);
-    const groqKey = tidyKey(process.env.GROQ_API_KEY) || (gem && !/^AIza/.test(gem) ? gem : '');   // clé Groq rangée sous GEMINI_API_KEY
-    const geminiKey = /^AIza/.test(gem) ? gem : '';
+    // Groq : gsk_...   Google AI Studio : AIza... ou nouveau format AQ....
+    const groqKey = tidyKey(process.env.GROQ_API_KEY) || (/^gsk_/.test(gem) ? gem : '');
+    const geminiKey = gem && !/^gsk_/.test(gem) ? gem : '';
     if (!groqKey && !geminiKey) return res.status(500).json({ error: 'Clé IA manquante : ajoutez GROQ_API_KEY (ou GEMINI_API_KEY) dans Vercel > Settings > Environment Variables.' });
 
     const errors = [];
