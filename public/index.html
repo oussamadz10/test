@@ -3,10 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChronoDevis AI | Spécialiste Plomberie, Chauffage, Sanitaire & VMC</title>
+    <title>Devis plomberie & chauffage en ligne à Valence (26) | ChronoDevis AI</title>
+    <meta name="description" content="Estimez gratuitement en 2 minutes le prix de vos travaux de plomberie, chauffage, pompe à chaleur, sanitaire et VMC à Valence et dans un rayon de 100 km : main d'œuvre, fournitures et déplacement détaillés.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://chronodevisia.fr/">
+    <meta name="theme-color" content="#0f172a">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="ChronoDevis AI">
+    <meta property="og:title" content="Devis plomberie & chauffage en ligne à Valence | ChronoDevis AI">
+    <meta property="og:description" content="Estimation gratuite et détaillée de vos travaux de plomberie, chauffage, sanitaire et VMC autour de Valence (26).">
+    <meta property="og:url" content="https://chronodevisia.fr/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f97316'/%3E%3Cpath d='M32 12c-7 10-14 17-14 25a14 14 0 0 0 28 0c0-8-7-15-14-25z' fill='%23fff'/%3E%3C/svg%3E">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"HomeAndConstructionBusiness","name":"ChronoDevis AI","url":"https://chronodevisia.fr/","description":"Plomberie, chauffage, pompe à chaleur, sanitaire et VMC à Valence et dans un rayon de 100 km. Estimation de devis en ligne.","areaServed":[{"@type":"City","name":"Valence"},{"@type":"AdministrativeArea","name":"Drôme"},{"@type":"AdministrativeArea","name":"Ardèche"}],"address":{"@type":"PostalAddress","addressLocality":"Valence","postalCode":"26000","addressCountry":"FR"},"priceRange":"€€"}</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -28,6 +39,18 @@
         }
         .modal.active {
             display: flex;
+        }
+        .spinner { width: 18px; height: 18px; border: 3px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; display: inline-block; vertical-align: -4px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .print-only { display: none; }
+        @media print {
+            @page { margin: 14mm; }
+            body { background: #fff !important; }
+            header, footer, #hero-section, #wizard-container, #progress-container, #email-gate, #unlocked-actions, #premium-box, .no-print, .modal { display: none !important; }
+            main { margin: 0 !important; max-width: none !important; padding: 0 !important; }
+            #devis-board { box-shadow: none !important; border: 1px solid #cbd5e1 !important; filter: none !important; }
+            .print-only { display: block !important; }
+            .bg-slate-900 { background: #0f172a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
 </head>
@@ -134,7 +157,14 @@
 
                 <div id="step-3" class="step">
                     <h2 class="text-2xl font-bold text-slate-900 mb-1">3. Planification technique de l'intervention</h2>
-                    <p class="text-slate-500 text-sm mb-4">La durée nécessaire estimée par l'IA externe pour garantir la conformité aux DTU.</p>
+                    <p class="text-slate-500 text-sm mb-4">Durée estimée pour une exécution conforme aux DTU, tests d'étanchéité et mise en service compris.</p>
+                    <div id="ai-summary-box" class="hidden mb-4 p-4 rounded-xl border border-slate-200 bg-white">
+                        <div class="flex items-center justify-between gap-3 mb-1">
+                            <h3 id="ai-title" class="font-bold text-slate-900"></h3>
+                            <span id="ai-confidence" class="text-[11px] font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-600 whitespace-nowrap"></span>
+                        </div>
+                        <p id="ai-summary" class="text-sm text-slate-600"></p>
+                    </div>
 
                     <div class="bg-orange-50 border border-orange-100 rounded-xl p-4 mb-6 flex items-center justify-between">
                         <span class="text-sm font-medium text-orange-800">Temps d'intervention requis :</span>
@@ -147,7 +177,7 @@
                     </div>
 
                     <div class="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-200/60">
-                        <span class="text-xs text-slate-400 font-medium block uppercase tracking-wider">Date de fin des essais de mise en service (hors week-end) :</span>
+                        <span class="text-xs text-slate-400 font-medium block uppercase tracking-wider">Fin prévisionnelle des essais et mise en service (jours ouvrés) :</span>
                         <span id="date-end-display" class="text-lg font-bold text-slate-800">Sélectionnez une date de début</span>
                     </div>
 
@@ -166,19 +196,28 @@
                 <div id="email-gate" class="absolute inset-0 z-30 bg-slate-900/40 backdrop-blur-md rounded-2xl flex items-center justify-center p-4">
                     <div class="bg-white p-8 rounded-2xl max-w-md w-full shadow-2xl text-center border border-slate-100">
                         <h3 class="text-2xl font-bold text-slate-900 mb-1">Analyse Technique Prête</h3>
-                        <p class="text-slate-500 text-sm mb-6">Votre chiffrage spécialisé CVC / Plomberie est calculé. Entrez votre email pour débloquer le Devis.</p>
+                        <p class="text-slate-500 text-sm mb-6">Votre chiffrage est calculé. Indiquez votre email pour l'afficher : l'artisan pourra vous recontacter pour affiner le devis.</p>
 
-                        <input type="email" id="auth-email" placeholder="votre@email.com" class="w-full border border-slate-200 rounded-xl p-3.5 mb-4 text-center focus:outline-none focus:border-orange-500 font-medium">
-                        <button onclick="unlockResults()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-orange-500/20">
-                            Voir le Devis Technique HT
-                        </button>
+                        <form onsubmit="event.preventDefault(); unlockResults();" class="space-y-3 text-left">
+                            <input type="email" id="auth-email" required autocomplete="email" placeholder="votre@email.com" class="w-full border border-slate-200 rounded-xl p-3.5 text-center focus:outline-none focus:border-orange-500 font-medium">
+                            <input type="tel" id="auth-phone" autocomplete="tel" placeholder="Téléphone (facultatif)" class="w-full border border-slate-200 rounded-xl p-3.5 text-center focus:outline-none focus:border-orange-500 font-medium">
+                            <input type="text" id="auth-website" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
+                            <label class="flex items-start gap-2 text-xs text-slate-500 leading-snug">
+                                <input type="checkbox" id="auth-consent" required class="mt-0.5 accent-orange-500">
+                                <span>J'accepte d'être recontacté au sujet de ce projet. Mes données ne sont ni revendues ni utilisées à d'autres fins (<button type="button" onclick="openModal('modal-legal')" class="underline">RGPD</button>).</span>
+                            </label>
+                            <button id="btn-unlock" type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-orange-500/20">
+                                Voir mon estimation détaillée
+                            </button>
+                        </form>
                     </div>
                 </div>
 
                 <div id="devis-board" class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden blur-effect">
+                    <div class="print-only p-6 pb-0 text-xs text-slate-500">ChronoDevis AI · Estimation n° <span id="print-ref"></span> · éditée le <span id="print-date"></span></div>
                     <div class="bg-slate-900 text-white p-6 md:p-8 flex flex-col md:flex-row justify-between gap-4">
                         <div>
-                            <span class="text-xs font-bold uppercase tracking-widest text-orange-400">Étude Technique & Chiffrage Spécialisé</span>
+                            <span class="text-xs font-bold uppercase tracking-widest text-orange-400">Estimation technique indicative</span>
                             <h2 class="text-2xl font-bold mt-1" id="out-type">---</h2>
                             <p class="text-xs text-slate-400 mt-1">Déplacement & Logistique : <span id="out-geo" class="text-white font-medium">---</span></p>
                         </div>
@@ -189,19 +228,31 @@
                     </div>
 
                     <div class="p-6 bg-slate-50 border-b border-slate-100">
-                        <h3 class="text-sm font-bold text-slate-900 mb-3">Détails des postes techniques étudiés (Plomberie / Chauffage / Sanitaire / VMC) :</h3>
+                        <p id="out-summary" class="text-sm text-slate-600 mb-4"></p>
+                        <h3 class="text-sm font-bold text-slate-900 mb-3">Fournitures principales prévues</h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-xs text-slate-600 border-collapse">
                                 <thead>
                                     <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider">
-                                        <th class="pb-2 font-semibold">Poste de Travail</th>
-                                        <th class="pb-2 font-semibold">Description de la Prestation Normée</th>
-                                        <th class="pb-2 font-semibold text-right">Statut</th>
+                                        <th class="pb-2 font-semibold">Fourniture</th>
+                                        <th class="pb-2 font-semibold text-right">Qté</th>
+                                        <th class="pb-2 font-semibold text-right">PU HT</th>
+                                        <th class="pb-2 font-semibold text-right">Total HT</th>
                                     </tr>
                                 </thead>
                                 <tbody id="ai-breakdown-table-body">
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6 mt-6">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 mb-2">Déroulé de l'intervention</h3>
+                                <ol id="out-steps" class="list-decimal ps-5 space-y-1 text-xs text-slate-600"></ol>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 mb-2">Hypothèses retenues</h3>
+                                <ul id="out-assumptions" class="list-disc ps-5 space-y-1 text-xs text-slate-600"></ul>
+                            </div>
                         </div>
                     </div>
 
@@ -217,7 +268,7 @@
                         <div class="flex justify-between items-start pb-4 border-b border-slate-100">
                             <div>
                                 <h4 class="font-bold text-slate-800">Matériaux, Matériel Thermique & Tuyauteries</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">La valeur des fournitures pros est estimée en temps réel par le serveur.</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Prix professionnels HT estimés pour la gamme choisie.</p>
                             </div>
                             <span class="text-xl font-bold text-slate-900" id="out-materials">0,00 €</span>
                         </div>
@@ -225,7 +276,7 @@
                         <div class="flex justify-between items-start pb-4 border-b border-slate-100">
                             <div>
                                 <h4 class="font-bold text-slate-800">Logistique, Approvisionnement et Transport</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Frais kilométriques réels calculés au départ de Valence.</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Forfait déplacement par jour d'intervention, au départ de Valence.</p>
                             </div>
                             <span class="text-xl font-bold text-orange-600" id="out-travel">0,00 €</span>
                         </div>
@@ -237,19 +288,24 @@
                             </div>
                             <span class="text-3xl font-extrabold text-orange-500" id="out-total">0,00 €</span>
                         </div>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">Estimation indicative générée automatiquement à partir de votre description. Elle ne constitue pas un devis contractuel : le prix définitif est fixé après visite technique ou échange avec l'artisan.</p>
 
                         <div id="unlocked-actions" class="hidden pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
-                            <button onclick="downloadPDFMock()" class="flex-1 bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2">
-                                Télécharger le Devis Technique PDF
+                            <button onclick="downloadPDF()" class="flex-1 bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2">
+                                Télécharger l'estimation (PDF)
+                            </button>
+                            <button onclick="restartWizard()" class="flex-1 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold py-3.5 rounded-xl transition text-sm">
+                                Nouvelle estimation
                             </button>
                         </div>
 
                         <div id="premium-box" class="hidden mt-4 p-5 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200/60 text-center">
                             <h4 class="font-bold text-amber-900 text-base mb-1">Besoin de bloquer vos dates d'intervention ?</h4>
-                            <p class="text-xs text-amber-700/80 max-w-md mx-auto mb-4">Valisez cette simulation pour réserver le planning de l'artisan et déclencher la visite technique de conformité sur site.</p>
-                            <button onclick="triggerPremiumPayment()" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm px-6 py-3.5 rounded-xl shadow-md hover:from-amber-600 hover:to-orange-600 transition flex items-center justify-center gap-2 mx-auto">
-                                Bloquer mes dates & réserver la visite sur site
+                            <p class="text-xs text-amber-700/80 max-w-md mx-auto mb-4">Validez cette simulation : l'artisan vous recontacte pour confirmer les dates et organiser la visite technique gratuite sur site.</p>
+                            <button id="btn-visit" onclick="requestVisit()" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm px-6 py-3.5 rounded-xl shadow-md hover:from-amber-600 hover:to-orange-600 transition flex items-center justify-center gap-2 mx-auto">
+                                Demander la visite technique
                             </button>
+                            <p id="visit-done" class="hidden mt-3 text-sm font-semibold text-emerald-700">✓ Demande envoyée. Vous serez recontacté rapidement.</p>
                         </div>
 
                     </div>
@@ -272,204 +328,293 @@
         </div>
     </footer>
 
-    <div id="modal-cgv" class="modal fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4">
+    <div id="modal-cgv" class="modal fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4" onclick="if(event.target===this)closeModal('modal-cgv')">
         <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-slate-900 text-lg">Conditions Générales (CGV/CGU) & Sécurité</h3>
+                <h3 class="font-bold text-slate-900 text-lg">Conditions générales d'utilisation</h3>
                 <button onclick="closeModal('modal-cgv')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto text-sm text-slate-600 space-y-4">
-                <p class="text-xs text-slate-400"><em>En vigueur au 27 juin 2026</em></p>
-                <h4 class="font-bold text-slate-900">Article 1 : Objet du service</h4>
-                <p>Le site propose un outil de simulation basé sur l'IA pour estimer le coût des travaux de plomberie, chauffage, sanitaire et VMC dans un rayon de 100 km autour de Valence (26000). Les résultats fournis en ligne sont des estimations indicatives hors taxes (HT).</p>
+                <p class="text-xs text-slate-400"><em>En vigueur au 19 novembre 2026</em></p>
+                <h4 class="font-bold text-slate-900">1. Objet</h4>
+                <p>Le site propose un outil gratuit de simulation, assisté par intelligence artificielle, pour estimer le coût de travaux de plomberie, chauffage, sanitaire, climatisation et VMC dans un rayon d'environ 100 km autour de Valence (26000).</p>
+                <h4 class="font-bold text-slate-900">2. Valeur des estimations</h4>
+                <p>Les montants affichés sont des estimations indicatives hors taxes, calculées automatiquement à partir de la description saisie. Ils ne constituent ni un devis ni une offre contractuelle. Seul un devis écrit, établi par l'entreprise après visite ou échange technique et accepté par le client, engage les parties.</p>
+                <h4 class="font-bold text-slate-900">3. Utilisation du service</h4>
+                <p>L'utilisateur s'engage à fournir des informations exactes et à ne pas utiliser le service de façon abusive (envois automatisés, contenus illicites). Le service peut être suspendu sans préavis pour maintenance.</p>
+                <h4 class="font-bold text-slate-900">4. Demande de visite</h4>
+                <p>La demande de visite technique est gratuite et sans engagement. Les dates indiquées sont souhaitées et seront confirmées par l'entreprise.</p>
+                <h4 class="font-bold text-slate-900">5. Responsabilité</h4>
+                <p>L'entreprise ne saurait être tenue responsable d'une décision prise sur la seule base d'une estimation en ligne, ni d'une indisponibilité temporaire du service.</p>
+                <h4 class="font-bold text-slate-900">6. Droit applicable</h4>
+                <p>Les présentes conditions sont soumises au droit français. En cas de litige, le consommateur peut recourir gratuitement à un médiateur de la consommation : <span data-cfg="mediator"></span>.</p>
             </div>
         </div>
     </div>
 
-    <div id="modal-legal" class="modal fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4">
+    <div id="modal-legal" class="modal fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4" onclick="if(event.target===this)closeModal('modal-legal')">
         <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-slate-900 text-lg">Mentions Légales & RGPD</h3>
+                <h3 class="font-bold text-slate-900 text-lg">Mentions légales & protection des données</h3>
                 <button onclick="closeModal('modal-legal')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto text-sm text-slate-600 space-y-4">
-                <p class="text-xs text-slate-400"><em>En vigueur au 27 juin 2026</em></p>
+                <p class="text-xs text-slate-400"><em>En vigueur au 19 novembre 2026</em></p>
+                <h4 class="font-bold text-slate-900">Éditeur du site</h4>
+                <p><span data-cfg="company"></span> – <span data-cfg="legalForm"></span><br>
+                   Dirigeant et directeur de la publication : <span data-cfg="owner"></span><br>
+                   SIRET : <span data-cfg="siret"></span><br>
+                   Adresse : <span data-cfg="address"></span><br>
+                   Téléphone : <span data-cfg="phone"></span> – Email : <span data-cfg="email"></span><br>
+                   Assurance décennale : <span data-cfg="insurance"></span><br>
+                   TVA non applicable, art. 293 B du CGI.</p>
+                <h4 class="font-bold text-slate-900">Hébergement</h4>
+                <p>Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis – vercel.com</p>
+                <h4 class="font-bold text-slate-900">Données personnelles (RGPD)</h4>
+                <p><strong>Données collectées :</strong> description des travaux, email, téléphone (facultatif), zone et dates souhaitées.</p>
+                <p><strong>Finalité :</strong> établir votre estimation et vous recontacter au sujet de votre projet (base légale : votre consentement et les mesures précontractuelles prises à votre demande).</p>
+                <p><strong>Destinataire :</strong> uniquement l'entreprise éditrice. La description des travaux est transmise, sans vos coordonnées, à un service d'intelligence artificielle (Groq ou Google) pour calculer l'estimation.</p>
+                <p><strong>Durée de conservation :</strong> 3 ans à compter du dernier contact.</p>
+                <p><strong>Vos droits :</strong> accès, rectification, effacement, opposition et portabilité, sur simple demande à <span data-cfg="email"></span>. Vous pouvez saisir la CNIL (cnil.fr).</p>
+                <p>Le site n'utilise aucun cookie publicitaire ni de suivi.</p>
             </div>
         </div>
     </div>
 
     <script>
+        // ===== Informations de l'entreprise (à compléter : elles s'affichent dans les mentions légales) =====
+        const CONFIG = {
+            company: "[Nom de l'entreprise]",
+            legalForm: "Entreprise individuelle (micro-entreprise)",
+            owner: "[Prénom Nom]",
+            siret: "[SIRET]",
+            address: "[Adresse], 26000 Valence",
+            phone: "[Téléphone]",
+            email: "[Email de contact]",
+            insurance: "[Assureur et n° de contrat]",
+            mediator: "[Nom et site du médiateur de la consommation]"
+        };
+        const RATES = { 'Intermédiaire': 50, 'Haut de Gamme': 78 };            // € HT / heure
+        const PREMIUM_MATERIALS = 1.4;                                         // fournitures haut de gamme
+        const TRAVEL_PER_DAY = { zone1: 45, zone2: 90, zone3: 150 };           // € HT / jour
+        const ZONE_LABEL = { zone1: 'Zone proche (0–25 km)', zone2: 'Zone moyenne (25–50 km)', zone3: 'Zone éloignée (50–100 km)' };
+        const HOURS_PER_DAY = 7;
+
+        document.querySelectorAll('[data-cfg]').forEach((el) => { el.textContent = CONFIG[el.dataset.cfg] || ''; });
+
         let dataStore = {
-            type: '',
-            zone: '',
-            textDescription: '',
-            investment: 'Intermédiaire',
-            durationHours: 16,
-            travelCostPerDay: 0,
-            calculatedMatCost: 2400,
-            customGeneratedDesc: "",
-            dynamicTitle: "",
-            finalTotalCalculated: "0,00 €"
+            type: '', zone: 'zone1', description: '', investment: 'Intermédiaire',
+            ai: null, durationHours: 0, calculatedMatCost: 0, travelCostPerDay: 0,
+            totals: null, startDate: null, endDate: null, email: '', phone: '', ref: ''
         };
 
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        const $ = (id) => document.getElementById(id);
+        const eur = (n) => Number(n || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+        const frDate = (d) => d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+        function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+        function notify(msg) { alert(msg); }
+
+        function openModal(id) { $(id).classList.add('active'); }
+        function closeModal(id) { $(id).classList.remove('active'); }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal.active').forEach((m) => m.classList.remove('active')); });
 
         function startWizard() {
-            document.getElementById('hero-section').classList.add('hidden');
-            document.getElementById('progress-container').classList.remove('hidden');
-            document.getElementById('wizard-container').classList.remove('hidden');
+            $('hero-section').classList.add('hidden');
+            $('progress-container').classList.remove('hidden');
+            $('wizard-container').classList.remove('hidden');
+            goToStep(1);
+            $('wizard-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function restartWizard() {
+            $('result-wrapper').classList.add('hidden');
+            $('ai-description').value = '';
+            dataStore.ai = null;
+            startWizard();
         }
 
         function selectType(selectedType) {
             dataStore.type = selectedType;
-            document.getElementById('type-renov').className = "border-2 border-slate-200 hover:border-orange-500 rounded-xl p-5 cursor-pointer bg-slate-50 transition flex items-start gap-4";
-            document.getElementById('type-neuf').className = "border-2 border-slate-200 hover:border-orange-500 rounded-xl p-5 cursor-pointer bg-slate-50 transition flex items-start gap-4";
-
-            if (selectedType === 'Rénovation / Remplacement') {
-                document.getElementById('type-renov').classList.add('border-orange-500', 'bg-orange-50/30');
-            } else {
-                document.getElementById('type-neuf').classList.add('border-orange-500', 'bg-orange-50/30');
-            }
+            const base = "border-2 border-slate-200 hover:border-orange-500 rounded-xl p-5 cursor-pointer bg-slate-50 transition flex items-start gap-4";
+            $('type-renov').className = base;
+            $('type-neuf').className = base;
+            $(selectedType === 'Rénovation / Remplacement' ? 'type-renov' : 'type-neuf').classList.add('border-orange-500', 'bg-orange-50/30');
         }
 
         function goToStep(stepNum) {
-            if (stepNum === 2 && !dataStore.type) {
-                alert("Veuillez sélectionner le type d'intervention.");
-                return;
-            }
-            document.querySelectorAll('.step').forEach(element => element.classList.remove('active'));
-            document.getElementById('step-' + stepNum).classList.add('active');
-            document.getElementById('progress-bar').style.width = (stepNum * 25) + '%';
+            if (stepNum === 2 && !dataStore.type) { notify("Veuillez sélectionner le type d'intervention."); return; }
+            if (stepNum === 3 && !dataStore.ai) { notify("Lancez d'abord l'analyse de votre projet."); return; }
+            document.querySelectorAll('.step').forEach((s) => s.classList.remove('active'));
+            $('step-' + stepNum).classList.add('active');
+            $('progress-bar').style.width = (stepNum * 25) + '%';
         }
 
         async function processAIStep3() {
-            const description = document.getElementById('ai-description')?.value || "";
-            if (!description.trim()) {
-                alert("Veuillez détailler vos travaux.");
-                return;
-            }
+            const description = ($('ai-description').value || '').trim();
+            if (description.length < 8) { notify("Décrivez vos travaux en quelques mots (équipement, pièce, problème…)."); return; }
 
-            const distanceZone = document.getElementById('geo-distance').value;
-            dataStore.zone = distanceZone;
-            if (distanceZone === 'zone1') dataStore.travelCostPerDay = 45;
-            else if (distanceZone === 'zone2') dataStore.travelCostPerDay = 90;
-            else dataStore.travelCostPerDay = 150;
+            dataStore.description = description;
+            dataStore.zone = $('geo-distance').value;
+            dataStore.travelCostPerDay = TRAVEL_PER_DAY[dataStore.zone] || 45;
+            dataStore.investment = document.querySelector('input[name="investment"]:checked')?.value || 'Intermédiaire';
 
-            const selectedInvestment = document.querySelector('input[name="investment"]:checked')?.value || "Intermédiaire";
-            dataStore.investment = selectedInvestment;
-
-            const btn = document.getElementById('btn-submit-ai');
-            if (btn) {
-                btn.disabled = true;
-                btn.innerText = "Analyse Gemini en cours...";
-            }
+            const btn = $('btn-submit-ai');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Analyse en cours…';
 
             try {
-                // 🔒 الاتصال بالسيرفر الخلفي
                 const response = await fetch('/api/analyze-devis', {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ description: description })
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description, type: dataStore.type, investment: dataStore.investment })
                 });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(data.error || ('Erreur serveur ' + response.status));
+                if (data.outOfScope) { notify(data.message + "\n\nNous intervenons en plomberie, chauffage, sanitaire, climatisation et VMC."); return; }
 
-                // 🚨 فحص نجاح الاستجابة: إذا رد السيرفر بـ 403 أو غيره، نتوقف فوراً
-                if (!response.ok) {
-                    throw new Error(`Erreur Serveur: ${response.status}`);
-                }
+                dataStore.ai = data;
+                dataStore.durationHours = Number(data.hours) || 0;
+                dataStore.calculatedMatCost = Number(data.materials) || 0;
 
-                const data = await response.json();
-                
-                dataStore.dynamicTitle = data.title || "Intervention Technique";
-                dataStore.durationHours = Number(data.hours);
-                dataStore.calculatedMatCost = Number(data.materials);
-                dataStore.customGeneratedDesc = data.desc || "Prestation technique.";
+                const days = Math.max(1, Math.ceil(dataStore.durationHours / HOURS_PER_DAY));
+                $('calculated-days').textContent = `${dataStore.durationHours} h · ${days} jour${days > 1 ? 's' : ''}`;
+                $('ai-title').textContent = data.title;
+                $('ai-summary').textContent = data.summary || '';
+                $('ai-confidence').textContent = 'Fiabilité ' + data.confidence;
+                $('ai-summary-box').classList.remove('hidden');
 
-                const calculatedDaysElem = document.getElementById('calculated-days');
-                if (calculatedDaysElem) {
-                    calculatedDaysElem.innerText = `${dataStore.durationHours} Heure(s)`;
-                }
-
+                const start = $('date-start');
+                const min = addWorkingDays(new Date(), 2);
+                start.min = `${min.getFullYear()}-${String(min.getMonth() + 1).padStart(2, '0')}-${String(min.getDate()).padStart(2, '0')}`;
+                if (!start.value || start.value < start.min) start.value = start.min;
+                calculateEndProjectDate();
                 goToStep(3);
-
             } catch (error) {
-                console.error("Gemini Internal Error:", error);
-                
-                // 🛑 تصفير الأرقام تماماً ومنع عرض أي قيمة افتراضية لخداع الزبون عند حدوث خطأ
-                dataStore.durationHours = 0;
-                dataStore.calculatedMatCost = 0;
-                
-                const calculatedDaysElem = document.getElementById('calculated-days');
-                if (calculatedDaysElem) {
-                    calculatedDaysElem.innerText = "0 Heure (Erreur)";
-                }
-                
-                // إظهار تنبيه شفاف للمستخدم
-                alert("Désolé, impossible de générer l'estimation pour le moment. Erreur de connexion avec l'IA.");
+                console.error('Analyse impossible :', error);
+                notify("Désolé, l'estimation automatique est momentanément indisponible. Réessayez dans un instant.\n(" + error.message + ")");
             } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerText = "Analyser mon projet";
-                }
+                btn.disabled = false;
+                btn.innerHTML = '<span id="btn-text">Analyser mon projet</span>';
             }
+        }
+
+        // jours ouvrés : on saute samedi et dimanche
+        function addWorkingDays(date, n) {
+            const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+            let left = n;
+            while (left > 0) { d.setDate(d.getDate() + 1); if (d.getDay() !== 0 && d.getDay() !== 6) left--; }
+            return d;
         }
 
         function calculateEndProjectDate() {
-            let startVal = document.getElementById('date-start').value;
-            if (!startVal) return new Date();
-            let currentDate = new Date(startVal);
-            currentDate.setDate(currentDate.getDate() + Math.max(1, Math.ceil(dataStore.durationHours / 7)));
-            document.getElementById('date-end-display').innerText = currentDate.toLocaleDateString('fr-FR');
-            return currentDate;
+            const v = $('date-start').value;
+            if (!v) return null;
+            const [y, m, d] = v.split('-').map(Number);
+            let start = new Date(y, m - 1, d);
+            while (start.getDay() === 0 || start.getDay() === 6) start.setDate(start.getDate() + 1);
+            const days = Math.max(1, Math.ceil(dataStore.durationHours / HOURS_PER_DAY));
+            const end = addWorkingDays(start, days - 1);
+            dataStore.startDate = start; dataStore.endDate = end;
+            $('date-end-display').textContent = frDate(end);
+            return end;
         }
 
         function renderAIDevis() {
-            if (!document.getElementById('date-start').value) { alert("Veuillez sélectionner une date."); return; }
-            document.getElementById('wizard-container').classList.add('hidden');
-            document.getElementById('progress-container').classList.add('hidden');
-            document.getElementById('result-wrapper').classList.remove('hidden');
+            if (!$('date-start').value) { notify('Veuillez sélectionner une date.'); return; }
+            calculateEndProjectDate();
+            const ai = dataStore.ai;
+            const premium = dataStore.investment === 'Haut de Gamme';
+            const hourlyRate = RATES[dataStore.investment] || 50;
+            const factor = premium ? PREMIUM_MATERIALS : 1;
+            const lines = (ai.materialsList || []).map((m) => ({ ...m, unitPrice: Math.round(m.unitPrice * factor * 100) / 100 }));
+            const materialsCost = lines.length ? lines.reduce((s, m) => s + m.qty * m.unitPrice, 0) : Math.ceil(dataStore.calculatedMatCost * factor);
+            const laborCost = dataStore.durationHours * hourlyRate;
+            const days = Math.max(1, Math.ceil(dataStore.durationHours / HOURS_PER_DAY));
+            const travelCost = dataStore.travelCostPerDay * days;
+            const total = materialsCost + laborCost + travelCost;
+            dataStore.totals = { materialsCost, laborCost, travelCost, total, hourlyRate, days };
+            dataStore.ref = 'CD-' + new Date().toISOString().slice(2, 10).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
 
-            let materialsCost = dataStore.calculatedMatCost;
-            if (dataStore.investment === 'Haut de Gamme') materialsCost = Math.ceil(materialsCost * 1.4);
+            $('out-type').textContent = ai.title;
+            $('out-summary').textContent = ai.summary || '';
+            $('out-geo').textContent = ZONE_LABEL[dataStore.zone];
+            $('out-labor-title').textContent = `Main d'œuvre spécialisée (${dataStore.durationHours} h × ${hourlyRate} € HT)`;
+            $('out-dates').textContent = `Du ${dataStore.startDate.toLocaleDateString('fr-FR')} au ${dataStore.endDate.toLocaleDateString('fr-FR')}`;
 
-            let hourlyRate = dataStore.investment === 'Intermédiaire' ? 50 : 78;
-            let laborCost = dataStore.durationHours * hourlyRate;
-            let daysCount = Math.max(1, Math.ceil(dataStore.durationHours / 7));
-            let travelCost = dataStore.travelCostPerDay * daysCount;
-            let total = materialsCost + laborCost + travelCost;
+            const body = $('ai-breakdown-table-body');
+            body.innerHTML = '';
+            if (lines.length) {
+                lines.forEach((m) => {
+                    const tr = el('tr', 'border-b border-slate-100');
+                    tr.append(el('td', 'py-2 pe-4 text-slate-800', m.label),
+                        el('td', 'py-2 text-right whitespace-nowrap', `${m.qty} ${m.unit}`),
+                        el('td', 'py-2 text-right whitespace-nowrap', eur(m.unitPrice)),
+                        el('td', 'py-2 text-right whitespace-nowrap font-semibold text-slate-800', eur(m.qty * m.unitPrice)));
+                    body.append(tr);
+                });
+            } else {
+                const tr = el('tr'); const td = el('td', 'py-2 text-slate-500', 'Fournitures selon prescription technique'); td.colSpan = 4; tr.append(td); body.append(tr);
+            }
+            const fill = (id, arr, empty) => { const ul = $(id); ul.innerHTML = ''; (arr && arr.length ? arr : [empty]).forEach((t) => ul.append(el('li', '', t))); };
+            fill('out-steps', ai.steps, 'Déroulé précisé lors de la visite technique.');
+            fill('out-assumptions', ai.assumptions, 'Accès normal au chantier, installation existante en état standard.');
 
-            dataStore.finalTotalCalculated = total.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
+            $('out-labor').textContent = eur(laborCost);
+            $('out-materials').textContent = eur(materialsCost);
+            $('out-travel').textContent = eur(travelCost);
+            $('out-total').textContent = eur(total);
+            $('print-ref').textContent = dataStore.ref;
+            $('print-date').textContent = new Date().toLocaleDateString('fr-FR');
 
-            document.getElementById('out-type').innerText = dataStore.dynamicTitle;
-            document.getElementById('out-labor-title').innerText = `Main d'œuvre Spécialisée (${dataStore.durationHours}h à ${hourlyRate}€/h HT)`;
-            document.getElementById('out-geo').innerText = dataStore.zone === 'zone1' ? 'Zone Proche (<25km)' : dataStore.zone === 'zone2' ? 'Zone Moyenne (25-50km)' : 'Zone Éloignée (50-100km)';
-
-            document.getElementById('ai-breakdown-table-body').innerHTML = `
-                <tr class="border-b border-slate-100">
-                    <td class="py-3 font-semibold text-slate-800 pr-4">${dataStore.dynamicTitle}</td>
-                    <td class="py-3 text-slate-500 max-w-md pr-4 leading-relaxed whitespace-pre-line">${dataStore.customGeneratedDesc}</td>
-                    <td class="py-3 text-right text-emerald-600 font-medium">Inclus</td>
-                </tr>
-            `;
-
-            document.getElementById('out-labor').innerText = laborCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
-            document.getElementById('out-materials').innerText = materialsCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
-            document.getElementById('out-travel').innerText = travelCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
-            document.getElementById('out-total').innerText = dataStore.finalTotalCalculated;
-
-            let startDateObj = new Date(document.getElementById('date-start').value);
-            let endDateObj = calculateEndProjectDate();
-            document.getElementById('out-dates').innerText = `Du ${startDateObj.toLocaleDateString('fr-FR')} au ${endDateObj.toLocaleDateString('fr-FR')}`;
+            $('wizard-container').classList.add('hidden');
+            $('progress-container').classList.add('hidden');
+            $('result-wrapper').classList.remove('hidden');
+            $('result-wrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        function unlockResults() {
-            let email = document.getElementById('auth-email').value;
-            if (email && email.includes('@')) {
-                document.getElementById('email-gate').classList.add('hidden');
-                document.getElementById('devis-board').classList.remove('blur-effect');
-                document.getElementById('unlocked-actions').classList.remove('hidden');
-                document.getElementById('premium-box').classList.remove('hidden');
-            } else { alert("Email invalide."); }
+        function leadPayload(kind) {
+            const t = dataStore.totals || {};
+            return {
+                kind, email: dataStore.email, phone: dataStore.phone, consent: true, website: $('auth-website').value,
+                title: dataStore.ai?.title, type: dataStore.type, zone: ZONE_LABEL[dataStore.zone], investment: dataStore.investment,
+                dates: dataStore.startDate ? `${dataStore.startDate.toLocaleDateString('fr-FR')} → ${dataStore.endDate.toLocaleDateString('fr-FR')}` : '',
+                labor: eur(t.laborCost), materials: eur(t.materialsCost), travel: eur(t.travelCost), total: eur(t.total),
+                description: dataStore.description + '\n\nRéf. ' + dataStore.ref
+            };
+        }
+        function sendLead(kind) {
+            return fetch('/api/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(leadPayload(kind)) })
+                .then((r) => r.json()).catch(() => ({ ok: false }));
+        }
+
+        async function unlockResults() {
+            const email = $('auth-email').value.trim();
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { notify('Adresse email invalide.'); return; }
+            if (!$('auth-consent').checked) { notify('Merci de cocher la case de consentement.'); return; }
+            dataStore.email = email;
+            dataStore.phone = $('auth-phone').value.trim();
+            const btn = $('btn-unlock'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+            await Promise.race([sendLead('estimate'), new Promise((r) => setTimeout(r, 4000))]);   // jamais bloquant
+            $('email-gate').classList.add('hidden');
+            $('devis-board').classList.remove('blur-effect');
+            $('unlocked-actions').classList.remove('hidden');
+            $('premium-box').classList.remove('hidden');
+        }
+
+        async function requestVisit() {
+            const btn = $('btn-visit');
+            btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Envoi…';
+            const r = await sendLead('visit');
+            if (r && r.ok) { btn.classList.add('hidden'); $('visit-done').classList.remove('hidden'); }
+            else { btn.disabled = false; btn.textContent = 'Demander la visite technique'; notify("L'envoi a échoué. Réessayez dans un instant."); }
+        }
+
+        function downloadPDF() {
+            const old = document.title;
+            document.title = 'Estimation ' + dataStore.ref;
+            window.print();
+            setTimeout(() => { document.title = old; }, 500);
         }
     </script>
 </body>
