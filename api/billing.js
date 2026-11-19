@@ -60,6 +60,7 @@ module.exports = async (req, res) => {
             const plan = b.plan === 'pro' ? 'pro' : 'essentiel', interval = b.interval === 'year' ? 'year' : 'month';
             const price = S.env(PRICE_ENV[plan + ':' + interval]);
             if (!price) return S.send(res, 503, { error: 'Tarif non configuré (' + PRICE_ENV[plan + ':' + interval] + ').' });
+            if (!/^price_/.test(price)) return S.send(res, 503, { error: PRICE_ENV[plan + ':' + interval] + ' doit contenir l\'identifiant Stripe du tarif (commence par price_), pas le montant.' });
             const s = await stripe('/checkout/sessions', {
                 mode: 'subscription', customer, client_reference_id: user.id,
                 line_items: { 0: { price, quantity: 1 } },

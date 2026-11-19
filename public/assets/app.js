@@ -508,9 +508,9 @@
         }
         drawPlans();
         const label = a.plan === 'trial' ? T('trial.left', { n: a.days }) : a.ok ? T('plan.active', { plan: a.plan === 'pro' ? 'Pro' : 'Essentiel' }) : T('trial.over');
-        status.append(el('h3', { text: label }),
-            P.current_period_end && a.ok && a.plan !== 'trial' ? el('p', { class: 'muted small', text: T('plan.renew', { date: new Date(P.current_period_end).toLocaleDateString() }) }) : null,
-            P.stripe_customer_id ? el('button', { class: 'btn btn-l', text: T('plan.manage'), onclick: async (e) => { busy(e.target, true); try { location.href = (await CD.api('billing', { action: 'portal' }, true)).url; } catch (x) { toast(x.message); busy(e.target, false, T('plan.manage')); } } }) : null);
+        status.append(...[el('h3', { text: label }),
+            (P.current_period_end && a.ok && a.plan !== 'trial') ? el('p', { class: 'muted small', text: T('plan.renew', { date: new Date(P.current_period_end).toLocaleDateString() }) }) : null,
+            P.stripe_customer_id ? el('button', { class: 'btn btn-l', text: T('plan.manage'), onclick: async (e) => { busy(e.target, true); try { location.href = (await CD.api('billing', { action: 'portal' }, true)).url; } catch (x) { toast(x.message); busy(e.target, false, T('plan.manage')); } } }) : null].filter(Boolean));
     }
 
     CD.installBanner();
