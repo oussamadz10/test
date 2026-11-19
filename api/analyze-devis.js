@@ -25,7 +25,8 @@ Règles :
 - Adapte à la description et aux photos (surface, nombre d'équipements, accès, état existant). Si l'information manque,
   prends une hypothèse moyenne et indique-la dans "assumptions".
 - "hours" = heures de main d'œuvre totales sur site (tests d'étanchéité et mise en service compris).
-- "hourlyRate" = taux horaire HT appliqué pour ce chantier dans la Drôme pour la gamme choisie.
+- "hourlyRateStandard" et "hourlyRatePremium" = taux horaires HT que l'artisan appliquerait pour CE chantier dans la Drôme,
+  en gamme standard et en gamme premium. Le taux premium est toujours supérieur au taux standard (service, finitions, garanties).
 - "travelCost" = total HT des déplacements pour toute la durée du chantier, selon la distance indiquée.
 - Fournitures : en gamme premium, choisis des marques et modèles haut de gamme et chiffre-les à leur prix réel.
 - Liste les fournitures principales avec quantité et prix unitaire HT. Pas de main d'œuvre dans les fournitures.
@@ -40,7 +41,8 @@ Format exact :
   "summary": "2 à 3 phrases claires pour le client",
   "photoFindings": ["Ce que montrent les photos …"],
   "hours": 0,
-  "hourlyRate": 0,
+  "hourlyRateStandard": 0,
+  "hourlyRatePremium": 0,
   "travelCost": 0,
   "steps": ["Étape 1 …", "Étape 2 …"],
   "materials": [{"label": "Fourniture", "qty": 1, "unit": "u", "unitPrice": 0}],
@@ -123,10 +125,18 @@ async function askGemini(key, user, images) {
     throw last;
 }
 
+// Le taux premium ne peut jamais être inférieur au taux standard (+15 % minimum)
+function rates(ai, premium) {
+    const n = (v) => { const x = Number(String(v).replace(',', '.')); return Number.isFinite(x) && x >= 20 && x <= 200 ? x : null; };
+    const std = n(ai.hourlyRateStandard) || n(ai.hourlyRate) || 55;
+    const pre = Math.max(n(ai.hourlyRatePremium) || 0, Math.ceil(std * 1.15));
+    return { hourlyRateStandard: Math.round(std), hourlyRatePremium: Math.round(pre), hourlyRate: Math.round(premium ? pre : std) };
+}
+
 const num = (v, min, max, def) => { const n = Number(String(v).replace(',', '.')); return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : def; };
 const str = (v, max) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, max);
 
-function clean(ai) {
+function clean(ai, premium) {
     if (ai && ai.outOfScope) return { outOfScope: true, message: str(ai.message, 300) || "Cette demande ne concerne pas nos métiers." };
     const materials = (Array.isArray(ai.materials) ? ai.materials : []).slice(0, 25).map((m) => ({
         label: str(m.label, 120), qty: num(m.qty, 0, 1000, 1), unit: str(m.unit, 12) || 'u', unitPrice: Math.round(num(m.unitPrice, 0, 30000, 0) * 100) / 100
@@ -136,7 +146,7 @@ function clean(ai) {
         title: str(ai.title, 120) || 'Intervention technique',
         summary: str(ai.summary, 600),
         hours: Math.round(num(ai.hours, 1, 400, 8) * 2) / 2,
-        hourlyRate: Math.round(num(ai.hourlyRate, 20, 200, 55)),
+        ...rates(ai, premium),
         travelCost: Math.round(num(ai.travelCost, 0, 5000, 0)),
         photoFindings: (Array.isArray(ai.photoFindings) ? ai.photoFindings : []).slice(0, 8).map((x) => str(x, 300)).filter(Boolean),
         steps: (Array.isArray(ai.steps) ? ai.steps : []).slice(0, 15).map((s) => str(s, 300)).filter(Boolean),
@@ -188,7 +198,8 @@ module.exports = async (req, res) => {
             const ms = Date.now() - t0;
             console.log('[analyze-devis] answered by ' + out.engine + ' in ' + ms + ' ms');
             res.setHeader('X-AI-Engine', out.engine);
-            return res.status(200).json(Object.assign(clean(out.ai), { engine: out.engine, ms }));
+            const premium = /haut|premium/i.test(String(body.investment || ''));
+            return res.status(200).json(Object.assign(clean(out.ai, premium), { engine: out.engine, ms }));
         }
         catch (e) { errors.push(e.message); console.error('[analyze-devis] ' + name + ': ' + e.message); }
     }
