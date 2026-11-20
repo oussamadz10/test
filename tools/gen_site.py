@@ -36,7 +36,7 @@ T = {
          ('🌍','4 langues','Interface en français, anglais, espagnol et arabe. Devis toujours édités en français, conformes au droit français.')],
   how_t='Comment ça marche', how=[('1','Décrivez ou photographiez','Quelques mots ou une photo du chantier suffisent.'),('2','L\'IA chiffre','Main d\'œuvre, fournitures, déplacement et TVA en quelques secondes.'),('3','Ajustez et envoyez','Modifiez les lignes, éditez le PDF et faites-le signer.')],
   p_t='Des tarifs simples', p_s='7 jours d\'essai gratuit avec toutes les fonctionnalités Pro. Sans carte bancaire.',
-  monthly='Mensuel', yearly='Annuel', save='-20 %', per_month='€ HT / mois', per_year='€ HT / an', billed_year='soit {m} € HT / mois, facturé annuellement',
+  monthly='Mensuel', yearly='Annuel', save='-20 %', per_month='€ / mois', per_year='€ / an', billed_year='soit {m} € / mois, facturé annuellement', tax_note='Prix nets : TVA non applicable, art. 293 B du CGI.',
   ess_n='Essentiel', ess_d='Pour l\'artisan qui démarre.', pro_n='Pro', pro_d='Pour chiffrer plus et convertir vos visiteurs.', popular='Le plus choisi',
   ess_f=['40 estimations IA par mois','Devis illimités et conformes (PDF)','Votre page client','30 demandes clients par mois','Toutes les mentions légales et régimes de TVA'],
   pro_f=['400 estimations IA par mois','Analyse de photos par l\'IA','Demandes clients illimitées','Votre logo et vos couleurs','Support prioritaire'],
@@ -72,7 +72,7 @@ T = {
          ('🌍','4 languages','Interface in French, English, Spanish and Arabic. Quotes are always issued in French, compliant with French law.')],
   how_t='How it works', how=[('1','Describe or photograph','A few words or a photo of the job is enough.'),('2','AI prices it','Labour, materials, travel and VAT in seconds.'),('3','Adjust and send','Edit the lines, export the PDF and get it signed.')],
   p_t='Simple pricing', p_s='7-day free trial with all Pro features. No credit card.',
-  monthly='Monthly', yearly='Yearly', save='-20%', per_month='€ excl. VAT / month', per_year='€ excl. VAT / year', billed_year='i.e. €{m} excl. VAT / month, billed yearly',
+  monthly='Monthly', yearly='Yearly', save='-20%', per_month='€ / month', per_year='€ / year', billed_year='i.e. €{m} / month, billed yearly', tax_note='Net prices: VAT not applicable (art. 293 B of the French tax code).',
   ess_n='Essentiel', ess_d='For tradespeople getting started.', pro_n='Pro', pro_d='Price more and convert your visitors.', popular='Most popular',
   ess_f=['40 AI estimates per month','Unlimited compliant quotes (PDF)','Your client page','30 client requests per month','All legal mentions and VAT regimes'],
   pro_f=['400 AI estimates per month','AI photo analysis','Unlimited client requests','Your logo and colours','Priority support'],
@@ -108,7 +108,7 @@ T = {
          ('🌍','4 idiomas','Interfaz en francés, inglés, español y árabe. Presupuestos siempre en francés, conformes al derecho francés.')],
   how_t='Cómo funciona', how=[('1','Describe o fotografía','Unas palabras o una foto bastan.'),('2','La IA calcula','Mano de obra, materiales, desplazamiento e IVA en segundos.'),('3','Ajusta y envía','Edita las líneas, exporta el PDF y hazlo firmar.')],
   p_t='Precios sencillos', p_s='7 días de prueba gratis con todas las funciones Pro. Sin tarjeta.',
-  monthly='Mensual', yearly='Anual', save='-20 %', per_month='€ sin IVA / mes', per_year='€ sin IVA / año', billed_year='es decir {m} € sin IVA / mes, facturado anualmente',
+  monthly='Mensual', yearly='Anual', save='-20 %', per_month='€ / mes', per_year='€ / año', billed_year='es decir {m} € / mes, facturado anualmente', tax_note='Precios netos: IVA no aplicable (art. 293 B del código fiscal francés).',
   ess_n='Essentiel', ess_d='Para empezar.', pro_n='Pro', pro_d='Para presupuestar más y convertir visitas.', popular='El más elegido',
   ess_f=['40 estimaciones IA al mes','Presupuestos ilimitados y conformes (PDF)','Tu página de clientes','30 solicitudes de clientes al mes','Todas las menciones legales y regímenes de IVA'],
   pro_f=['400 estimaciones IA al mes','Análisis de fotos con IA','Solicitudes de clientes ilimitadas','Tu logo y tus colores','Soporte prioritario'],
@@ -144,7 +144,7 @@ T = {
          ('🌍','4 لغات','الواجهة بالفرنسية والإنجليزية والإسبانية والعربية. عروض الأسعار تصدر دائماً بالفرنسية وفق القانون الفرنسي.')],
   how_t='كيف يعمل', how=[('1','صِف أو صوّر','بضع كلمات أو صورة للورشة تكفي.'),('2','الذكاء الاصطناعي يسعّر','اليد العاملة واللوازم والتنقل والضريبة في ثوانٍ.'),('3','عدّل وأرسل','عدّل البنود، صدّر PDF واجعل الزبون يوقّع.')],
   p_t='أسعار بسيطة', p_s='7 أيام تجربة مجانية بكل مزايا Pro. بدون بطاقة بنكية.',
-  monthly='شهري', yearly='سنوي', save='-20٪', per_month='€ بدون ضريبة / شهرياً', per_year='€ بدون ضريبة / سنوياً', billed_year='أي {m} € بدون ضريبة شهرياً، تُدفع سنوياً',
+  monthly='شهري', yearly='سنوي', save='-20٪', per_month='€ / شهرياً', per_year='€ / سنوياً', billed_year='أي {m} € شهرياً، تُدفع سنوياً', tax_note='أسعار صافية: لا تُطبَّق ضريبة القيمة المضافة (المادة 293 B من قانون الضرائب الفرنسي).',
   ess_n='Essentiel', ess_d='للحرفي الذي يبدأ.', pro_n='Pro', pro_d='لتسعير أكثر وتحويل الزوار إلى زبائن.', popular='الأكثر اختياراً',
   ess_f=['40 تقديراً بالذكاء الاصطناعي شهرياً','عروض أسعار غير محدودة ومطابقة (PDF)','صفحتك للزبائن','30 طلباً من الزبائن شهرياً','كل المعلومات القانونية وأنظمة الضريبة'],
   pro_f=['400 تقدير بالذكاء الاصطناعي شهرياً','تحليل الصور بالذكاء الاصطناعي','طلبات زبائن غير محدودة','شعارك وألوانك','دعم ذو أولوية'],
@@ -248,6 +248,7 @@ def page(l):
   <h2 class="center">{e(d['p_t'])}</h2><p class="center muted">{e(d['p_s'])}</p>
   <div class="center" style="margin:18px 0 28px"><div class="tog" id="tog"><button class="on" data-i="m">{e(d['monthly'])}</button><button data-i="y">{e(d['yearly'])} <span class="pill ok">{e(d['save'])}</span></button></div></div>
   <div class="grid g2 narrow" style="margin:0 auto">{plan('essentiel', False)}{plan('pro', True)}</div>
+  <p class="xs muted center" style="margin-top:14px">{e(d['tax_note'])}</p>
 </div></section>
 
 <section class="sec" id="faq"><div class="wrap narrow">
@@ -259,7 +260,7 @@ def page(l):
   <div class="row"><a href="/legal.html#mentions">{e(d['f_legal'])}</a><a href="/legal.html#cgv">{e(d['f_cgv'])}</a><a href="/legal.html#confidentialite">{e(d['f_priv'])}</a><a href="/legal.html#contact">{e(d['f_contact'])}</a></div>
 </div></footer>
 
-<script src="/assets/i18n.js?v={V}"></script>
+<script src="/assets/i18n.js?v=4"></script>
 <script src="/assets/core.js?v={V}"></script>
 <script>
 CD.setLang({json.dumps(l)});
