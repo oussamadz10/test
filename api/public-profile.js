@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
             slug: p.slug, active: acc.ok, photos: acc.ok && acc.limits.photos,
             company_name: p.company_name || 'Artisan', trades: p.trades || [], city: p.city, postal_code: p.postal_code,
             phone: p.phone, contact_email: p.contact_email, website: p.website, accent_color: p.accent_color || '#f97316',
-            logo_url: p.logo_url, siret: p.siret, legal_form: p.legal_form, address: p.address, insurance: p.insurance,
+            logo_url: p.logo_url, siret: p.siret, siret_verified: !!p.siret_verified, legal_form: p.legal_form, address: p.address, insurance: p.insurance,
             vat_regime: p.vat_regime, service_radius_km: p.service_radius_km, lang: p.lang || 'fr'
         });
     } catch (e) { console.error('[public-profile] ' + e.message); return S.send(res, 500, { error: 'Erreur serveur.' }); }

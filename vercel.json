@@ -49,6 +49,13 @@
       "dest": "/public/p/index.html"
     },
     {
+      "src": "/v/([A-Za-z0-9]+)/?",
+      "headers": {
+        "X-Robots-Tag": "noindex"
+      },
+      "dest": "/public/v/index.html"
+    },
+    {
       "src": "/(en|es|ar)/?",
       "dest": "/public/$1/index.html"
     },

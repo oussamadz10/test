@@ -79,6 +79,15 @@
     const input = (val, attrs) => el('input', Object.assign({ class: 'in', value: val == null ? '' : val }, attrs || {}));
     const select = (val, opts) => { const s = el('select', { class: 'in' }, opts.map(([v, l]) => el('option', { value: v, text: l }))); s.value = val == null ? '' : String(val); return s; };
     const isPro = () => ['pro', 'trial'].includes(access(P).plan);
+    // Anti-fraude : un devis « propre » exige un SIRET vérifié ET un abonnement payé
+    const docMark = () => !P.siret_verified ? 'ENTREPRISE NON VÉRIFIÉE' : !['essentiel', 'pro'].includes(access(P).plan) ? 'DOCUMENT DE DÉMONSTRATION' : '';
+    async function verifySiret(value) {
+        const j = await CD.api('siret', { siret: String(value || '').replace(/\s+/g, '') }, true).catch((e) => { throw new Error(T('si.e.' + (e.code === 'busy' ? 'unavailable' : e.code || 'unavailable'))); });
+        const fresh = (await CD.db('/profiles?id=eq.' + P.id + '&select=*'))[0];
+        if (fresh) Object.assign(P, fresh);
+        return j;
+    }
+    const DISPOSABLE = /@(yopmail|mailinator|guerrillamail|sharklasers|10minutemail|temp-?mail|tempmail|trashmail|getnada|dispostable|maildrop|throwawaymail|fakeinbox|mailnesia|mohmal|emailondeck|spamgourmet|mintemail|tmail|tmpmail|moakt|burnermail|discard\.email|mail\.tm|inboxkitten)\./i;
 
     // ---------- bibliothèque de prix (cache) ----------
     let CAT = null;
@@ -112,6 +121,7 @@
             ev.preventDefault(); err.innerHTML = ''; busy(btn, true);
             try {
                 if (mode === 'signup') {
+                    if (DISPOSABLE.test(email.value)) throw new Error(T('su.disposable'));
                     const j = await CD.auth.signUp(email.value.trim(), pass.value, { lang: CD.lang });
                     if (j.access_token) return boot();
                     form.innerHTML = ''; form.append(el('h2', { text: T('auth.checkTitle') }), el('p', { class: 'muted', text: T('auth.checkText', { email: email.value.trim() }) })); return;
@@ -166,6 +176,7 @@
             const patch = { company_name: name.value.trim(), trades: trades.get(), legal_form: form.value, vat_regime: vat.value, siret: siret.value.trim(), postal_code: cp.value.trim(), city: city.value.trim(), phone: phone.value.trim(), lang: CD.lang };
             try {
                 await CD.db('/profiles?id=eq.' + P.id, { method: 'PATCH', body: Object.assign({ slug }, patch) }).catch(() => CD.db('/profiles?id=eq.' + P.id, { method: 'PATCH', body: Object.assign({ slug: slug + '-' + P.id.slice(0, 4) }, patch) }));
+                if (/^\d{14}$/.test(patch.siret.replace(/\s+/g, ''))) await verifySiret(patch.siret).catch(() => {});
                 boot();
             } catch (x) { err.append(el('div', { class: 'alert err', text: x.message })); busy(btn, false); }
         } },
@@ -182,6 +193,7 @@
         const main = shell('home', el('h1', { text: T('home.hello', { name: P.company_name }) }));
         const stats = el('div', { class: 'grid g3', style: 'margin:18px 0' });
         main.append(el('div', { class: 'row', style: 'margin:6px 0 4px' }, el('a', { class: 'btn btn-p btn-lg', href: '#new' }, CD.icon('plus'), T('nav.new')), el('a', { class: 'btn btn-l', href: '#page' }, CD.icon('link'), T('home.share'))), stats);
+        if (!P.siret_verified) main.append(el('div', { class: 'alert info row between', style: 'margin:14px 0 0;gap:10px' }, el('span', {}, CD.icon('lock'), ' ', T('si.banner')), el('a', { class: 'btn btn-l btn-sm', href: '#settings' }, T('si.bannerBtn'))));
         const dash = el('div', { class: 'card dash', style: 'margin-bottom:18px' });
         const recent = el('div', { class: 'card' }, el('h3', { text: T('home.recent') }), el('div', { class: 'empty' }, el('span', { class: 'spin dk' })));
         main.append(dash, recent);
@@ -469,7 +481,10 @@
         const steps = (d.steps || []).length ? `<p style="margin-top:12px"><b>Détail de l'intervention</b></p><ol style="margin:4px 0 0;padding-inline-start:18px">${d.steps.map((s) => '<li>' + f(s) + '</li>').join('')}</ol>` : '';
         const vatRows = franchise ? `<tr><td colspan="2" style="font-size:10.5px">TVA non applicable, art. 293 B du CGI</td></tr>` : `<tr><td>TVA ${String(d.vatRate).replace('.', ',')} %</td><td class="r">${eur(t.vat)}</td></tr>`;
         const reduced = !franchise && (Number(d.vatRate) === 10 || Number(d.vatRate) === 5.5) ? '<p>Taux réduit de TVA applicable sous réserve de la remise par le client de l\'attestation simplifiée prévue à l\'article 279-0 bis du CGI (travaux dans un logement achevé depuis plus de 2 ans).</p>' : '';
-        return `<div class="devis">
+        const mark = docMark(), vurl = q.verify_code ? location.origin + '/v/' + q.verify_code : '';
+        const vcode = q.verify_code ? q.verify_code.slice(0, 5) + '-' + q.verify_code.slice(5) : '';
+        const verifyBlock = vurl && window.QR ? `<div class="vfy"><div class="qr">${window.QR.svg(vurl, 84)}</div><div><b>Vérifiez l'authenticité de ce devis</b><br>Scannez le QR code ou rendez-vous sur <b>${f(location.host)}/v</b> avec le code <b>${vcode}</b>.<br>${P.siret_verified ? 'SIRET vérifié auprès du registre officiel (INSEE).' : '<span style="color:#b91c1c">SIRET non vérifié.</span>'}</div></div>` : '';
+        return `<div class="devis">${mark ? `<div class="wm" aria-hidden="true"><span>${mark}</span><span>${mark}</span><span>${mark}</span></div><div class="wm-top">${mark === 'ENTREPRISE NON VÉRIFIÉE' ? 'Entreprise non vérifiée – identité non contrôlée par ChronoDevis' : 'Document de démonstration – sans valeur commerciale'}</div>` : ''}
   <div style="display:flex;justify-content:space-between;gap:20px;align-items:flex-start">
     <div>${P.logo_url ? `<img src="${f(P.logo_url)}" alt="" style="max-height:60px;max-width:180px;margin-bottom:6px"><br>` : ''}<div class="co">${f(P.company_name)}</div>
       <div>${FORM_LABEL[P.legal_form] || ''}</div><div>${co}</div><div>${[f(P.phone), f(P.contact_email)].filter(Boolean).join(' · ')}</div><div style="font-size:11px;color:#555">${ids}</div></div>
@@ -488,6 +503,7 @@
     ${P.mediator ? `<p><b>Médiateur de la consommation :</b> ${f(P.mediator)}</p>` : ''}
   </div>
   <div class="sign"><div>L'entreprise</div><div>Le client : date, signature et mention manuscrite « Devis reçu avant l'exécution des travaux, bon pour accord »</div></div>
+  ${verifyBlock}
 </div>`;
     }
     async function quoteView(id) {
@@ -514,6 +530,7 @@
                     } }, CD.icon('copy'), T('q.duplicate')),
                     el('button', { class: 'btn btn-bad btn-sm', 'aria-label': T('q.delete'), onclick: async () => { if (!confirm(T('q.confirmDelete'))) return; await CD.db('/quotes?id=eq.' + id, { method: 'DELETE' }); location.hash = 'quotes'; } }, CD.icon('trash')))),
                 (!P.siret || !P.address || !P.insurance) ? el('div', { class: 'alert info no-print' }, T('q.missingInfo') + ' ', el('a', { href: '#settings', text: T('nav.settings') })) : '',
+                docMark() ? el('div', { class: 'alert info no-print' }, T('wm.why', { wm: docMark(), how: P.siret_verified ? T('wm.howPlan') : T('wm.howSiret') }) + ' ', el('a', { href: P.siret_verified ? '#billing' : '#settings', text: P.siret_verified ? T('nav.billing') : T('nav.settings') })) : '',
                 el('div', { html: devisDoc(q) }));
         } catch (e) { main.innerHTML = ''; main.append(el('div', { class: 'alert err', text: e.message })); }
     }
@@ -607,10 +624,29 @@
         const vatRate = select(String(P.default_vat_rate || 20), [['20', '20 %'], ['10', '10 %'], ['5.5', '5,5 %']]);
         const terms = el('textarea', { class: 'in', style: 'min-height:70px' }); terms.value = P.payment_terms || '';
         const save = el('button', { class: 'btn btn-p btn-lg', text: T('saveBtn') });
+        mk('siret', { inputmode: 'numeric', maxlength: 17 });
+        const siretBox = el('div');
+        function drawSiret() {
+            siretBox.innerHTML = '';
+            if (P.siret_verified) {
+                F.siret.disabled = true; F.siret.value = P.siret;
+                siretBox.append(el('label', { class: 'f' }, 'SIRET ', el('span', { class: 'pill ok' }, CD.icon('check'), T('si.ok'))), F.siret,
+                    el('div', { class: 'hint', text: T('si.official', { name: P.siret_name || '' }) + ' · ' + T('si.lockedHint') }));
+                return;
+            }
+            const vb = el('button', { class: 'btn btn-d', type: 'button' }, CD.icon('check'), T('si.verify')), msg = el('div');
+            vb.onclick = async () => {
+                msg.innerHTML = ''; busy(vb, true);
+                try { await verifySiret(F.siret.value); toast(T('si.ok')); drawSiret(); }
+                catch (e) { msg.append(el('div', { class: 'alert err', style: 'margin-top:8px', text: e.message })); busy(vb, false); }
+            };
+            siretBox.append(el('label', { class: 'f', text: 'SIRET' }), el('div', { class: 'row', style: 'gap:8px;flex-wrap:nowrap' }, F.siret, vb), el('div', { class: 'hint', text: T('si.why') }), msg);
+        }
+        drawSiret();
         const sec = (title, ...kids) => el('div', { class: 'card', style: 'margin-bottom:16px' }, el('h3', { text: title }), ...kids);
         shell('settings', el('h1', { text: T('nav.settings') }),
             el('div', { class: 'row m-only', style: 'margin-bottom:14px' }, el('a', { class: 'btn btn-l btn-sm', href: '#prices' }, CD.icon('tag'), T('nav.prices')), el('a', { class: 'btn btn-l btn-sm', href: '#billing' }, CD.icon('card'), T('nav.billing'))),
-            sec(T('set.company'), el('div', { class: 'grid g2' }, field(T('f.company'), mk('company_name')), field(T('f.legalForm'), form), field('SIRET', mk('siret')), field(T('f.rcs'), mk('rcs_rm'), T('f.rcsHint')),
+            sec(T('set.company'), el('div', { class: 'grid g2' }, field(T('f.company'), mk('company_name')), field(T('f.legalForm'), form), el('div', { class: 'field' }, siretBox), field(T('f.rcs'), mk('rcs_rm'), T('f.rcsHint')),
                 field(T('f.vat'), vat), field(T('f.vatNumber'), mk('vat_number')), field(T('f.vatDefault'), vatRate), field(T('f.insurance'), mk('insurance'), T('f.insuranceHint')))),
             sec(T('set.contact'), el('div', { class: 'grid g2' }, field(T('f.address'), mk('address')), field(T('f.postal'), mk('postal_code')), field(T('f.city'), mk('city')), field(T('f.phone'), mk('phone', { type: 'tel' })),
                 field(T('f.contactEmail'), mk('contact_email', { type: 'email' }), T('f.contactHint')), field(T('f.website'), mk('website')))),

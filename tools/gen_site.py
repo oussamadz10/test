@@ -8,7 +8,7 @@ def svg(name):
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', 'public')
 SITE = 'https://chronodevisia.fr'
-V = '6'
+V = '7'
 LANGS = ['fr', 'en', 'es', 'ar']
 PATH = {'fr': '/', 'en': '/en/', 'es': '/es/', 'ar': '/ar/'}
 OG = {'fr': 'fr_FR', 'en': 'en_GB', 'es': 'es_ES', 'ar': 'ar_AR'}
@@ -263,7 +263,7 @@ def page(l):
   <div class="row"><a href="/legal.html#mentions">{e(d['f_legal'])}</a><a href="/legal.html#cgv">{e(d['f_cgv'])}</a><a href="/legal.html#confidentialite">{e(d['f_priv'])}</a><a href="/legal.html#contact">{e(d['f_contact'])}</a></div>
 </div></footer>
 
-<script src="/assets/i18n.js?v=7"></script>
+<script src="/assets/i18n.js?v=8"></script>
 <script src="/assets/core.js?v={V}"></script>
 <script>
 CD.setLang({json.dumps(l)});
