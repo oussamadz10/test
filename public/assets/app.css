@@ -154,3 +154,8 @@ h3 .i{vertical-align:-3px;color:var(--acc2)}
 .vbox{border-radius:16px;padding:18px 20px;margin:16px 0}.vbox.ok{background:var(--okbg);color:#065f46}.vbox.bad{background:var(--badbg);color:#991b1b}.vbox.warn{background:#fffbeb;color:#92400e}
 .vbox h2{margin:0 0 4px;font-size:1.2rem;display:flex;gap:8px;align-items:center}.vbox .i{width:22px;height:22px}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:8px 18px}.kv dt{color:var(--mute)}.kv dd{margin:0;font-weight:700}
+/* signature en ligne */
+.sigpad{display:block;width:100%;max-width:600px;aspect-ratio:3/1;height:auto;margin-top:8px;border:2px dashed var(--line);border-radius:12px;background:#fff;touch-action:none;cursor:crosshair}
+.devis .signed img{display:block;max-width:220px;max-height:74px;margin-bottom:4px}
+.devis .sign div.signed{height:auto;min-height:96px;font-size:11px;color:#111;border-style:solid;border-color:#059669;overflow-wrap:anywhere}
+@media(max-width:600px){.devis{padding:16px}.devis .sign{grid-template-columns:1fr}.devis .sign div{height:auto;min-height:70px}}

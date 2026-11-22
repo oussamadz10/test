@@ -7,14 +7,14 @@
 <meta name="theme-color" content="#0f172a">
 <link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/app.css?v=7">
+<link rel="stylesheet" href="/assets/app.css?v=8">
 </head>
 <body>
 <header class="top"><div class="wrap"><a class="logo" href="/"><img src="/icons/icon-192.png" alt="">Chrono<b>Devis</b></a><div class="nav"><select class="lang" id="lang" aria-label="Langue"><option value="fr">Français</option><option value="en">English</option><option value="es">Español</option><option value="ar">العربية</option></select></div></div></header>
 <main class="wrap narrow" style="padding:24px 16px 40px" id="root"><div class="empty"><span class="spin dk"></span></div></main>
 <footer class="foot"><div class="wrap row between small"><a href="/legal.html">Mentions légales</a><a href="/">chronodevisia.fr</a></div></footer>
-<script src="/assets/i18n.js?v=8"></script>
-<script src="/assets/core.js?v=6"></script>
+<script src="/assets/i18n.js?v=9"></script>
+<script src="/assets/core.js?v=7"></script>
 <script>
 (function () {
   'use strict';
@@ -62,7 +62,10 @@
         ...row(T('v.company'), c.name), ...(c.verified && c.officialName ? row('INSEE', c.officialName) : []), ...row('SIRET', c.siret), ...(c.city ? row('', c.city) : []))),
       el('div', { class: 'card', style: 'margin-top:16px' }, el('h3', { text: T('v.doc') }), el('dl', { class: 'kv' },
         ...row(T('v.number'), q.number), ...row(T('v.date'), date(q.createdAt)), ...row(T('v.updated'), date(q.updatedAt)), ...row(T('v.object'), q.title),
-        ...row(T('v.client'), [q.client, q.city].filter(Boolean).join(' – ')), ...row(T('v.totalHt'), eur(q.totalHt)), ...row(T('v.total'), eur(q.totalTtc)), ...row(T('v.status'), T('status.' + (q.status || 'draft'))))),
+        ...row(T('v.client'), [q.client, q.city].filter(Boolean).join(' – ')), ...row(T('v.totalHt'), eur(q.totalHt)), ...row(T('v.total'), eur(q.totalTtc)), ...row(T('v.status'), T('status.' + (q.status || 'draft'))),
+        ...(q.signedAt ? row('✓', T('v.signed', { date: new Date(q.signedAt).toLocaleString('fr-FR'), name: q.signedBy })) : []),
+        ...(q.hash ? row(T('v.hash'), q.hash.slice(0, 16) + '…') : []),
+        ...(q.declinedAt ? row('✕', T('v.declinedOn', { date: date(q.declinedAt) })) : []))),
       el('div', { class: 'alert info', style: 'margin-top:16px', text: T('v.compare') }), reportForm());
   }
   async function load() {

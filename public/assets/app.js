@@ -9,7 +9,7 @@
     const TRADES = ['plombier', 'chauffagiste', 'climaticien', 'electricien', 'macon', 'peintre', 'plaquiste', 'carreleur', 'menuisier', 'charpentier', 'couvreur',
         'facadier', 'serrurier', 'vitrier', 'solier', 'cuisiniste', 'paysagiste', 'terrassier', 'piscine', 'domotique', 'ramoneur', 'demenageur', 'nettoyage', 'multiservices', 'autre'];
     const FORMS = ['micro', 'ei', 'eurl', 'sarl', 'sasu', 'sas', 'sa', 'scop', 'autre'];
-    const FORM_LABEL = { micro: 'Micro-entreprise', ei: 'Entreprise individuelle', eurl: 'EURL', sarl: 'SARL', sasu: 'SASU', sas: 'SAS', sa: 'SA', scop: 'SCOP', autre: '—' };
+    const FORM_LABEL = CD.FORM_LABEL;
 
     // ---------- langue ----------
     const langSel = $('#lang');
@@ -454,7 +454,13 @@
             } catch (e) { toast(e.message, 5000); busy(saveBtn, false, T('q.save')); }
         };
     }
-    async function editQuote(id) { try { const r = await CD.db('/quotes?id=eq.' + id + '&select=*'); editorView(r[0]); } catch (e) { toast(e.message); } }
+    async function editQuote(id) {
+        try {
+            const r = await CD.db('/quotes?id=eq.' + id + '&select=*');
+            if (r[0] && r[0].signed_at) { toast(T('q.lockedEdit'), 6000); location.hash = 'quote/' + id; return; }
+            editorView(r[0]);
+        } catch (e) { toast(e.message); }
+    }
 
     // ---------- liste et affichage des devis ----------
     async function quotesView() {
@@ -469,43 +475,7 @@
     }
 
     // Devis imprimable (toujours en français : document légal en France)
-    function devisDoc(q) {
-        const d = q.data || {}, lines = d.lines || [], franchise = isFranchise() || Number(d.vatRate) === 0 && P.vat_regime === 'franchise';
-        const t = CD.totals(lines, franchise ? 0 : d.vatRate);
-        const created = new Date(q.created_at || Date.now());
-        const until = new Date(created.getTime() + (d.validityDays || 30) * 864e5);
-        const f = (x) => x ? CD.esc(x) : '';
-        const co = [f(P.address), [f(P.postal_code), f(P.city)].filter(Boolean).join(' ')].filter(Boolean).join('<br>');
-        const ids = [P.siret ? 'SIRET ' + f(P.siret) : '', P.rcs_rm ? f(P.rcs_rm) : '', P.vat_regime === 'assujetti' && P.vat_number ? 'TVA ' + f(P.vat_number) : ''].filter(Boolean).join(' · ');
-        const rows = lines.map((l) => `<tr><td>${f(l.label)}</td><td class="r">${l.qty} ${f(l.unit)}</td><td class="r">${eur(l.unitPrice)}</td><td class="r">${eur(l.qty * l.unitPrice)}</td></tr>`).join('');
-        const steps = (d.steps || []).length ? `<p style="margin-top:12px"><b>Détail de l'intervention</b></p><ol style="margin:4px 0 0;padding-inline-start:18px">${d.steps.map((s) => '<li>' + f(s) + '</li>').join('')}</ol>` : '';
-        const vatRows = franchise ? `<tr><td colspan="2" style="font-size:10.5px">TVA non applicable, art. 293 B du CGI</td></tr>` : `<tr><td>TVA ${String(d.vatRate).replace('.', ',')} %</td><td class="r">${eur(t.vat)}</td></tr>`;
-        const reduced = !franchise && (Number(d.vatRate) === 10 || Number(d.vatRate) === 5.5) ? '<p>Taux réduit de TVA applicable sous réserve de la remise par le client de l\'attestation simplifiée prévue à l\'article 279-0 bis du CGI (travaux dans un logement achevé depuis plus de 2 ans).</p>' : '';
-        const mark = docMark(), vurl = q.verify_code ? location.origin + '/v/' + q.verify_code : '';
-        const vcode = q.verify_code ? q.verify_code.slice(0, 5) + '-' + q.verify_code.slice(5) : '';
-        const verifyBlock = vurl && window.QR ? `<div class="vfy"><div class="qr">${window.QR.svg(vurl, 84)}</div><div><b>Vérifiez l'authenticité de ce devis</b><br>Scannez le QR code ou rendez-vous sur <b>${f(location.host)}/v</b> avec le code <b>${vcode}</b>.<br>${P.siret_verified ? 'SIRET vérifié auprès du registre officiel (INSEE).' : '<span style="color:#b91c1c">SIRET non vérifié.</span>'}</div></div>` : '';
-        return `<div class="devis">${mark ? `<div class="wm" aria-hidden="true"><span>${mark}</span><span>${mark}</span><span>${mark}</span></div><div class="wm-top">${mark === 'ENTREPRISE NON VÉRIFIÉE' ? 'Entreprise non vérifiée – identité non contrôlée par ChronoDevis' : 'Document de démonstration – sans valeur commerciale'}</div>` : ''}
-  <div style="display:flex;justify-content:space-between;gap:20px;align-items:flex-start">
-    <div>${P.logo_url ? `<img src="${f(P.logo_url)}" alt="" style="max-height:60px;max-width:180px;margin-bottom:6px"><br>` : ''}<div class="co">${f(P.company_name)}</div>
-      <div>${FORM_LABEL[P.legal_form] || ''}</div><div>${co}</div><div>${[f(P.phone), f(P.contact_email)].filter(Boolean).join(' · ')}</div><div style="font-size:11px;color:#555">${ids}</div></div>
-    <div style="text-align:end"><h1>DEVIS</h1><div>N° <b>${f(q.number)}</b></div><div>Date : ${created.toLocaleDateString('fr-FR')}</div><div>Valable jusqu'au : ${until.toLocaleDateString('fr-FR')}</div>${d.startDate ? `<div>Début prévu : ${new Date(d.startDate).toLocaleDateString('fr-FR')}</div>` : ''}</div>
-  </div>
-  <div class="boxes"><div class="bx"><b>Objet</b><br>${f(q.title)}${d.summary ? `<div style="color:#555;margin-top:4px">${f(d.summary)}</div>` : ''}</div>
-    <div class="bx"><b>Client</b><br>${f(q.client_name) || '—'}<br>${f(q.client_address)}<br>${[f(q.client_phone), f(q.client_email)].filter(Boolean).join(' · ')}</div></div>
-  <table><thead><tr><th>Désignation</th><th class="r">Quantité</th><th class="r">Prix unitaire HT</th><th class="r">Total HT</th></tr></thead><tbody>${rows}</tbody></table>
-  <table class="tot"><tr><td>Total HT</td><td class="r">${eur(t.ht)}</td></tr>${vatRows}<tr class="g"><td>${franchise ? 'Net à payer' : 'Total TTC'}</td><td class="r">${eur(franchise ? t.ht : t.ttc)}</td></tr></table>
-  ${steps}
-  <div class="legal">
-    <p><b>Conditions de paiement :</b> ${f(P.payment_terms)}</p>
-    <p>Devis gratuit. En cas de retard de paiement, pénalités au taux d'intérêt légal majoré de 10 points ; pour les clients professionnels, indemnité forfaitaire de 40 € pour frais de recouvrement (art. L441-10 du Code de commerce).</p>
-    ${reduced}
-    ${P.insurance ? `<p><b>Assurance professionnelle :</b> ${f(P.insurance)}</p>` : ''}
-    ${P.mediator ? `<p><b>Médiateur de la consommation :</b> ${f(P.mediator)}</p>` : ''}
-  </div>
-  <div class="sign"><div>L'entreprise</div><div>Le client : date, signature et mention manuscrite « Devis reçu avant l'exécution des travaux, bon pour accord »</div></div>
-  ${verifyBlock}
-</div>`;
-    }
+    const devisDoc = (q) => CD.devisDoc(q, P, { mark: docMark() });
     async function quoteView(id) {
         const main = shell('quotes', el('div', { class: 'empty' }, el('span', { class: 'spin dk' })));
         try {
@@ -513,22 +483,38 @@
             if (!q) throw new Error(T('q.notFound'));
             main.innerHTML = ''; main.append(accessBanner() || '');
             const st = select(q.status || 'draft', ['draft', 'sent', 'accepted', 'refused'].map((s) => [s, T('status.' + s)]));
-            st.style.width = 'auto';
+            st.style.width = 'auto'; st.disabled = !!q.signed_at;
             st.onchange = () => CD.db('/quotes?id=eq.' + id, { method: 'PATCH', body: { status: st.value } }).then(() => toast(T('saved'))).catch((e) => toast(e.message));
-            const mail = 'mailto:' + encodeURIComponent(q.client_email || '') + '?subject=' + encodeURIComponent('Devis ' + q.number + ' – ' + P.company_name) +
-                '&body=' + encodeURIComponent(T('q.mailBody', { name: q.client_name || '', number: q.number, title: q.title, total: eur(q.total_ttc), company: P.company_name }));
+            const link = q.share_token ? location.origin + '/s/' + q.share_token : '';
+            const msg = link ? T('q.signMsg', { name: q.client_name || '', number: q.number, title: q.title, total: eur(q.total_ttc), company: P.company_name, link })
+                : T('q.mailBody', { name: q.client_name || '', number: q.number, title: q.title, total: eur(q.total_ttc), company: P.company_name });
+            const mail = 'mailto:' + encodeURIComponent(q.client_email || '') + '?subject=' + encodeURIComponent('Devis ' + q.number + ' – ' + P.company_name) + '&body=' + encodeURIComponent(msg);
+            const markSent = () => { if ((q.status || 'draft') === 'draft') { q.status = 'sent'; st.value = 'sent'; CD.db('/quotes?id=eq.' + id, { method: 'PATCH', body: { status: 'sent' } }).catch(() => {}); } };
+            const linkIn = el('input', { class: 'in', value: link, readonly: true, onfocus: (e) => e.target.select() });
+            const phone = String(q.client_phone || '').replace(/[^\d+]/g, '');
+            const sharePanel = el('div', { class: 'card no-print hidden', style: 'margin-bottom:14px' }, el('label', { class: 'f', text: T('q.signLink') }),
+                el('div', { class: 'row', style: 'gap:8px;flex-wrap:nowrap' }, linkIn, el('button', { class: 'btn btn-l btn-sm', onclick: async () => { try { await navigator.clipboard.writeText(link); } catch (e) { linkIn.select(); document.execCommand('copy'); } markSent(); toast(T('q.copied')); } }, CD.icon('copy'), T('q.copy'))),
+                el('div', { class: 'row', style: 'margin-top:10px' },
+                    el('a', { class: 'btn btn-l btn-sm', href: mail, onclick: markSent }, CD.icon('mail'), 'Email'),
+                    el('a', { class: 'btn btn-l btn-sm', href: 'https://wa.me/' + (phone.startsWith('0') ? '33' + phone.slice(1) : phone.replace('+', '')) + '?text=' + encodeURIComponent(msg), target: '_blank', rel: 'noopener', onclick: markSent }, CD.icon('phone'), 'WhatsApp'),
+                    el('a', { class: 'btn btn-l btn-sm', href: 'sms:' + phone + '?&body=' + encodeURIComponent(msg), onclick: markSent }, CD.icon('mail'), 'SMS')));
+            const signBtn = link && !q.signed_at && !q.declined_at ? el('button', { class: 'btn btn-d btn-sm', onclick: () => sharePanel.classList.toggle('hidden') }, CD.icon('pencil'), T('q.sendSign')) : '';
             main.append(el('div', { class: 'row between no-print', style: 'margin-bottom:14px' },
                 el('a', { class: 'btn btn-g btn-sm', href: '#quotes' }, CD.icon('back', 'flip'), T('nav.quotes')),
                 el('div', { class: 'row' }, st,
                     el('button', { class: 'btn btn-p btn-sm', onclick: () => { const o = document.title; document.title = 'Devis ' + q.number; print(); setTimeout(() => { document.title = o; }, 500); } }, CD.icon('printer'), T('q.pdf')),
-                    el('a', { class: 'btn btn-l btn-sm', href: mail }, CD.icon('mail'), T('q.send')),
-                    el('a', { class: 'btn btn-l btn-sm', href: '#edit/' + id }, CD.icon('pencil'), T('q.editBtn')),
+                    signBtn,
+                    el('a', { class: 'btn btn-l btn-sm', href: mail, onclick: markSent }, CD.icon('mail'), T('q.send')),
+                    q.signed_at ? '' : el('a', { class: 'btn btn-l btn-sm', href: '#edit/' + id }, CD.icon('pencil'), T('q.editBtn')),
                     el('button', { class: 'btn btn-l btn-sm', onclick: async () => {
                         const number = await CD.db('/rpc/next_quote_number', { method: 'POST', body: {} });
-                        const c = Object.assign({}, q); delete c.id; delete c.created_at; c.number = number; c.status = 'draft';
+                        const c = Object.assign({}, q); ['id', 'created_at', 'updated_at', 'verify_code', 'share_token', 'signed_at', 'signed_name', 'signed_ip', 'signature', 'signed_hash', 'declined_at', 'decline_reason'].forEach((k) => delete c[k]); c.number = number; c.status = 'draft';
                         const s = await CD.db('/quotes', { method: 'POST', body: c, headers: { Prefer: 'return=representation' } }); location.hash = 'quote/' + s[0].id;
                     } }, CD.icon('copy'), T('q.duplicate')),
-                    el('button', { class: 'btn btn-bad btn-sm', 'aria-label': T('q.delete'), onclick: async () => { if (!confirm(T('q.confirmDelete'))) return; await CD.db('/quotes?id=eq.' + id, { method: 'DELETE' }); location.hash = 'quotes'; } }, CD.icon('trash')))),
+                    q.signed_at ? '' : el('button', { class: 'btn btn-bad btn-sm', 'aria-label': T('q.delete'), onclick: async () => { if (!confirm(T('q.confirmDelete'))) return; await CD.db('/quotes?id=eq.' + id, { method: 'DELETE' }); location.hash = 'quotes'; } }, CD.icon('trash')))),
+                sharePanel,
+                q.signed_at ? el('div', { class: 'alert ok no-print' }, CD.icon('check'), ' ', T('q.signedOn', { date: new Date(q.signed_at).toLocaleString(CD.lang === 'ar' ? 'fr-FR' : CD.lang), name: q.signed_name })) : '',
+                q.declined_at ? el('div', { class: 'alert err no-print', text: T('q.declinedOn', { date: new Date(q.declined_at).toLocaleDateString('fr-FR') }) + (q.decline_reason ? ' — « ' + q.decline_reason + ' »' : '') }) : '',
                 (!P.siret || !P.address || !P.insurance) ? el('div', { class: 'alert info no-print' }, T('q.missingInfo') + ' ', el('a', { href: '#settings', text: T('nav.settings') })) : '',
                 docMark() ? el('div', { class: 'alert info no-print' }, T('wm.why', { wm: docMark(), how: P.siret_verified ? T('wm.howPlan') : T('wm.howSiret') }) + ' ', el('a', { href: P.siret_verified ? '#billing' : '#settings', text: P.siret_verified ? T('nav.billing') : T('nav.settings') })) : '',
                 el('div', { html: devisDoc(q) }));

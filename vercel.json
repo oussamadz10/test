@@ -56,6 +56,14 @@
       "dest": "/public/v/index.html"
     },
     {
+      "src": "/s/([a-f0-9]+)/?",
+      "headers": {
+        "X-Robots-Tag": "noindex",
+        "Referrer-Policy": "no-referrer"
+      },
+      "dest": "/public/s/index.html"
+    },
+    {
       "src": "/(en|es|ar)/?",
       "dest": "/public/$1/index.html"
     },

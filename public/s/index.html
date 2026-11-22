@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signature du devis</title>
+<meta name="robots" content="noindex"><meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0f172a">
+<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css?v=8">
+</head>
+<body>
+<header class="top no-print"><div class="wrap"><div class="logo" id="brand"></div><div class="nav"><select class="lang" id="lang" aria-label="Langue"><option value="fr">Français</option><option value="en">English</option><option value="es">Español</option><option value="ar">العربية</option></select></div></div></header>
+<main class="wrap" style="padding:20px 16px 40px;max-width:900px" id="root"><div class="empty"><span class="spin dk"></span></div></main>
+<footer class="foot no-print"><div class="wrap row between small"><a href="/legal.html">Mentions légales</a><a href="/" target="_blank" rel="noopener">ChronoDevis</a></div></footer>
+<script src="/assets/i18n.js?v=9"></script>
+<script src="/assets/core.js?v=7"></script>
+<script src="/assets/qr.js?v=1"></script>
+<script>
+(function () {
+  'use strict';
+  const { T, el, $ } = CD;
+  const root = $('#root'), lang = $('#lang');
+  const token = (location.pathname.match(/\/s\/([a-f0-9]+)/) || [])[1] || new URLSearchParams(location.search).get('t') || '';
+  let D = null, justSigned = false;
+  const fmt = (d) => new Date(d).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+  lang.value = CD.lang;
+  lang.onchange = () => { CD.setLang(lang.value); render(); };
+
+  // Zone de signature (doigt, stylet ou souris)
+  function pad() {
+    const c = el('canvas', { class: 'sigpad', width: 600, height: 200 }), g = c.getContext('2d');
+    let drawing = false, ink = 0, last = null;
+    g.lineWidth = 2.6; g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = '#0f172a';
+    const pos = (e) => { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) * c.width / r.width, (e.clientY - r.top) * c.height / r.height]; };
+    c.addEventListener('pointerdown', (e) => { drawing = true; last = pos(e); c.setPointerCapture(e.pointerId); e.preventDefault(); });
+    c.addEventListener('pointermove', (e) => { if (!drawing) return; const p = pos(e); g.beginPath(); g.moveTo(last[0], last[1]); g.lineTo(p[0], p[1]); g.stroke(); ink += Math.hypot(p[0] - last[0], p[1] - last[1]); last = p; e.preventDefault(); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach((t) => c.addEventListener(t, () => { drawing = false; }));
+    return { c, clear: () => { g.clearRect(0, 0, c.width, c.height); ink = 0; }, ok: () => ink > 60, data: () => c.toDataURL('image/png') };
+  }
+
+  function render() {
+    root.innerHTML = '';
+    if (!D) { root.append(el('div', { class: 'empty', text: T('sg.notFound') })); return; }
+    const q = D.quote, P = D.company;
+    document.title = T('sg.title') + ' – ' + (P.company_name || '');
+    document.documentElement.style.setProperty('--acc', P.accent_color || '#f97316');
+    const b = $('#brand'); b.innerHTML = '';
+    if (P.logo_url) b.append(el('img', { src: P.logo_url, alt: '', style: 'width:auto;max-width:110px;border-radius:6px' }));
+    b.append(el('span', { text: P.company_name || '' }));
+    if (P.siret_verified) b.append(el('span', { class: 'pill ok', style: 'margin-inline-start:8px' }, CD.icon('check'), T('v.badge')));
+
+    const status = q.signed_at ? el('div', { class: 'vbox ok no-print' }, el('h2', {}, CD.icon('check'), T('sg.signed', { date: fmt(q.signed_at), name: q.signed_name })), justSigned ? el('div', { text: T('sg.thanks') }) : '')
+      : q.declined_at ? el('div', { class: 'vbox bad no-print' }, el('h2', {}, CD.icon('x'), T('sg.declined', { date: fmt(q.declined_at) })))
+      : D.expired ? el('div', { class: 'vbox warn no-print' }, el('h2', {}, CD.icon('lock'), T('sg.expired')))
+      : el('div', { class: 'no-print' }, el('h1', { text: T('sg.title') }), el('p', { class: 'muted', text: T('sg.intro') }));
+    root.append(status);
+    if (D.mark) root.append(el('div', { class: 'alert err no-print', text: T('sg.demo') }));
+    root.append(el('div', { class: 'row no-print', style: 'justify-content:flex-end;margin:10px 0' }, el('button', { class: 'btn btn-l btn-sm', onclick: () => print() }, CD.icon('printer'), T('sg.print'))));
+    root.append(el('div', { html: CD.devisDoc(q, P, { mark: D.mark }) }));
+    if (q.signed_at || q.declined_at || D.expired) return;
+
+    // Formulaire de signature
+    const name = el('input', { class: 'in', value: q.client_name || '', autocomplete: 'name' });
+    const sp = pad(), consent = el('input', { type: 'checkbox' }), err = el('div');
+    const accept = el('button', { class: 'btn btn-p btn-lg btn-block', type: 'button' }, CD.icon('pencil'), T('sg.accept'));
+    accept.onclick = async () => {
+      err.innerHTML = '';
+      const m = name.value.trim().length < 2 ? T('sg.needName') : !sp.ok() ? T('sg.needSig') : !consent.checked ? T('sg.needConsent') : '';
+      if (m) { err.append(el('div', { class: 'alert err', text: m })); return; }
+      accept.disabled = true;
+      try {
+        await CD.api('sign', { token, action: 'accept', name: name.value.trim(), signature: sp.data(), consent: true });
+        justSigned = true; await load(); scrollTo(0, 0);
+      } catch (e) { err.append(el('div', { class: 'alert err', text: e.message })); accept.disabled = false; }
+    };
+    const reason = el('textarea', { class: 'in', style: 'min-height:70px' });
+    const declineBox = el('div', { class: 'hidden', style: 'margin-top:12px' }, el('label', { class: 'f', text: T('sg.reason') }), reason,
+      el('div', { class: 'row', style: 'margin-top:10px' }, el('button', { class: 'btn btn-bad btn-sm', type: 'button', onclick: async (e) => {
+        e.target.disabled = true;
+        try { await CD.api('sign', { token, action: 'decline', reason: reason.value }); await load(); scrollTo(0, 0); } catch (x) { toastErr(x); e.target.disabled = false; }
+      } }, T('sg.confirmDecline')), el('button', { class: 'btn btn-g btn-sm', type: 'button', onclick: () => declineBox.classList.add('hidden') }, T('sg.cancel'))));
+    const toastErr = (x) => { err.innerHTML = ''; err.append(el('div', { class: 'alert err', text: x.message })); };
+    root.append(el('div', { class: 'card no-print', style: 'margin-top:20px' },
+      el('div', { class: 'field' }, el('label', { class: 'f', text: T('sg.name') }), name),
+      el('div', { class: 'field' }, el('div', { class: 'row between' }, el('label', { class: 'f', style: 'margin:0', text: T('sg.draw') }), el('button', { class: 'btn btn-g btn-sm', type: 'button', onclick: () => sp.clear() }, T('sg.clear'))), sp.c),
+      el('label', { class: 'chk', style: 'margin:10px 0 16px' }, consent, el('span', { text: T('sg.consent') })),
+      err, accept,
+      el('div', { style: 'text-align:center;margin-top:14px' }, el('button', { class: 'btn btn-g btn-sm', type: 'button', onclick: () => declineBox.classList.remove('hidden') }, T('sg.decline'))),
+      declineBox));
+  }
+  async function load() {
+    try { const r = await fetch('/api/sign?token=' + encodeURIComponent(token)); D = r.ok ? await r.json() : null; }
+    catch (e) { D = null; }
+    render();
+  }
+  load();
+})();
+</script>
+</body>
+</html>

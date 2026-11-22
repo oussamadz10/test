@@ -123,6 +123,47 @@
         return j;
     };
 
+    CD.FORM_LABEL = { micro: 'Micro-entreprise', ei: 'Entreprise individuelle', eurl: 'EURL', sarl: 'SARL', sasu: 'SASU', sas: 'SAS', sa: 'SA', scop: 'SCOP', autre: '—' };
+    // Devis imprimable (toujours en français). opts.mark = filigrane éventuel
+    CD.devisDoc = function (q, P, opts) {
+        opts = opts || {}; const eur = CD.eur, FORM_LABEL = CD.FORM_LABEL;
+        const d = q.data || {}, lines = d.lines || [], franchise = P.vat_regime === 'franchise';
+        const t = CD.totals(lines, franchise ? 0 : d.vatRate);
+        const created = new Date(q.created_at || Date.now());
+        const until = new Date(created.getTime() + (d.validityDays || 30) * 864e5);
+        const f = (x) => x ? CD.esc(x) : '';
+        const co = [f(P.address), [f(P.postal_code), f(P.city)].filter(Boolean).join(' ')].filter(Boolean).join('<br>');
+        const ids = [P.siret ? 'SIRET ' + f(P.siret) : '', P.rcs_rm ? f(P.rcs_rm) : '', P.vat_regime === 'assujetti' && P.vat_number ? 'TVA ' + f(P.vat_number) : ''].filter(Boolean).join(' · ');
+        const rows = lines.map((l) => `<tr><td>${f(l.label)}</td><td class="r">${l.qty} ${f(l.unit)}</td><td class="r">${eur(l.unitPrice)}</td><td class="r">${eur(l.qty * l.unitPrice)}</td></tr>`).join('');
+        const steps = (d.steps || []).length ? `<p style="margin-top:12px"><b>Détail de l'intervention</b></p><ol style="margin:4px 0 0;padding-inline-start:18px">${d.steps.map((s) => '<li>' + f(s) + '</li>').join('')}</ol>` : '';
+        const vatRows = franchise ? `<tr><td colspan="2" style="font-size:10.5px">TVA non applicable, art. 293 B du CGI</td></tr>` : `<tr><td>TVA ${String(d.vatRate).replace('.', ',')} %</td><td class="r">${eur(t.vat)}</td></tr>`;
+        const reduced = !franchise && (Number(d.vatRate) === 10 || Number(d.vatRate) === 5.5) ? '<p>Taux réduit de TVA applicable sous réserve de la remise par le client de l\'attestation simplifiée prévue à l\'article 279-0 bis du CGI (travaux dans un logement achevé depuis plus de 2 ans).</p>' : '';
+        const mark = opts.mark || '', vurl = q.verify_code ? location.origin + '/v/' + q.verify_code : '';
+        const vcode = q.verify_code ? q.verify_code.slice(0, 5) + '-' + q.verify_code.slice(5) : '';
+        const verifyBlock = vurl && window.QR ? `<div class="vfy"><div class="qr">${window.QR.svg(vurl, 84)}</div><div><b>Vérifiez l'authenticité de ce devis</b><br>Scannez le QR code ou rendez-vous sur <b>${f(location.host)}/v</b> avec le code <b>${vcode}</b>.<br>${P.siret_verified ? 'SIRET vérifié auprès du registre officiel (INSEE).' : '<span style="color:#b91c1c">SIRET non vérifié.</span>'}</div></div>` : '';
+        return `<div class="devis">${mark ? `<div class="wm" aria-hidden="true"><span>${mark}</span><span>${mark}</span><span>${mark}</span></div><div class="wm-top">${mark === 'ENTREPRISE NON VÉRIFIÉE' ? 'Entreprise non vérifiée – identité non contrôlée par ChronoDevis' : 'Document de démonstration – sans valeur commerciale'}</div>` : ''}
+  <div style="display:flex;justify-content:space-between;gap:20px;align-items:flex-start">
+    <div>${P.logo_url ? `<img src="${f(P.logo_url)}" alt="" style="max-height:60px;max-width:180px;margin-bottom:6px"><br>` : ''}<div class="co">${f(P.company_name)}</div>
+      <div>${FORM_LABEL[P.legal_form] || ''}</div><div>${co}</div><div>${[f(P.phone), f(P.contact_email)].filter(Boolean).join(' · ')}</div><div style="font-size:11px;color:#555">${ids}</div></div>
+    <div style="text-align:end"><h1>DEVIS</h1><div>N° <b>${f(q.number)}</b></div><div>Date : ${created.toLocaleDateString('fr-FR')}</div><div>Valable jusqu'au : ${until.toLocaleDateString('fr-FR')}</div>${d.startDate ? `<div>Début prévu : ${new Date(d.startDate).toLocaleDateString('fr-FR')}</div>` : ''}</div>
+  </div>
+  <div class="boxes"><div class="bx"><b>Objet</b><br>${f(q.title)}${d.summary ? `<div style="color:#555;margin-top:4px">${f(d.summary)}</div>` : ''}</div>
+    <div class="bx"><b>Client</b><br>${f(q.client_name) || '—'}<br>${f(q.client_address)}<br>${[f(q.client_phone), f(q.client_email)].filter(Boolean).join(' · ')}</div></div>
+  <table><thead><tr><th>Désignation</th><th class="r">Quantité</th><th class="r">Prix unitaire HT</th><th class="r">Total HT</th></tr></thead><tbody>${rows}</tbody></table>
+  <table class="tot"><tr><td>Total HT</td><td class="r">${eur(t.ht)}</td></tr>${vatRows}<tr class="g"><td>${franchise ? 'Net à payer' : 'Total TTC'}</td><td class="r">${eur(franchise ? t.ht : t.ttc)}</td></tr></table>
+  ${steps}
+  <div class="legal">
+    <p><b>Conditions de paiement :</b> ${f(P.payment_terms)}</p>
+    <p>Devis gratuit. En cas de retard de paiement, pénalités au taux d'intérêt légal majoré de 10 points ; pour les clients professionnels, indemnité forfaitaire de 40 € pour frais de recouvrement (art. L441-10 du Code de commerce).</p>
+    ${reduced}
+    ${P.insurance ? `<p><b>Assurance professionnelle :</b> ${f(P.insurance)}</p>` : ''}
+    ${P.mediator ? `<p><b>Médiateur de la consommation :</b> ${f(P.mediator)}</p>` : ''}
+  </div>
+  ${q.signed_at ? `<div class="sign"><div>L'entreprise</div><div class="signed">${q.signature ? `<img src="${f(q.signature)}" alt="Signature">` : ''}<b>Bon pour accord</b> – devis reçu avant l'exécution des travaux.<br>Signé électroniquement par <b>${f(q.signed_name)}</b> le ${new Date(q.signed_at).toLocaleString('fr-FR')}${q.signed_hash ? `<br><span style="font-size:9.5px;color:#6b7280;word-break:break-all">Empreinte SHA-256 : ${f(q.signed_hash)}</span>` : ''}</div></div>` : `<div class="sign"><div>L'entreprise</div><div>Le client : date, signature et mention manuscrite « Devis reçu avant l'exécution des travaux, bon pour accord »</div></div>`}
+  ${verifyBlock}
+</div>`;
+    };
+
     // ---------- photos (réduites dans le navigateur avant envoi) ----------
     CD.compressImage = function (file, max, quality) {
         return new Promise((resolve, reject) => {
