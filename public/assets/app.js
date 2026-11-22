@@ -54,10 +54,10 @@
     }
 
     // ---------- coquille ----------
-    const NAV = [['home', 'home', 'nav.home'], ['new', 'plus', 'nav.new'], ['quotes', 'file', 'nav.quotes'], ['requests', 'inbox', 'nav.requests'], ['page', 'link', 'nav.page'], ['settings', 'settings', 'nav.settings'], ['billing', 'card', 'nav.billing']];
+    const NAV = [['home', 'home', 'nav.home'], ['new', 'plus', 'nav.new'], ['quotes', 'file', 'nav.quotes'], ['requests', 'inbox', 'nav.requests'], ['page', 'link', 'nav.page'], ['prices', 'tag', 'nav.prices'], ['settings', 'settings', 'nav.settings'], ['billing', 'card', 'nav.billing']];
     function shell(active, ...content) {
         root.innerHTML = '';
-        const side = el('nav', { class: 'side no-print' }, NAV.map(([k, ic, t]) => el('a', { href: '#' + k, class: active === k ? 'on' : '' }, CD.icon(ic), el('span', { class: k === 'settings' || k === 'billing' || k === 'page' ? 't2' : '', text: T(t) }),
+        const side = el('nav', { class: 'side no-print' }, NAV.map(([k, ic, t]) => el('a', { href: '#' + k, class: (active === k ? 'on' : '') + (k === 'prices' || k === 'billing' ? ' m-hide' : '') }, CD.icon(ic), el('span', { class: k === 'settings' || k === 'billing' || k === 'page' || k === 'prices' ? 't2' : '', text: T(t) }),
             k === 'requests' ? el('span', { class: 'badge' + (newRequests ? '' : ' hidden'), id: 'badge-req', text: newRequests }) : null)));
         const main = el('main', { class: 'main' }, accessBanner(), ...content);
         root.append(el('div', { class: 'app-shell' }, side, main));
@@ -72,12 +72,35 @@
     }
     function route() {
         const [view, id] = location.hash.replace(/^#/, '').split('/');
-        ({ home: homeView, new: () => editorView(null), quotes: quotesView, quote: () => quoteView(id), edit: () => editQuote(id), requests: requestsView, request: () => requestView(id), page: pageView, settings: settingsView, billing: billingView }[view] || homeView)();
+        ({ home: homeView, new: () => editorView(null), quotes: quotesView, quote: () => quoteView(id), edit: () => editQuote(id), requests: requestsView, request: () => requestView(id), page: pageView, prices: pricesView, settings: settingsView, billing: billingView }[view] || homeView)();
     }
     const busy = (btn, on, label) => { btn.disabled = on; if (on) { btn.dataset.h = btn.innerHTML; btn.innerHTML = '<span class="spin"></span> ' + CD.esc(label || ''); } else if (btn.dataset.h != null) btn.innerHTML = btn.dataset.h; else btn.textContent = label || ''; };
     const field = (label, input, hint) => el('div', { class: 'field' }, el('label', { class: 'f', text: label }), input, hint ? el('div', { class: 'hint', text: hint }) : null);
     const input = (val, attrs) => el('input', Object.assign({ class: 'in', value: val == null ? '' : val }, attrs || {}));
     const select = (val, opts) => { const s = el('select', { class: 'in' }, opts.map(([v, l]) => el('option', { value: v, text: l }))); s.value = val == null ? '' : String(val); return s; };
+    const isPro = () => ['pro', 'trial'].includes(access(P).plan);
+
+    // ---------- bibliothèque de prix (cache) ----------
+    let CAT = null;
+    async function loadCatalog(force) {
+        if (CAT && !force) return CAT;
+        try { CAT = await CD.db('/catalog?select=*&order=label.asc&limit=1000'); CAT.ready = true; } catch (e) { CAT = []; CAT.ready = false; }
+        return CAT;
+    }
+    const normLabel = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+    const findCat = (label) => (CAT || []).find((c) => normLabel(c.label) === normLabel(label));
+    const KIND_OF_LINE = { labor: 'labor', material: 'material', extra: 'material' };
+    async function saveLineToCatalog(l) {
+        await loadCatalog();
+        if (!CAT.ready) return toast(T('pr.notReady'), 5000);
+        if (!String(l.label || '').trim()) return;
+        const body = { label: l.label.trim(), unit: l.unit || 'u', unit_price: Number(l.unitPrice) || 0, kind: KIND_OF_LINE[l.kind] || 'other', updated_at: new Date().toISOString() };
+        const ex = findCat(l.label);
+        try {
+            if (ex) { await CD.db('/catalog?id=eq.' + ex.id, { method: 'PATCH', body }); Object.assign(ex, body); toast(T('pr.updatedLine')); }
+            else { const r = await CD.db('/catalog', { method: 'POST', body: Object.assign({ user_id: P.id }, body), headers: { Prefer: 'return=representation' } }); CAT.push(r[0]); toast(T('pr.savedLine')); }
+        } catch (e) { toast(e.message); }
+    }
 
     // ---------- connexion / inscription ----------
     function authView(mode) {
@@ -159,8 +182,10 @@
         const main = shell('home', el('h1', { text: T('home.hello', { name: P.company_name }) }));
         const stats = el('div', { class: 'grid g3', style: 'margin:18px 0' });
         main.append(el('div', { class: 'row', style: 'margin:6px 0 4px' }, el('a', { class: 'btn btn-p btn-lg', href: '#new' }, CD.icon('plus'), T('nav.new')), el('a', { class: 'btn btn-l', href: '#page' }, CD.icon('link'), T('home.share'))), stats);
+        const dash = el('div', { class: 'card dash', style: 'margin-bottom:18px' });
         const recent = el('div', { class: 'card' }, el('h3', { text: T('home.recent') }), el('div', { class: 'empty' }, el('span', { class: 'spin dk' })));
-        main.append(recent);
+        main.append(dash, recent);
+        dashboard(dash);
         try {
             const month = new Date().toISOString().slice(0, 7);
             const [qs, rs] = await Promise.all([CD.db('/quotes?select=id,number,title,client_name,total_ht,status,created_at&order=created_at.desc&limit=6'), CD.db('/requests?select=id&status=eq.new')]);
@@ -172,6 +197,93 @@
             qs.forEach((q) => recent.append(quoteItem(q)));
         } catch (e) { recent.lastChild.replaceWith(el('div', { class: 'alert err', text: e.message })); }
     }
+    async function dashboard(box) {
+        const head = el('div', { class: 'row between' }, el('h3', { style: 'margin:0' }, CD.icon('chart'), ' ', T('db.title')), el('span', { class: 'muted small', text: T('db.sub') }));
+        if (!isPro()) {
+            box.classList.add('locked');
+            box.append(head, el('p', { class: 'muted', style: 'margin:10px 0 14px', text: T('db.locked') }), el('a', { class: 'btn btn-d btn-sm', href: '#billing' }, CD.icon('lock'), T('db.discover')));
+            return;
+        }
+        box.append(head, el('div', { class: 'empty' }, el('span', { class: 'spin dk' })));
+        try {
+            const now = new Date(), months = [];
+            for (let i = 5; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth() - i, 1); months.push({ key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), label: d.toLocaleDateString(CD.lang, { month: 'short' }), q: 0, s: 0 }); }
+            const since = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString();
+            const [qs, rs] = await Promise.all([CD.db('/quotes?select=total_ttc,status,created_at&created_at=gte.' + since + '&limit=5000'), CD.db('/requests?select=status&created_at=gte.' + since + '&limit=5000')]);
+            const byKey = Object.fromEntries(months.map((m) => [m.key, m]));
+            let pending = 0, acc = 0, decided = 0;
+            qs.forEach((q) => {
+                const m = byKey[String(q.created_at).slice(0, 7)], v = Number(q.total_ttc) || 0;
+                if (m) { m.q += v; if (q.status === 'accepted') m.s += v; }
+                if (q.status === 'sent') pending += v;
+                if (q.status === 'accepted') acc++;
+                if (['sent', 'accepted', 'refused'].includes(q.status)) decided++;
+            });
+            const cur = months[months.length - 1], won = rs.filter((r) => r.status === 'won').length;
+            const kpi = (k, v, sub) => el('div', { class: 'kpi' }, el('div', { class: 'muted small', text: k }), el('div', { class: 'v', text: v }), sub ? el('div', { class: 'xs muted', text: sub }) : null);
+            const max = Math.max(1, ...months.map((m) => m.q));
+            const bars = el('div', { class: 'bars' }, months.map((m) => el('div', { class: 'bcol', title: m.label + ' · ' + T('db.legendQuoted') + ' ' + eur(m.q) + ' · ' + T('db.legendSigned') + ' ' + eur(m.s) },
+                el('div', { class: 'bstack' }, el('div', { class: 'b q', style: 'height:' + Math.round(m.q / max * 100) + '%' }), el('div', { class: 'b s', style: 'height:' + Math.round(m.s / max * 100) + '%' })),
+                el('div', { class: 'xs muted', text: m.label }))));
+            box.lastChild.remove();
+            box.append(el('div', { class: 'kpis' },
+                kpi(T('db.signed'), eur(cur.s)), kpi(T('db.quoted'), eur(cur.q)), kpi(T('db.pending'), eur(pending)),
+                kpi(T('db.rate'), decided ? Math.round(acc / decided * 100) + ' %' : '—'), kpi(T('db.requests'), String(rs.length), won + ' ' + T('db.won'))),
+                bars, el('div', { class: 'legend xs muted' }, el('span', { class: 'lg q' }), T('db.legendQuoted'), el('span', { class: 'lg s' }), T('db.legendSigned')),
+                decided ? '' : el('p', { class: 'hint', text: T('db.hint') }));
+        } catch (e) { box.lastChild.replaceWith(el('div', { class: 'alert err', text: e.message })); }
+    }
+
+    // ---------- bibliothèque de prix ----------
+    async function pricesView() {
+        const list = el('div', { class: 'card' }, el('div', { class: 'empty' }, el('span', { class: 'spin dk' })));
+        const q = input('', { placeholder: T('pr.search'), type: 'search' });
+        const nl = input('', { placeholder: T('q.label') }), nu = input('u', { style: 'width:80px' }), np = input('', { inputmode: 'decimal', placeholder: '0,00', style: 'width:110px' });
+        const kinds = [['material', T('pr.material')], ['labor', T('pr.labor')], ['other', T('pr.other')]];
+        const nk = select('material', kinds);
+        const add = el('button', { class: 'btn btn-p', type: 'submit' }, CD.icon('plus'), T('pr.add'));
+        const form = el('form', { class: 'card prform', style: 'margin-bottom:16px' }, el('div', { class: 'prrow' }, field(T('q.label'), nl), field(T('q.unit'), nu), field(T('q.pu'), np), field(T('pr.kind'), nk), el('div', { class: 'field' }, el('label', { class: 'f', html: '&nbsp;' }), add)));
+        const count = el('span', { class: 'muted small' });
+        shell('prices', el('h1', { text: T('nav.prices') }), el('p', { class: 'muted', text: T('pr.sub') }), form, el('div', { class: 'row between', style: 'margin-bottom:10px' }, el('div', { style: 'flex:1;max-width:340px' }, q), count), list);
+        const cat = await loadCatalog(true);
+        if (!cat.ready) { list.innerHTML = ''; list.append(el('div', { class: 'alert info', text: T('pr.notReady') })); form.classList.add('hidden'); return; }
+        const num = (v) => Number(String(v).replace(',', '.')) || 0;
+        const patch = (c, body) => CD.db('/catalog?id=eq.' + c.id, { method: 'PATCH', body: Object.assign(body, { updated_at: new Date().toISOString() }) }).then(() => { Object.assign(c, body); toast(T('saved')); }).catch((e) => toast(e.message));
+        function draw() {
+            list.innerHTML = '';
+            const f = normLabel(q.value);
+            const rows = CAT.filter((c) => !f || normLabel(c.label).includes(f));
+            count.textContent = T('pr.count', { n: CAT.length });
+            if (!rows.length) { list.append(el('div', { class: 'empty', text: T('pr.none') })); return; }
+            rows.forEach((c) => {
+                const k = select(c.kind, kinds); k.onchange = () => patch(c, { kind: k.value });
+                list.append(el('div', { class: 'prrow item' },
+                    el('input', { class: 'in', value: c.label, onchange: (e) => e.target.value.trim() && patch(c, { label: e.target.value.trim() }) }),
+                    el('input', { class: 'in', value: c.unit, style: 'width:80px', onchange: (e) => patch(c, { unit: e.target.value.trim() || 'u' }) }),
+                    el('input', { class: 'in', value: Number(c.unit_price), inputmode: 'decimal', style: 'width:110px', onchange: (e) => patch(c, { unit_price: num(e.target.value) }) }),
+                    k,
+                    el('button', { class: 'btn btn-g btn-sm', type: 'button', title: T('pr.delete'), 'aria-label': T('pr.delete'), onclick: async () => {
+                        try { await CD.db('/catalog?id=eq.' + c.id, { method: 'DELETE' }); CAT.splice(CAT.indexOf(c), 1); draw(); } catch (e) { toast(e.message); }
+                    } }, CD.icon('trash'))));
+            });
+        }
+        q.oninput = draw;
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            if (!nl.value.trim()) return nl.focus();
+            busy(add, true);
+            try {
+                const body = { user_id: P.id, label: nl.value.trim(), unit: nu.value.trim() || 'u', unit_price: num(np.value), kind: nk.value };
+                const ex = findCat(body.label);
+                if (ex) await patch(ex, { unit: body.unit, unit_price: body.unit_price, kind: body.kind });
+                else { const r = await CD.db('/catalog', { method: 'POST', body, headers: { Prefer: 'return=representation' } }); CAT.push(r[0]); CAT.sort((a, b) => a.label.localeCompare(b.label)); }
+                nl.value = ''; np.value = ''; nl.focus(); draw();
+            } catch (x) { toast(x.message); }
+            busy(add, false);
+        };
+        draw();
+    }
+
     const STATUS = { draft: '', sent: 'acc', accepted: 'ok', refused: 'bad' };
     function quoteItem(q) {
         return el('div', { class: 'list-item', onclick: () => { location.hash = 'quote/' + q.id; } },
@@ -197,8 +309,30 @@
         const photoBox = el('div');
         const picker = CD.photoPicker(photoBox, 5);
         const aiBtn = el('button', { class: 'btn btn-d', type: 'button' }, CD.icon('sparkles'), T('q.analyze')), aiMsg = el('div');
+        // dictée vocale (Pro)
+        const micHint = el('div', { class: 'hint hidden', text: T('mic.listening') });
+        const micBtn = el('button', { class: 'btn btn-l btn-sm mic', type: 'button' });
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let rec = null;
+        const micIdle = () => { micBtn.classList.remove('on'); micBtn.innerHTML = ''; micBtn.append(CD.icon(isPro() ? 'mic' : 'lock'), T('mic.start')); micHint.classList.add('hidden'); rec = null; };
+        micIdle();
+        micBtn.onclick = () => {
+            if (!isPro()) return toast(T('mic.pro'), 4500);
+            if (!SR) return toast(T('mic.unsupported'), 6000);
+            if (rec) { rec.stop(); return; }
+            rec = new SR();
+            rec.lang = { fr: 'fr-FR', en: 'en-GB', es: 'es-ES', ar: 'ar-SA' }[CD.lang] || 'fr-FR';
+            rec.continuous = true; rec.interimResults = true;
+            const base = desc.value ? desc.value.replace(/\s*$/, ' ') : '';
+            rec.onresult = (ev) => { let txt = ''; for (let i = 0; i < ev.results.length; i++) txt += ev.results[i][0].transcript; desc.value = base + txt.trim(); };
+            rec.onerror = (ev) => { if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') toast(T('mic.denied'), 6000); };
+            rec.onend = micIdle;
+            try { rec.start(); micBtn.classList.add('on'); micBtn.innerHTML = ''; micBtn.append(CD.icon('stop'), T('mic.stop')); micHint.classList.remove('hidden'); }
+            catch (e) { micIdle(); toast(e.message); }
+        };
+        addEventListener('hashchange', () => { if (rec) rec.stop(); }, { once: true });
         const aiCard = el('div', { class: 'card', style: 'margin-bottom:16px' }, el('h3', { text: T('q.aiTitle') }), el('p', { class: 'muted small', text: T('q.aiSub') }),
-            field(T('q.desc'), desc), el('div', { class: 'grid g3' }, field(T('q.type'), type), field(T('q.range'), gamme), field(T('q.site'), site)),
+            el('div', { class: 'field' }, el('div', { class: 'row between', style: 'margin-bottom:6px' }, el('label', { class: 'f', style: 'margin:0', text: T('q.desc') }), micBtn), desc, micHint), el('div', { class: 'grid g3' }, field(T('q.type'), type), field(T('q.range'), gamme), field(T('q.site'), site)),
             el('div', { class: 'field' }, el('label', { class: 'f', text: T('q.photos') }), a.plan === 'essentiel' ? el('div', { class: 'hint', text: T('q.photosPro') }) : photoBox),
             aiMsg, aiBtn);
         if (!existing) main.append(aiCard);
@@ -211,17 +345,21 @@
         const startDate = input(d.startDate || '', { type: 'date' });
         const tbody = el('tbody'), tot = el('div');
         const summaryBox = el('div', { class: 'small muted' });
+        const catList = el('datalist', { id: 'cat-list' });
+        loadCatalog().then((c) => { c.forEach((x) => catList.append(el('option', { value: x.label }))); });
         function drawLines() {
             tbody.innerHTML = '';
             lines.forEach((l, i) => {
-                const upd = (k, isNum) => (e) => { l[k] = isNum ? Number(String(e.target.value).replace(',', '.')) || 0 : e.target.value; drawTotals(); };
+                const upd = (k, isNum) => (e) => { l[k] = isNum ? Number(String(e.target.value).replace(',', '.')) || 0 : e.target.value; if (k === 'unitPrice' && l.fromCatalog) { l.fromCatalog = false; e.target.closest('tr').querySelector('.in').classList.remove('cat-in'); } drawTotals(); };
+                const pick = (e) => { const c = findCat(e.target.value); if (c) { l.label = c.label; l.unit = c.unit; l.unitPrice = Number(c.unit_price); l.fromCatalog = true; if (c.kind === 'labor') l.kind = 'labor'; drawLines(); } };
                 tbody.append(el('tr', {},
-                    el('td', {}, el('input', { class: 'in', value: l.label, oninput: upd('label') })),
+                    el('td', {}, el('input', { class: 'in' + (l.fromCatalog ? ' cat-in' : ''), value: l.label, list: 'cat-list', title: l.fromCatalog ? T('pr.fromLib') : null, oninput: upd('label'), onchange: pick })),
                     el('td', { style: 'width:80px' }, el('input', { class: 'in', value: l.qty, inputmode: 'decimal', oninput: upd('qty', true) })),
                     el('td', { style: 'width:70px' }, el('input', { class: 'in', value: l.unit, oninput: upd('unit') })),
                     el('td', { style: 'width:100px' }, el('input', { class: 'in', value: l.unitPrice, inputmode: 'decimal', oninput: upd('unitPrice', true) })),
                     el('td', { class: 'r', id: 'lt' + i, text: eur(l.qty * l.unitPrice) }),
-                    el('td', {}, el('button', { class: 'btn btn-g btn-sm', type: 'button', 'aria-label': T('remove'), onclick: () => { lines.splice(i, 1); drawLines(); } }, CD.icon('x')))));
+                    el('td', { class: 'acts' }, el('button', { class: 'btn btn-g btn-sm', type: 'button', title: T('pr.saveLine'), 'aria-label': T('pr.saveLine'), onclick: () => saveLineToCatalog(l) }, CD.icon('bookmark')),
+                        el('button', { class: 'btn btn-g btn-sm', type: 'button', 'aria-label': T('remove'), onclick: () => { lines.splice(i, 1); drawLines(); } }, CD.icon('x')))));
             });
             drawTotals();
         }
@@ -243,7 +381,7 @@
         const addLine = el('button', { class: 'btn btn-l btn-sm', type: 'button', onclick: () => { lines.push({ kind: 'other', label: '', qty: 1, unit: 'u', unitPrice: 0 }); drawLines(); } }, CD.icon('plus'), T('q.addLine'));
         const saveBtn = el('button', { class: 'btn btn-p btn-lg', type: 'button', text: T('q.save') });
         const linesCard = el('div', { class: 'card' + (lines.length || existing ? '' : ' hidden') },
-            el('h3', { text: T('q.lines') }), field(T('q.title'), title), summaryBox,
+            el('h3', { text: T('q.lines') }), field(T('q.title'), title), summaryBox, catList,
             el('div', { style: 'overflow-x:auto' }, el('table', { class: 'tbl' }, el('thead', {}, el('tr', {}, el('th', { text: T('q.label') }), el('th', { text: T('q.qty') }), el('th', { text: T('q.unit') }), el('th', { text: T('q.pu') }), el('th', { class: 'r', text: T('q.lineTotal') }), el('th'))), tbody)),
             el('div', { style: 'margin:10px 0 16px' }, addLine),
             el('div', { class: 'grid g3' }, field(T('f.vatRate'), vatSel), field(T('q.validity'), validity), field(T('q.start'), startDate)),
@@ -264,7 +402,7 @@
                 if (!title.value) title.value = est.title;
                 if (!isFranchise()) vatSel.value = String(est.suggestedVatRate || P.default_vat_rate || 20);
                 linesCard.classList.remove('hidden'); drawLines(); drawSummary();
-                aiMsg.append(el('div', { class: 'alert ok', text: T('q.aiDone', { n: lines.length }) }));
+                aiMsg.append(el('div', { class: 'alert ok', text: T('q.aiDone', { n: lines.length }) + (est.catalogUsed ? ' ' + T('pr.used', { n: est.catalogUsed }) : '') }));
                 linesCard.scrollIntoView({ behavior: 'smooth' });
             } catch (e) {
                 aiMsg.append(el('div', { class: 'alert err' }, e.message, e.status === 402 ? el('div', {}, el('a', { href: '#billing', text: T('trial.choose') })) : null));
@@ -355,11 +493,11 @@
                     el('button', { class: 'btn btn-p btn-sm', onclick: () => { const o = document.title; document.title = 'Devis ' + q.number; print(); setTimeout(() => { document.title = o; }, 500); } }, CD.icon('printer'), T('q.pdf')),
                     el('a', { class: 'btn btn-l btn-sm', href: mail }, CD.icon('mail'), T('q.send')),
                     el('a', { class: 'btn btn-l btn-sm', href: '#edit/' + id }, CD.icon('pencil'), T('q.editBtn')),
-                    el('button', { class: 'btn btn-l btn-sm', text: '⧉ ' + T('q.duplicate'), onclick: async () => {
+                    el('button', { class: 'btn btn-l btn-sm', onclick: async () => {
                         const number = await CD.db('/rpc/next_quote_number', { method: 'POST', body: {} });
                         const c = Object.assign({}, q); delete c.id; delete c.created_at; c.number = number; c.status = 'draft';
                         const s = await CD.db('/quotes', { method: 'POST', body: c, headers: { Prefer: 'return=representation' } }); location.hash = 'quote/' + s[0].id;
-                    } }),
+                    } }, CD.icon('copy'), T('q.duplicate')),
                     el('button', { class: 'btn btn-bad btn-sm', 'aria-label': T('q.delete'), onclick: async () => { if (!confirm(T('q.confirmDelete'))) return; await CD.db('/quotes?id=eq.' + id, { method: 'DELETE' }); location.hash = 'quotes'; } }, CD.icon('trash')))),
                 (!P.siret || !P.address || !P.insurance) ? el('div', { class: 'alert info no-print' }, T('q.missingInfo') + ' ', el('a', { href: '#settings', text: T('nav.settings') })) : '',
                 el('div', { html: devisDoc(q) }));
@@ -457,6 +595,7 @@
         const save = el('button', { class: 'btn btn-p btn-lg', text: T('saveBtn') });
         const sec = (title, ...kids) => el('div', { class: 'card', style: 'margin-bottom:16px' }, el('h3', { text: title }), ...kids);
         shell('settings', el('h1', { text: T('nav.settings') }),
+            el('div', { class: 'row m-only', style: 'margin-bottom:14px' }, el('a', { class: 'btn btn-l btn-sm', href: '#prices' }, CD.icon('tag'), T('nav.prices')), el('a', { class: 'btn btn-l btn-sm', href: '#billing' }, CD.icon('card'), T('nav.billing'))),
             sec(T('set.company'), el('div', { class: 'grid g2' }, field(T('f.company'), mk('company_name')), field(T('f.legalForm'), form), field('SIRET', mk('siret')), field(T('f.rcs'), mk('rcs_rm'), T('f.rcsHint')),
                 field(T('f.vat'), vat), field(T('f.vatNumber'), mk('vat_number')), field(T('f.vatDefault'), vatRate), field(T('f.insurance'), mk('insurance'), T('f.insuranceHint')))),
             sec(T('set.contact'), el('div', { class: 'grid g2' }, field(T('f.address'), mk('address')), field(T('f.postal'), mk('postal_code')), field(T('f.city'), mk('city')), field(T('f.phone'), mk('phone', { type: 'tel' })),
@@ -494,7 +633,7 @@
         shell('billing', el('h1', { text: T('nav.billing') }), status,
             el('div', { class: 'tog' }, el('button', { class: 'on', text: T('monthly'), onclick: (e) => { yearly = false; tog(e.target); } }), el('button', { text: T('yearly') + ' -20 %', onclick: (e) => { yearly = true; tog(e.target); } })), plans);
         function tog(b) { b.parentNode.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); drawPlans(); }
-        const PL = { essentiel: { m: 19, y: 182, f: ['plan.e1', 'plan.e2', 'plan.e3', 'plan.e4'] }, pro: { m: 39, y: 374, f: ['plan.p1', 'plan.p2', 'plan.p3', 'plan.p4'] } };
+        const PL = { essentiel: { m: 19, y: 182, f: ['plan.e1', 'plan.e2', 'plan.e5', 'plan.e3', 'plan.e4'] }, pro: { m: 39, y: 374, f: ['plan.p1', 'plan.p2', 'plan.p5', 'plan.p6', 'plan.p3', 'plan.p4'] } };
         function drawPlans() {
             plans.innerHTML = '';
             Object.entries(PL).forEach(([k, p]) => {

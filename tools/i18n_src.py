@@ -156,6 +156,35 @@ add('cp.thanksSub', '{company} a bien reçu votre demande et vous recontacte rap
 add('cp.again', 'Nouvelle demande', 'New request', 'Nueva solicitud', 'طلب جديد'); add('cp.notFound', "Cette page n'existe pas.", 'This page does not exist.', 'Esta página no existe.', 'هذه الصفحة غير موجودة.')
 add('cp.paused', 'Le simulateur en ligne est momentanément indisponible. Contactez-nous directement :', 'The online estimator is temporarily unavailable. Contact us directly:', 'El simulador no está disponible. Contáctanos:', 'المحاكي غير متاح مؤقتاً. تواصل معنا مباشرة:')
 
+# ----- Bibliothèque de prix -----
+add('nav.prices', 'Mes prix', 'My prices', 'Mis precios', 'أسعاري')
+add('pr.sub', "Enregistrez vos prix habituels (fournitures, main d'œuvre, forfaits). L'IA les utilise en priorité dans vos devis et sur votre page client.", 'Save your usual prices (materials, labour, flat fees). The AI uses them first in your quotes and on your client page.', 'Guarda tus precios habituales (materiales, mano de obra, tarifas fijas). La IA los usa primero en tus presupuestos y en tu página de clientes.', 'احفظ أسعارك المعتادة (مواد، يد عاملة، مبالغ ثابتة). يستعملها الذكاء الاصطناعي أولاً في عروضك وفي صفحة زبائنك.')
+add('pr.add', 'Ajouter un prix', 'Add a price', 'Añadir un precio', 'أضف سعراً'); add('pr.search', 'Rechercher…', 'Search…', 'Buscar…', 'بحث…')
+add('pr.none', "Aucun prix enregistré. Ajoutez-en ici ou depuis les lignes d'un devis.", 'No saved prices yet. Add some here or from the lines of a quote.', 'Aún no hay precios. Añádelos aquí o desde las líneas de un presupuesto.', 'لا توجد أسعار محفوظة. أضفها هنا أو من سطور أحد العروض.')
+add('pr.kind', 'Type', 'Type', 'Tipo', 'النوع'); add('pr.material', 'Fourniture', 'Material', 'Material', 'مواد'); add('pr.labor', "Main d'œuvre", 'Labour', 'Mano de obra', 'يد عاملة'); add('pr.other', 'Forfait / autre', 'Flat fee / other', 'Tarifa fija / otro', 'مبلغ ثابت / آخر')
+add('pr.saveLine', 'Enregistrer dans mes prix', 'Save to my prices', 'Guardar en mis precios', 'احفظ في أسعاري'); add('pr.savedLine', 'Ajouté à vos prix', 'Added to your prices', 'Añadido a tus precios', 'أُضيف إلى أسعارك')
+add('pr.updatedLine', 'Prix mis à jour', 'Price updated', 'Precio actualizado', 'حُدّث السعر'); add('pr.used', '{n} prix de votre bibliothèque utilisé(s).', '{n} price(s) from your library used.', '{n} precio(s) de tu biblioteca usado(s).', 'استُعمل {n} من أسعارك المحفوظة.')
+add('pr.fromLib', 'Prix de votre bibliothèque', 'Price from your library', 'Precio de tu biblioteca', 'سعر من أسعارك المحفوظة'); add('pr.notReady', "La bibliothèque de prix n'est pas encore activée sur ce serveur.", 'The price library is not enabled on this server yet.', 'La biblioteca de precios aún no está activada en este servidor.', 'مكتبة الأسعار غير مفعّلة بعد على هذا الخادم.')
+add('pr.count', '{n} prix', '{n} prices', '{n} precios', '{n} سعر'); add('pr.delete', 'Supprimer ce prix', 'Delete this price', 'Eliminar este precio', 'احذف هذا السعر')
+# ----- Dictée vocale -----
+add('mic.start', 'Dicter', 'Dictate', 'Dictar', 'إملاء'); add('mic.stop', 'Arrêter', 'Stop', 'Parar', 'توقّف')
+add('mic.listening', "Parlez : décrivez les travaux, les quantités, l'état du chantier…", 'Speak: describe the work, quantities, site condition…', 'Habla: describe el trabajo, las cantidades, el estado de la obra…', 'تكلّم: صِف الأعمال والكميات وحالة الورشة…')
+add('mic.pro', 'La dictée vocale est incluse dans la formule Pro.', 'Voice dictation is included in the Pro plan.', 'El dictado por voz está incluido en el plan Pro.', 'الإملاء الصوتي متوفر في باقة Pro.')
+add('mic.unsupported', "La dictée n'est pas disponible dans ce navigateur. Utilisez Chrome, Edge ou Safari, ou le micro de votre clavier.", 'Dictation is not available in this browser. Use Chrome, Edge or Safari, or your keyboard microphone.', 'El dictado no está disponible en este navegador. Usa Chrome, Edge o Safari, o el micrófono del teclado.', 'الإملاء غير متوفر في هذا المتصفح. استعمل Chrome أو Edge أو Safari، أو ميكروفون لوحة المفاتيح.')
+add('mic.denied', "Accès au micro refusé. Autorisez-le dans les réglages du navigateur.", 'Microphone access denied. Allow it in your browser settings.', 'Acceso al micrófono denegado. Permítelo en los ajustes del navegador.', 'رُفض الوصول إلى الميكروفون. اسمح به في إعدادات المتصفح.')
+# ----- Tableau de bord -----
+add('db.title', 'Tableau de bord', 'Dashboard', 'Panel', 'لوحة الأرقام'); add('db.sub', '6 derniers mois', 'Last 6 months', 'Últimos 6 meses', 'آخر 6 أشهر')
+add('db.signed', 'Signé ce mois', 'Signed this month', 'Firmado este mes', 'المقبول هذا الشهر'); add('db.pending', 'En attente de réponse', 'Awaiting reply', 'Pendiente de respuesta', 'في انتظار الرد')
+add('db.rate', "Taux d'acceptation", 'Acceptance rate', 'Tasa de aceptación', 'نسبة القبول'); add('db.quoted', 'Montant devisé ce mois', 'Quoted this month', 'Presupuestado este mes', 'مجموع العروض هذا الشهر')
+add('db.legendQuoted', 'Devisé', 'Quoted', 'Presupuestado', 'مجموع العروض'); add('db.legendSigned', 'Signé', 'Signed', 'Firmado', 'المقبول')
+add('db.requests', 'Demandes reçues', 'Requests received', 'Solicitudes recibidas', 'الطلبات المستلمة'); add('db.won', 'gagnées', 'won', 'ganadas', 'ناجحة')
+add('db.locked', 'Suivez votre chiffre signé, vos devis en attente et votre taux d\'acceptation avec la formule Pro.', 'Track signed revenue, pending quotes and your acceptance rate with the Pro plan.', 'Sigue tu facturación firmada, tus presupuestos pendientes y tu tasa de aceptación con el plan Pro.', 'تابع المبالغ المقبولة والعروض المنتظرة ونسبة القبول مع باقة Pro.')
+add('db.discover', 'Passer à Pro', 'Upgrade to Pro', 'Pasar a Pro', 'انتقل إلى Pro'); add('db.hint', 'Mettez à jour le statut de vos devis (envoyé, accepté, refusé) pour des chiffres exacts.', 'Keep quote statuses up to date (sent, accepted, declined) for accurate figures.', 'Actualiza el estado de tus presupuestos (enviado, aceptado, rechazado) para cifras exactas.', 'حدّث حالة عروضك (مُرسل، مقبول، مرفوض) لتكون الأرقام دقيقة.')
+# ----- Formules (nouvelles lignes) -----
+add('plan.e5', 'Bibliothèque de vos prix', 'Your price library', 'Biblioteca de tus precios', 'مكتبة أسعارك')
+add('plan.p5', 'Dictée vocale', 'Voice dictation', 'Dictado por voz', 'الإملاء الصوتي'); add('plan.p6', 'Tableau de bord', 'Dashboard', 'Panel de control', 'لوحة الأرقام')
+add('q.duplicateShort', 'Dupliquer', 'Duplicate', 'Duplicar', 'نسخ')
+
 out = {l: {k: v[l] for k, v in K.items()} for l in ['fr', 'en', 'es', 'ar']}
 p = os.path.join(os.path.dirname(__file__), '..', 'public', 'assets', 'i18n.js')
 open(p, 'w', encoding='utf-8').write('/* Généré par tools/i18n_src.py */\nwindow.CD = window.CD || {};\nCD.I18N = ' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + ';\n')

@@ -43,7 +43,8 @@ module.exports = async (req, res) => {
         }
 
         if (input.description.length < 8 && !input.images.length) return S.send(res, 400, { error: 'Décrivez les travaux en quelques mots ou ajoutez une photo.' });
-        const out = await AI.estimate(input, profile);
+        const catalog = profile && profile.id && S.sbConfigured() ? await S.getCatalog(profile.id) : [];
+        const out = await AI.estimate(input, profile, catalog);
         console.log('[analyze-devis] ' + (user ? 'artisan' : slug ? 'page ' + slug : 'demo') + ' · ' + out.engine + ' · ' + out.ms + ' ms');
         res.setHeader('X-AI-Engine', out.engine);
         return S.send(res, 200, out);
