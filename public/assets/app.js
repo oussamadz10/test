@@ -313,24 +313,38 @@
         const micHint = el('div', { class: 'hint hidden', text: T('mic.listening') });
         const micBtn = el('button', { class: 'btn btn-l btn-sm mic', type: 'button' });
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let rec = null;
-        const micIdle = () => { micBtn.classList.remove('on'); micBtn.innerHTML = ''; micBtn.append(CD.icon(isPro() ? 'mic' : 'lock'), T('mic.start')); micHint.classList.add('hidden'); rec = null; };
+        let rec = null, dog = null;
+        const micIdle = () => { clearTimeout(dog); rec = null; micBtn.classList.remove('on'); micBtn.innerHTML = ''; micBtn.append(CD.icon(isPro() ? 'mic' : 'lock'), T('mic.start')); micHint.classList.add('hidden'); };
+        const stopRec = (hard) => { const r = rec; if (!r) return; try { hard ? r.abort() : r.stop(); } catch (e) {} setTimeout(() => { if (rec === r) micIdle(); }, 1200); };
         micIdle();
         micBtn.onclick = () => {
             if (!isPro()) return toast(T('mic.pro'), 4500);
             if (!SR) return toast(T('mic.unsupported'), 6000);
-            if (rec) { rec.stop(); return; }
-            rec = new SR();
-            rec.lang = { fr: 'fr-FR', en: 'en-GB', es: 'es-ES', ar: 'ar-SA' }[CD.lang] || 'fr-FR';
-            rec.continuous = true; rec.interimResults = true;
+            if (rec) return stopRec();
+            const r = rec = new SR();
+            r.lang = { fr: 'fr-FR', en: 'en-GB', es: 'es-ES', ar: 'ar-SA' }[CD.lang] || 'fr-FR';
+            r.continuous = false; r.interimResults = true; r.maxAlternatives = 1;   // une phrase à la fois : fiable sur Android et iPhone
             const base = desc.value ? desc.value.replace(/\s*$/, ' ') : '';
-            rec.onresult = (ev) => { let txt = ''; for (let i = 0; i < ev.results.length; i++) txt += ev.results[i][0].transcript; desc.value = base + txt.trim(); };
-            rec.onerror = (ev) => { if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') toast(T('mic.denied'), 6000); };
-            rec.onend = micIdle;
-            try { rec.start(); micBtn.classList.add('on'); micBtn.innerHTML = ''; micBtn.append(CD.icon('stop'), T('mic.stop')); micHint.classList.remove('hidden'); }
-            catch (e) { micIdle(); toast(e.message); }
+            let done = '', started = false;
+            const arm = (ms) => { clearTimeout(dog); dog = setTimeout(() => { if (!started) toast(T('mic.unsupported'), 6000); stopRec(!started); }, ms); };
+            r.onstart = () => { started = true; arm(15000); };
+            r.onresult = (ev) => {
+                if (rec !== r) return;
+                let live = '';
+                for (let i = ev.resultIndex; i < ev.results.length; i++) { const t = ev.results[i][0].transcript; if (ev.results[i].isFinal) done += t + ' '; else live += t; }
+                desc.value = (base + done + live).replace(/[ \t]+/g, ' ');
+                arm(6000);
+            };
+            r.onerror = (ev) => {
+                if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') toast(T('mic.denied'), 6000);
+                else if (ev.error === 'no-speech') toast(T('mic.noSpeech'), 4000);
+                else if (ev.error !== 'aborted') toast(T('mic.unsupported'), 6000);
+            };
+            r.onend = () => { if (rec === r) micIdle(); };
+            try { r.start(); micBtn.classList.add('on'); micBtn.innerHTML = ''; micBtn.append(CD.icon('stop'), T('mic.stop')); micHint.classList.remove('hidden'); arm(6000); }
+            catch (e) { micIdle(); toast(T('mic.unsupported'), 6000); }
         };
-        addEventListener('hashchange', () => { if (rec) rec.stop(); }, { once: true });
+        addEventListener('hashchange', () => stopRec(true), { once: true });
         const aiCard = el('div', { class: 'card', style: 'margin-bottom:16px' }, el('h3', { text: T('q.aiTitle') }), el('p', { class: 'muted small', text: T('q.aiSub') }),
             el('div', { class: 'field' }, el('div', { class: 'row between', style: 'margin-bottom:6px' }, el('label', { class: 'f', style: 'margin:0', text: T('q.desc') }), micBtn), desc, micHint), el('div', { class: 'grid g3' }, field(T('q.type'), type), field(T('q.range'), gamme), field(T('q.site'), site)),
             el('div', { class: 'field' }, el('label', { class: 'f', text: T('q.photos') }), a.plan === 'essentiel' ? el('div', { class: 'hint', text: T('q.photosPro') }) : photoBox),
