@@ -2,10 +2,13 @@
 """Génère les pages publiques de ChronoDevis (accueil + tarifs + mentions) en 4 langues.
 Usage : python3 tools/gen_site.py   (écrit dans public/)"""
 import html, json, os
+ICONS = json.load(open(os.path.join(os.path.dirname(__file__), 'icons.json'), encoding='utf-8'))
+def svg(name):
+    return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[name] + '</svg>'
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', 'public')
 SITE = 'https://chronodevisia.fr'
-V = '3'
+V = '5'
 LANGS = ['fr', 'en', 'es', 'ar']
 PATH = {'fr': '/', 'en': '/en/', 'es': '/es/', 'ar': '/ar/'}
 OG = {'fr': 'fr_FR', 'en': 'en_GB', 'es': 'es_ES', 'ar': 'ar_AR'}
@@ -26,14 +29,14 @@ T = {
   demo_ph='Ex : repeindre un salon de 25 m², murs et plafond, avec préparation des fissures',
   demo_btn='Estimer', demo_photo='Ajouter une photo',
   f_t='Tout pour chiffrer, envoyer et signer plus vite',
-  feats=[('🤖','Chiffrage par IA','Heures, taux horaire, fournitures avec quantités et prix, déplacement : l\'IA propose, vous ajustez.'),
-         ('📷','Analyse de photos','Photographiez l\'équipement ou le chantier : l\'IA identifie le matériel, l\'état et les contraintes.'),
-         ('📄','Devis conformes','Numérotation, mentions légales, TVA (20 %, 10 %, 5,5 % ou franchise 293 B), assurance, bon pour accord.'),
-         ('🔗','Votre page client','Un lien à partager : vos clients obtiennent une estimation et vous envoient leur demande directement.'),
-         ('🧰','Tous les métiers','Plomberie, électricité, maçonnerie, peinture, menuiserie, couverture, carrelage, paysagisme et plus.'),
-         ('🏢','Toutes les structures','Micro-entreprise, EI, EURL, SARL, SASU, SAS : vos mentions et votre régime de TVA s\'adaptent.'),
-         ('📱','Application mobile','Installez ChronoDevis sur Android et iPhone et faites vos devis directement sur le chantier.'),
-         ('🌍','4 langues','Interface en français, anglais, espagnol et arabe. Devis toujours édités en français, conformes au droit français.')],
+  feats=[('sparkles','Chiffrage par IA','Heures, taux horaire, fournitures avec quantités et prix, déplacement : l\'IA propose, vous ajustez.'),
+         ('camera','Analyse de photos','Photographiez l\'équipement ou le chantier : l\'IA identifie le matériel, l\'état et les contraintes.'),
+         ('file','Devis conformes','Numérotation, mentions légales, TVA (20 %, 10 %, 5,5 % ou franchise 293 B), assurance, bon pour accord.'),
+         ('link','Votre page client','Un lien à partager : vos clients obtiennent une estimation et vous envoient leur demande directement.'),
+         ('wrench','Tous les métiers','Plomberie, électricité, maçonnerie, peinture, menuiserie, couverture, carrelage, paysagisme et plus.'),
+         ('building','Toutes les structures','Micro-entreprise, EI, EURL, SARL, SASU, SAS : vos mentions et votre régime de TVA s\'adaptent.'),
+         ('phone-app','Application mobile','Installez ChronoDevis sur Android et iPhone et faites vos devis directement sur le chantier.'),
+         ('globe','4 langues','Interface en français, anglais, espagnol et arabe. Devis toujours édités en français, conformes au droit français.')],
   how_t='Comment ça marche', how=[('1','Décrivez ou photographiez','Quelques mots ou une photo du chantier suffisent.'),('2','L\'IA chiffre','Main d\'œuvre, fournitures, déplacement et TVA en quelques secondes.'),('3','Ajustez et envoyez','Modifiez les lignes, éditez le PDF et faites-le signer.')],
   p_t='Des tarifs simples', p_s='7 jours d\'essai gratuit avec toutes les fonctionnalités Pro. Sans carte bancaire.',
   monthly='Mensuel', yearly='Annuel', save='-20 %', per_month='€ / mois', per_year='€ / an', billed_year='soit {m} € / mois, facturé annuellement', tax_note='Prix nets : TVA non applicable, art. 293 B du CGI.',
@@ -62,14 +65,14 @@ T = {
   demo_ph='E.g. repaint a 25 m² living room, walls and ceiling, including crack repair',
   demo_btn='Estimate', demo_photo='Add a photo',
   f_t='Everything to price, send and sign faster',
-  feats=[('🤖','AI pricing','Hours, hourly rate, materials with quantities and prices, travel: the AI suggests, you adjust.'),
-         ('📷','Photo analysis','Snap the equipment or the site: the AI identifies the hardware, its condition and constraints.'),
-         ('📄','Compliant quotes','Numbering, French legal mentions, VAT (20%, 10%, 5.5% or 293 B exemption), insurance, sign-off box.'),
-         ('🔗','Your client page','A link to share: your clients get an estimate and send their request straight to you.'),
-         ('🧰','Every trade','Plumbing, electrical, masonry, painting, carpentry, roofing, tiling, landscaping and more.'),
-         ('🏢','Every business type','Micro-entreprise, EI, EURL, SARL, SASU, SAS: your mentions and VAT regime adapt.'),
-         ('📱','Mobile app','Install ChronoDevis on Android and iPhone and quote right on site.'),
-         ('🌍','4 languages','Interface in French, English, Spanish and Arabic. Quotes are always issued in French, compliant with French law.')],
+  feats=[('sparkles','AI pricing','Hours, hourly rate, materials with quantities and prices, travel: the AI suggests, you adjust.'),
+         ('camera','Photo analysis','Snap the equipment or the site: the AI identifies the hardware, its condition and constraints.'),
+         ('file','Compliant quotes','Numbering, French legal mentions, VAT (20%, 10%, 5.5% or 293 B exemption), insurance, sign-off box.'),
+         ('link','Your client page','A link to share: your clients get an estimate and send their request straight to you.'),
+         ('wrench','Every trade','Plumbing, electrical, masonry, painting, carpentry, roofing, tiling, landscaping and more.'),
+         ('building','Every business type','Micro-entreprise, EI, EURL, SARL, SASU, SAS: your mentions and VAT regime adapt.'),
+         ('phone-app','Mobile app','Install ChronoDevis on Android and iPhone and quote right on site.'),
+         ('globe','4 languages','Interface in French, English, Spanish and Arabic. Quotes are always issued in French, compliant with French law.')],
   how_t='How it works', how=[('1','Describe or photograph','A few words or a photo of the job is enough.'),('2','AI prices it','Labour, materials, travel and VAT in seconds.'),('3','Adjust and send','Edit the lines, export the PDF and get it signed.')],
   p_t='Simple pricing', p_s='7-day free trial with all Pro features. No credit card.',
   monthly='Monthly', yearly='Yearly', save='-20%', per_month='€ / month', per_year='€ / year', billed_year='i.e. €{m} / month, billed yearly', tax_note='Net prices: VAT not applicable (art. 293 B of the French tax code).',
@@ -98,14 +101,14 @@ T = {
   demo_ph='Ej.: pintar un salón de 25 m², paredes y techo, reparando grietas',
   demo_btn='Calcular', demo_photo='Añadir una foto',
   f_t='Todo para presupuestar, enviar y firmar más rápido',
-  feats=[('🤖','Cálculo con IA','Horas, tarifa, materiales con cantidades y precios, desplazamiento: la IA propone, tú ajustas.'),
-         ('📷','Análisis de fotos','Fotografía el equipo o la obra: la IA identifica el material, su estado y las dificultades.'),
-         ('📄','Presupuestos conformes','Numeración, menciones legales francesas, IVA (20 %, 10 %, 5,5 % o exención 293 B), seguro, firma.'),
-         ('🔗','Tu página de clientes','Un enlace para compartir: tus clientes obtienen una estimación y te envían su solicitud.'),
-         ('🧰','Todos los oficios','Fontanería, electricidad, albañilería, pintura, carpintería, tejados, alicatado, jardinería y más.'),
-         ('🏢','Todas las estructuras','Micro-entreprise, EI, EURL, SARL, SASU, SAS: tus menciones y tu régimen de IVA se adaptan.'),
-         ('📱','App móvil','Instala ChronoDevis en Android y iPhone y presupuesta en la obra.'),
-         ('🌍','4 idiomas','Interfaz en francés, inglés, español y árabe. Presupuestos siempre en francés, conformes al derecho francés.')],
+  feats=[('sparkles','Cálculo con IA','Horas, tarifa, materiales con cantidades y precios, desplazamiento: la IA propone, tú ajustas.'),
+         ('camera','Análisis de fotos','Fotografía el equipo o la obra: la IA identifica el material, su estado y las dificultades.'),
+         ('file','Presupuestos conformes','Numeración, menciones legales francesas, IVA (20 %, 10 %, 5,5 % o exención 293 B), seguro, firma.'),
+         ('link','Tu página de clientes','Un enlace para compartir: tus clientes obtienen una estimación y te envían su solicitud.'),
+         ('wrench','Todos los oficios','Fontanería, electricidad, albañilería, pintura, carpintería, tejados, alicatado, jardinería y más.'),
+         ('building','Todas las estructuras','Micro-entreprise, EI, EURL, SARL, SASU, SAS: tus menciones y tu régimen de IVA se adaptan.'),
+         ('phone-app','App móvil','Instala ChronoDevis en Android y iPhone y presupuesta en la obra.'),
+         ('globe','4 idiomas','Interfaz en francés, inglés, español y árabe. Presupuestos siempre en francés, conformes al derecho francés.')],
   how_t='Cómo funciona', how=[('1','Describe o fotografía','Unas palabras o una foto bastan.'),('2','La IA calcula','Mano de obra, materiales, desplazamiento e IVA en segundos.'),('3','Ajusta y envía','Edita las líneas, exporta el PDF y hazlo firmar.')],
   p_t='Precios sencillos', p_s='7 días de prueba gratis con todas las funciones Pro. Sin tarjeta.',
   monthly='Mensual', yearly='Anual', save='-20 %', per_month='€ / mes', per_year='€ / año', billed_year='es decir {m} € / mes, facturado anualmente', tax_note='Precios netos: IVA no aplicable (art. 293 B del código fiscal francés).',
@@ -134,14 +137,14 @@ T = {
   demo_ph='مثال: دهن صالون مساحته 25 م²، الجدران والسقف، مع إصلاح الشقوق',
   demo_btn='احسب', demo_photo='أضف صورة',
   f_t='كل ما تحتاجه لتسعير العروض وإرسالها وتوقيعها أسرع',
-  feats=[('🤖','تسعير بالذكاء الاصطناعي','الساعات، سعر الساعة، اللوازم بكمياتها وأسعارها، التنقل: الذكاء الاصطناعي يقترح وأنت تعدّل.'),
-         ('📷','تحليل الصور','صوّر الجهاز أو الورشة: يتعرّف الذكاء الاصطناعي على المعدات وحالتها والصعوبات.'),
-         ('📄','عروض مطابقة للقانون','ترقيم، المعلومات القانونية الفرنسية، الضريبة (20٪، 10٪، 5.5٪ أو الإعفاء 293 B)، التأمين، خانة الموافقة.'),
-         ('🔗','صفحتك للزبائن','رابط تشاركه: يحصل زبائنك على تقدير ويرسلون طلبهم إليك مباشرة.'),
-         ('🧰','كل الحرف','سباكة، كهرباء، بناء، دهان، نجارة، أسقف، بلاط، حدائق وغيرها.'),
-         ('🏢','كل أشكال المؤسسات','مقاول ذاتي، EI، EURL، SARL، SASU، SAS: معلوماتك القانونية ونظام ضريبتك يتكيّفان.'),
-         ('📱','تطبيق للهاتف','ثبّت ChronoDevis على أندرويد وآيفون واصنع عروضك في الورشة مباشرة.'),
-         ('🌍','4 لغات','الواجهة بالفرنسية والإنجليزية والإسبانية والعربية. عروض الأسعار تصدر دائماً بالفرنسية وفق القانون الفرنسي.')],
+  feats=[('sparkles','تسعير بالذكاء الاصطناعي','الساعات، سعر الساعة، اللوازم بكمياتها وأسعارها، التنقل: الذكاء الاصطناعي يقترح وأنت تعدّل.'),
+         ('camera','تحليل الصور','صوّر الجهاز أو الورشة: يتعرّف الذكاء الاصطناعي على المعدات وحالتها والصعوبات.'),
+         ('file','عروض مطابقة للقانون','ترقيم، المعلومات القانونية الفرنسية، الضريبة (20٪، 10٪، 5.5٪ أو الإعفاء 293 B)، التأمين، خانة الموافقة.'),
+         ('link','صفحتك للزبائن','رابط تشاركه: يحصل زبائنك على تقدير ويرسلون طلبهم إليك مباشرة.'),
+         ('wrench','كل الحرف','سباكة، كهرباء، بناء، دهان، نجارة، أسقف، بلاط، حدائق وغيرها.'),
+         ('building','كل أشكال المؤسسات','مقاول ذاتي، EI، EURL، SARL، SASU، SAS: معلوماتك القانونية ونظام ضريبتك يتكيّفان.'),
+         ('phone-app','تطبيق للهاتف','ثبّت ChronoDevis على أندرويد وآيفون واصنع عروضك في الورشة مباشرة.'),
+         ('globe','4 لغات','الواجهة بالفرنسية والإنجليزية والإسبانية والعربية. عروض الأسعار تصدر دائماً بالفرنسية وفق القانون الفرنسي.')],
   how_t='كيف يعمل', how=[('1','صِف أو صوّر','بضع كلمات أو صورة للورشة تكفي.'),('2','الذكاء الاصطناعي يسعّر','اليد العاملة واللوازم والتنقل والضريبة في ثوانٍ.'),('3','عدّل وأرسل','عدّل البنود، صدّر PDF واجعل الزبون يوقّع.')],
   p_t='أسعار بسيطة', p_s='7 أيام تجربة مجانية بكل مزايا Pro. بدون بطاقة بنكية.',
   monthly='شهري', yearly='سنوي', save='-20٪', per_month='€ / شهرياً', per_year='€ / سنوياً', billed_year='أي {m} € شهرياً، تُدفع سنوياً', tax_note='أسعار صافية: لا تُطبَّق ضريبة القيمة المضافة (المادة 293 B من قانون الضرائب الفرنسي).',
@@ -168,7 +171,7 @@ def page(l):
     url = SITE + PATH[l]
     alts = '\n'.join(f'<link rel="alternate" hreflang="{x}" href="{SITE}{PATH[x]}">' for x in LANGS) + f'\n<link rel="alternate" hreflang="x-default" href="{SITE}/">'
     app = f'/app/?lang={l}'
-    feats = ''.join(f'<div class="card feat"><div class="ic">{i}</div><h3>{e(a)}</h3><p class="muted small">{e(b)}</p></div>' for i, a, b in d['feats'])
+    feats = ''.join(f'<div class="card feat"><div class="ic">{svg(i)}</div><h3>{e(a)}</h3><p class="muted small">{e(b)}</p></div>' for i, a, b in d['feats'])
     how = ''.join(f'<div class="card"><div class="pill acc">{n}</div><h3 style="margin-top:10px">{e(a)}</h3><p class="muted small">{e(b)}</p></div>' for n, a, b in d['how'])
     faq = ''.join(f'<details class="faq"><summary>{e(q)}</summary><p class="muted" style="margin:10px 0 0">{e(a)}</p></details>' for q, a in d['faq'])
     def plan(key, best):
@@ -260,7 +263,7 @@ def page(l):
   <div class="row"><a href="/legal.html#mentions">{e(d['f_legal'])}</a><a href="/legal.html#cgv">{e(d['f_cgv'])}</a><a href="/legal.html#confidentialite">{e(d['f_priv'])}</a><a href="/legal.html#contact">{e(d['f_contact'])}</a></div>
 </div></footer>
 
-<script src="/assets/i18n.js?v=4"></script>
+<script src="/assets/i18n.js?v=5"></script>
 <script src="/assets/core.js?v={V}"></script>
 <script>
 CD.setLang({json.dumps(l)});

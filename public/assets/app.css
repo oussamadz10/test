@@ -61,7 +61,7 @@ textarea.in{min-height:110px;resize:vertical}
 .hero h1 em{font-style:normal;color:var(--acc)}
 .hero p.lead{font-size:1.15rem;color:var(--ink2);max-width:640px}
 .sec{padding:60px 0}.sec h2{font-size:clamp(1.6rem,3.5vw,2.3rem);letter-spacing:-.01em}
-.feat .ic{width:44px;height:44px;border-radius:12px;background:var(--accbg);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px}
+.feat .ic{width:44px;height:44px;border-radius:12px;background:var(--accbg);color:var(--acc2);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
 .price{position:relative}.price.best{border:2px solid var(--acc);box-shadow:var(--sh)}
 .price .amt{font-size:2.6rem;font-weight:800;letter-spacing:-.02em}.price ul{padding:0;list-style:none;margin:16px 0 22px}
 .price li{padding:6px 0 6px 26px;position:relative;font-size:.93rem}[dir=rtl] .price li{padding:6px 26px 6px 0}
@@ -110,3 +110,15 @@ footer.foot{background:var(--ink);color:#94a3b8;padding:36px 0;font-size:.88rem;
 .pwa-bar.on{transform:none}.pwa-bar img{width:42px;height:42px;border-radius:11px}.pwa-bar .t{flex:1;min-width:0;line-height:1.25}.pwa-bar b{display:block;font-size:14px}.pwa-bar small{color:#94a3b8;font-size:12px}
 .pwa-bar .x{border:0;background:none;color:#94a3b8;font-size:22px;cursor:pointer}
 @media(max-width:860px){.app-page .pwa-bar{bottom:80px}}
+
+.i{display:inline-flex;width:18px;height:18px;flex:none;line-height:0}.i svg{width:100%;height:100%}
+.btn-sm .i{width:16px;height:16px}.btn-lg .i{width:20px;height:20px}
+.side a .i{width:20px;height:20px}
+[dir=rtl] .i.flip svg{transform:scaleX(-1)}
+.upl .i{width:17px;height:17px}
+.ph button{display:flex;align-items:center;justify-content:center}.ph button .i{width:14px;height:14px}
+.done-ic{display:flex;justify-content:center;color:var(--ok,#16a34a);margin-bottom:6px}.done-ic .i{width:56px;height:56px}
+.logo{gap:0;flex:none}.logo img{margin-inline-end:10px}.top .nav{min-width:0}
+@media(max-width:420px){.top .wrap{gap:8px}.top .logo{font-size:1.05rem}.top .logo img{width:30px;height:30px;margin-inline-end:8px}.top .lang{max-width:96px;padding:6px}.top #logout{padding:8px 8px;font-size:.8rem}}
+@media(max-width:480px){.top .nav a.btn-g{display:none}.top .nav{gap:6px}}
+@media(max-width:380px){.top .logo{font-size:.98rem}.top .logo img{width:28px;height:28px;margin-inline-end:6px}.top .lang{max-width:86px;font-size:.8rem}.top .nav .btn-sm{padding:8px 10px;font-size:.82rem}}

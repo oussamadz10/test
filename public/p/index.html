@@ -7,14 +7,14 @@
 <meta name="theme-color" content="#0f172a">
 <link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/app.css?v=3">
+<link rel="stylesheet" href="/assets/app.css?v=5">
 </head>
 <body>
 <header class="top"><div class="wrap"><div class="logo" id="brand"></div><div class="nav"><select class="lang" id="lang" aria-label="Langue"><option value="fr">FR</option><option value="en">EN</option><option value="es">ES</option><option value="ar">AR</option></select><a class="btn btn-p btn-sm hidden" id="call"></a></div></div></header>
 <main class="wrap narrow" style="padding:24px 16px 40px" id="root"><div class="empty"><span class="spin dk"></span></div></main>
-<footer class="foot"><div class="wrap row between small"><div id="legal"></div><a href="/" target="_blank" rel="noopener">⚡ ChronoDevis</a></div></footer>
-<script src="/assets/i18n.js?v=4"></script>
-<script src="/assets/core.js?v=3"></script>
+<footer class="foot"><div class="wrap row between small"><div id="legal"></div><a href="/" target="_blank" rel="noopener">ChronoDevis</a></div></footer>
+<script src="/assets/i18n.js?v=5"></script>
+<script src="/assets/core.js?v=5"></script>
 <script>
 (function () {
   'use strict';
@@ -38,7 +38,7 @@
     const b = $('#brand'); b.innerHTML = '';
     if (P.logo_url) b.append(el('img', { src: P.logo_url, alt: '', style: 'width:auto;max-width:120px;border-radius:6px' }));
     b.append(el('span', { text: P.company_name }));
-    if (P.phone) { const c = $('#call'); c.href = 'tel:' + P.phone.replace(/\s/g, ''); c.textContent = '📞 ' + P.phone; c.classList.remove('hidden'); }
+    if (P.phone) { const c = $('#call'); c.href = 'tel:' + P.phone.replace(/\s/g, ''); c.textContent = ''; c.append(CD.icon('phone'), P.phone); c.classList.remove('hidden'); }
     $('#legal').textContent = [P.company_name, P.siret ? 'SIRET ' + P.siret : '', P.city].filter(Boolean).join(' · ');
     form();
   }
@@ -47,7 +47,7 @@
   function form() {
     root.innerHTML = '';
     if (!P.active) { root.append(el('div', { class: 'card center' }, el('h2', { text: P.company_name }), el('p', { class: 'muted', text: T('cp.paused') }),
-      P.phone ? el('a', { class: 'btn btn-p', href: 'tel:' + P.phone, text: '📞 ' + P.phone }) : null, P.contact_email ? el('p', {}, el('a', { href: 'mailto:' + P.contact_email, text: P.contact_email })) : null)); return; }
+      P.phone ? el('a', { class: 'btn btn-p', href: 'tel:' + P.phone }, CD.icon('phone'), P.phone) : null, P.contact_email ? el('p', {}, el('a', { href: 'mailto:' + P.contact_email, text: P.contact_email })) : null)); return; }
     const d = el('textarea', { class: 'in', placeholder: T('cp.descPh') }); d.value = desc;
     const g = el('select', { class: 'in' }, el('option', { value: 'Standard', text: T('q.std') }), el('option', { value: 'Haut de gamme', text: T('q.premium') })); g.value = range;
     const site = el('input', { class: 'in', value: place, placeholder: T('cp.sitePh') });
@@ -90,7 +90,7 @@
       try {
         await CD.api('request', { slug, name: name.value, email: email.value, phone: phone.value, city: city.value, website: hp.value, consent: ok.checked, description: desc, photosCount: est.photosCount,
           estimate: { title: est.title, summary: est.summary, totalHt: t.ht, hours: est.hours, lines, steps: est.steps, photoFindings: est.photoFindings, investment: range } });
-        f.innerHTML = ''; f.append(el('div', { class: 'center' }, el('div', { style: 'font-size:3rem', text: '✅' }), el('h2', { text: T('cp.thanks') }), el('p', { class: 'muted', text: T('cp.thanksSub', { company: P.company_name }) }),
+        f.innerHTML = ''; f.append(el('div', { class: 'center' }, el('div', { class: 'done-ic' }, CD.icon('check')), el('h2', { text: T('cp.thanks') }), el('p', { class: 'muted', text: T('cp.thanksSub', { company: P.company_name }) }),
           el('button', { class: 'btn btn-l', type: 'button', text: T('cp.again'), onclick: () => { est = null; desc = ''; form(); } })));
       } catch (e) { msg.append(el('div', { class: 'alert err', text: e.message })); send.disabled = false; send.textContent = T('cp.send'); }
     } }, el('h3', { text: T('cp.formTitle') }), el('p', { class: 'muted small', text: T('cp.formSub', { company: P.company_name }) }), msg,
@@ -104,7 +104,7 @@
         el('div', { class: 'sum-row tot' }, el('span', { text: T('cp.total') }), el('span', { text: eur(t.ht) })),
         P.vat_regime === 'franchise' ? el('div', { class: 'xs muted', text: T('vat.293b') }) : el('div', { class: 'xs muted', text: T('cp.vatNote') }),
         el('p', { class: 'xs muted', style: 'margin-top:10px', text: T('cp.disclaimer', { company: P.company_name }) }),
-        el('button', { class: 'btn btn-g btn-sm', text: '← ' + T('cp.modify'), onclick: () => { est = null; form(); } })), f);
+        el('button', { class: 'btn btn-g btn-sm', onclick: () => { est = null; form(); } }, CD.icon('back', 'flip'), T('cp.modify'))), f);
     scrollTo(0, 0);
   }
   if (!slug) { root.innerHTML = ''; root.append(el('div', { class: 'empty', text: T('cp.notFound') })); } else load();

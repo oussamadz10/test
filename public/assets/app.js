@@ -54,10 +54,10 @@
     }
 
     // ---------- coquille ----------
-    const NAV = [['home', '🏠', 'nav.home'], ['new', '➕', 'nav.new'], ['quotes', '📄', 'nav.quotes'], ['requests', '📥', 'nav.requests'], ['page', '🔗', 'nav.page'], ['settings', '⚙️', 'nav.settings'], ['billing', '💳', 'nav.billing']];
+    const NAV = [['home', 'home', 'nav.home'], ['new', 'plus', 'nav.new'], ['quotes', 'file', 'nav.quotes'], ['requests', 'inbox', 'nav.requests'], ['page', 'link', 'nav.page'], ['settings', 'settings', 'nav.settings'], ['billing', 'card', 'nav.billing']];
     function shell(active, ...content) {
         root.innerHTML = '';
-        const side = el('nav', { class: 'side no-print' }, NAV.map(([k, ic, t]) => el('a', { href: '#' + k, class: active === k ? 'on' : '' }, el('span', { text: ic }), el('span', { class: k === 'settings' || k === 'billing' || k === 'page' ? 't2' : '', text: T(t) }),
+        const side = el('nav', { class: 'side no-print' }, NAV.map(([k, ic, t]) => el('a', { href: '#' + k, class: active === k ? 'on' : '' }, CD.icon(ic), el('span', { class: k === 'settings' || k === 'billing' || k === 'page' ? 't2' : '', text: T(t) }),
             k === 'requests' ? el('span', { class: 'badge' + (newRequests ? '' : ' hidden'), id: 'badge-req', text: newRequests }) : null)));
         const main = el('main', { class: 'main' }, accessBanner(), ...content);
         root.append(el('div', { class: 'app-shell' }, side, main));
@@ -74,7 +74,7 @@
         const [view, id] = location.hash.replace(/^#/, '').split('/');
         ({ home: homeView, new: () => editorView(null), quotes: quotesView, quote: () => quoteView(id), edit: () => editQuote(id), requests: requestsView, request: () => requestView(id), page: pageView, settings: settingsView, billing: billingView }[view] || homeView)();
     }
-    const busy = (btn, on, label) => { btn.disabled = on; if (on) { btn.dataset.l = btn.textContent; btn.innerHTML = '<span class="spin"></span> ' + (label || ''); } else btn.textContent = btn.dataset.l || label || ''; };
+    const busy = (btn, on, label) => { btn.disabled = on; if (on) { btn.dataset.h = btn.innerHTML; btn.innerHTML = '<span class="spin"></span> ' + CD.esc(label || ''); } else if (btn.dataset.h != null) btn.innerHTML = btn.dataset.h; else btn.textContent = label || ''; };
     const field = (label, input, hint) => el('div', { class: 'field' }, el('label', { class: 'f', text: label }), input, hint ? el('div', { class: 'hint', text: hint }) : null);
     const input = (val, attrs) => el('input', Object.assign({ class: 'in', value: val == null ? '' : val }, attrs || {}));
     const select = (val, opts) => { const s = el('select', { class: 'in' }, opts.map(([v, l]) => el('option', { value: v, text: l }))); s.value = val == null ? '' : String(val); return s; };
@@ -158,7 +158,7 @@
     async function homeView() {
         const main = shell('home', el('h1', { text: T('home.hello', { name: P.company_name }) }));
         const stats = el('div', { class: 'grid g3', style: 'margin:18px 0' });
-        main.append(el('div', { class: 'row', style: 'margin:6px 0 4px' }, el('a', { class: 'btn btn-p btn-lg', href: '#new', text: '➕ ' + T('nav.new') }), el('a', { class: 'btn btn-l', href: '#page', text: '🔗 ' + T('home.share') })), stats);
+        main.append(el('div', { class: 'row', style: 'margin:6px 0 4px' }, el('a', { class: 'btn btn-p btn-lg', href: '#new' }, CD.icon('plus'), T('nav.new')), el('a', { class: 'btn btn-l', href: '#page' }, CD.icon('link'), T('home.share'))), stats);
         const recent = el('div', { class: 'card' }, el('h3', { text: T('home.recent') }), el('div', { class: 'empty' }, el('span', { class: 'spin dk' })));
         main.append(recent);
         try {
@@ -196,7 +196,7 @@
         const site = input(prefill && prefill.client_city, { placeholder: T('q.sitePh') });
         const photoBox = el('div');
         const picker = CD.photoPicker(photoBox, 5);
-        const aiBtn = el('button', { class: 'btn btn-d', type: 'button', text: '🤖 ' + T('q.analyze') }), aiMsg = el('div');
+        const aiBtn = el('button', { class: 'btn btn-d', type: 'button' }, CD.icon('sparkles'), T('q.analyze')), aiMsg = el('div');
         const aiCard = el('div', { class: 'card', style: 'margin-bottom:16px' }, el('h3', { text: T('q.aiTitle') }), el('p', { class: 'muted small', text: T('q.aiSub') }),
             field(T('q.desc'), desc), el('div', { class: 'grid g3' }, field(T('q.type'), type), field(T('q.range'), gamme), field(T('q.site'), site)),
             el('div', { class: 'field' }, el('label', { class: 'f', text: T('q.photos') }), a.plan === 'essentiel' ? el('div', { class: 'hint', text: T('q.photosPro') }) : photoBox),
@@ -221,7 +221,7 @@
                     el('td', { style: 'width:70px' }, el('input', { class: 'in', value: l.unit, oninput: upd('unit') })),
                     el('td', { style: 'width:100px' }, el('input', { class: 'in', value: l.unitPrice, inputmode: 'decimal', oninput: upd('unitPrice', true) })),
                     el('td', { class: 'r', id: 'lt' + i, text: eur(l.qty * l.unitPrice) }),
-                    el('td', {}, el('button', { class: 'btn btn-g btn-sm', type: 'button', 'aria-label': '×', text: '✕', onclick: () => { lines.splice(i, 1); drawLines(); } }))));
+                    el('td', {}, el('button', { class: 'btn btn-g btn-sm', type: 'button', 'aria-label': T('remove'), onclick: () => { lines.splice(i, 1); drawLines(); } }, CD.icon('x')))));
             });
             drawTotals();
         }
@@ -240,7 +240,7 @@
             if (info.assumptions.length) summaryBox.append(el('p', { html: '<b>' + T('q.assumptions') + '</b>' }), el('ul', {}, info.assumptions.map((s) => el('li', { text: s }))));
         }
         vatSel.onchange = drawTotals;
-        const addLine = el('button', { class: 'btn btn-l btn-sm', type: 'button', text: '+ ' + T('q.addLine'), onclick: () => { lines.push({ kind: 'other', label: '', qty: 1, unit: 'u', unitPrice: 0 }); drawLines(); } });
+        const addLine = el('button', { class: 'btn btn-l btn-sm', type: 'button', onclick: () => { lines.push({ kind: 'other', label: '', qty: 1, unit: 'u', unitPrice: 0 }); drawLines(); } }, CD.icon('plus'), T('q.addLine'));
         const saveBtn = el('button', { class: 'btn btn-p btn-lg', type: 'button', text: T('q.save') });
         const linesCard = el('div', { class: 'card' + (lines.length || existing ? '' : ' hidden') },
             el('h3', { text: T('q.lines') }), field(T('q.title'), title), summaryBox,
@@ -268,7 +268,7 @@
                 linesCard.scrollIntoView({ behavior: 'smooth' });
             } catch (e) {
                 aiMsg.append(el('div', { class: 'alert err' }, e.message, e.status === 402 ? el('div', {}, el('a', { href: '#billing', text: T('trial.choose') })) : null));
-            } finally { busy(aiBtn, false, '🤖 ' + T('q.analyze')); }
+            } finally { busy(aiBtn, false, T('q.analyze')); }
         };
         saveBtn.onclick = async () => {
             if (!lines.length) return toast(T('q.noLines'));
@@ -295,7 +295,7 @@
     // ---------- liste et affichage des devis ----------
     async function quotesView() {
         const box = el('div', { class: 'card' }, el('div', { class: 'empty' }, el('span', { class: 'spin dk' })));
-        shell('quotes', el('div', { class: 'row between' }, el('h1', { text: T('nav.quotes') }), el('a', { class: 'btn btn-p', href: '#new', text: '+ ' + T('nav.new') })), box);
+        shell('quotes', el('div', { class: 'row between' }, el('h1', { text: T('nav.quotes') }), el('a', { class: 'btn btn-p', href: '#new' }, CD.icon('plus'), T('nav.new'))), box);
         try {
             const qs = await CD.db('/quotes?select=id,number,title,client_name,total_ht,status,created_at&order=created_at.desc&limit=200');
             box.innerHTML = '';
@@ -350,17 +350,17 @@
             const mail = 'mailto:' + encodeURIComponent(q.client_email || '') + '?subject=' + encodeURIComponent('Devis ' + q.number + ' – ' + P.company_name) +
                 '&body=' + encodeURIComponent(T('q.mailBody', { name: q.client_name || '', number: q.number, title: q.title, total: eur(q.total_ttc), company: P.company_name }));
             main.append(el('div', { class: 'row between no-print', style: 'margin-bottom:14px' },
-                el('a', { class: 'btn btn-g btn-sm', href: '#quotes', text: '← ' + T('nav.quotes') }),
+                el('a', { class: 'btn btn-g btn-sm', href: '#quotes' }, CD.icon('back', 'flip'), T('nav.quotes')),
                 el('div', { class: 'row' }, st,
-                    el('button', { class: 'btn btn-p btn-sm', text: '🖨️ ' + T('q.pdf'), onclick: () => { const o = document.title; document.title = 'Devis ' + q.number; print(); setTimeout(() => { document.title = o; }, 500); } }),
-                    el('a', { class: 'btn btn-l btn-sm', href: mail, text: '✉️ ' + T('q.send') }),
-                    el('a', { class: 'btn btn-l btn-sm', href: '#edit/' + id, text: '✏️ ' + T('q.editBtn') }),
+                    el('button', { class: 'btn btn-p btn-sm', onclick: () => { const o = document.title; document.title = 'Devis ' + q.number; print(); setTimeout(() => { document.title = o; }, 500); } }, CD.icon('printer'), T('q.pdf')),
+                    el('a', { class: 'btn btn-l btn-sm', href: mail }, CD.icon('mail'), T('q.send')),
+                    el('a', { class: 'btn btn-l btn-sm', href: '#edit/' + id }, CD.icon('pencil'), T('q.editBtn')),
                     el('button', { class: 'btn btn-l btn-sm', text: '⧉ ' + T('q.duplicate'), onclick: async () => {
                         const number = await CD.db('/rpc/next_quote_number', { method: 'POST', body: {} });
                         const c = Object.assign({}, q); delete c.id; delete c.created_at; c.number = number; c.status = 'draft';
                         const s = await CD.db('/quotes', { method: 'POST', body: c, headers: { Prefer: 'return=representation' } }); location.hash = 'quote/' + s[0].id;
                     } }),
-                    el('button', { class: 'btn btn-bad btn-sm', text: '🗑', 'aria-label': T('q.delete'), onclick: async () => { if (!confirm(T('q.confirmDelete'))) return; await CD.db('/quotes?id=eq.' + id, { method: 'DELETE' }); location.hash = 'quotes'; } }))),
+                    el('button', { class: 'btn btn-bad btn-sm', 'aria-label': T('q.delete'), onclick: async () => { if (!confirm(T('q.confirmDelete'))) return; await CD.db('/quotes?id=eq.' + id, { method: 'DELETE' }); location.hash = 'quotes'; } }, CD.icon('trash')))),
                 (!P.siret || !P.address || !P.insurance) ? el('div', { class: 'alert info no-print' }, T('q.missingInfo') + ' ', el('a', { href: '#settings', text: T('nav.settings') })) : '',
                 el('div', { html: devisDoc(q) }));
         } catch (e) { main.innerHTML = ''; main.append(el('div', { class: 'alert err', text: e.message })); }
@@ -391,7 +391,7 @@
             const st = select(r.status, ['new', 'contacted', 'quoted', 'won', 'lost'].map((s) => [s, T('rs.' + s)])); st.style.width = 'auto';
             st.onchange = () => CD.db('/requests?id=eq.' + id, { method: 'PATCH', body: { status: st.value } }).then(() => toast(T('saved')));
             main.innerHTML = '';
-            main.append(el('a', { class: 'btn btn-g btn-sm', href: '#requests', text: '← ' + T('nav.requests') }),
+            main.append(el('a', { class: 'btn btn-g btn-sm', href: '#requests' }, CD.icon('back', 'flip'), T('nav.requests')),
                 el('div', { class: 'card', style: 'margin-top:12px' },
                     el('div', { class: 'row between' }, el('h2', { text: e.title || T('req.request') }), st),
                     e.kind === 'visit' ? el('span', { class: 'pill acc', text: T('req.visit') }) : null,
@@ -403,10 +403,10 @@
                     el('h3', { style: 'margin-top:16px', text: T('q.desc') }), el('p', { style: 'white-space:pre-line', text: r.description || '—' }),
                     (e.photoFindings || []).length ? el('div', {}, el('b', { text: T('q.photoFindings') + ' (' + r.photos_count + ')' }), el('ul', {}, e.photoFindings.map((s) => el('li', { text: s })))) : null,
                     el('div', { class: 'row', style: 'margin-top:16px' },
-                        el('button', { class: 'btn btn-p', text: '📄 ' + T('req.makeQuote'), onclick: () => editorView(null, { request_id: r.id, client_name: r.client_name, client_email: r.client_email, client_phone: r.client_phone, client_city: r.client_city,
-                            description: r.description, title: e.title, summary: e.summary, steps: e.steps, photoFindings: e.photoFindings, lines: e.lines }) }),
-                        r.client_phone ? el('a', { class: 'btn btn-l', href: 'tel:' + r.client_phone, text: '📞 ' + T('req.call') }) : null,
-                        el('a', { class: 'btn btn-l', href: 'mailto:' + r.client_email, text: '✉️ ' + T('req.reply') }))));
+                        el('button', { class: 'btn btn-p', onclick: () => editorView(null, { request_id: r.id, client_name: r.client_name, client_email: r.client_email, client_phone: r.client_phone, client_city: r.client_city,
+                            description: r.description, title: e.title, summary: e.summary, steps: e.steps, photoFindings: e.photoFindings, lines: e.lines }) }, CD.icon('file'), T('req.makeQuote')),
+                        r.client_phone ? el('a', { class: 'btn btn-l', href: 'tel:' + r.client_phone }, CD.icon('phone'), T('req.call')) : null,
+                        el('a', { class: 'btn btn-l', href: 'mailto:' + r.client_email }, CD.icon('mail'), T('req.reply')))));
         } catch (x) { main.innerHTML = ''; main.append(el('div', { class: 'alert err', text: x.message })); }
     }
 
