@@ -64,6 +64,14 @@
       "dest": "/public/s/index.html"
     },
     {
+      "src": "/blog/?",
+      "dest": "/public/blog/index.html"
+    },
+    {
+      "src": "/blog/([a-z0-9-]+)/?",
+      "dest": "/public/blog/$1/index.html"
+    },
+    {
       "src": "/(en|es|ar)/?",
       "dest": "/public/$1/index.html"
     },

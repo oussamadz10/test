@@ -214,7 +214,7 @@ def page(l):
 <header class="top"><div class="wrap">
   <a class="logo" href="{PATH[l]}"><img src="/icons/icon-192.png" alt="">Chrono<b>Devis</b></a>
   <nav class="nav">
-    <a class="lnk" href="#features">{e(d['nav_feat'])}</a><a class="lnk" href="#pricing">{e(d['nav_price'])}</a><a class="lnk" href="#faq">{e(d['nav_faq'])}</a>
+    <a class="lnk" href="#features">{e(d['nav_feat'])}</a><a class="lnk" href="#pricing">{e(d['nav_price'])}</a><a class="lnk" href="#faq">{e(d['nav_faq'])}</a>{'<a class="lnk" href="/blog/">Guides</a>' if l=='fr' else ''}
     <select class="lang" aria-label="Langue" onchange="location.href=this.value">{langsel}</select>
     <a class="btn btn-g btn-sm" href="{app}">{e(d['login'])}</a><a class="btn btn-p btn-sm" href="{app}&signup=1">{e(d['start'])}</a>
   </nav>
@@ -260,7 +260,7 @@ def page(l):
 
 <footer class="foot"><div class="wrap row between">
   <div>© 2026 ChronoDevis. {e(d['rights'])}</div>
-  <div class="row"><a href="/legal.html#mentions">{e(d['f_legal'])}</a><a href="/legal.html#cgv">{e(d['f_cgv'])}</a><a href="/legal.html#confidentialite">{e(d['f_priv'])}</a><a href="/legal.html#contact">{e(d['f_contact'])}</a></div>
+  <div class="row"><a href="/blog/">{'Guides' if l=='fr' else 'Blog (FR)'}</a><a href="/legal.html#mentions">{e(d['f_legal'])}</a><a href="/legal.html#cgv">{e(d['f_cgv'])}</a><a href="/legal.html#confidentialite">{e(d['f_priv'])}</a><a href="/legal.html#contact">{e(d['f_contact'])}</a></div>
 </div></footer>
 
 <script src="/assets/i18n.js?v=9"></script>
