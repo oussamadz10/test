@@ -159,3 +159,15 @@ h3 .i{vertical-align:-3px;color:var(--acc2)}
 .devis .signed img{display:block;max-width:220px;max-height:74px;margin-bottom:4px}
 .devis .sign div.signed{height:auto;min-height:96px;font-size:11px;color:#111;border-style:solid;border-color:#059669;overflow-wrap:anywhere}
 @media(max-width:600px){.devis{padding:16px}.devis .sign{grid-template-columns:1fr}.devis .sign div{height:auto;min-height:70px}}
+
+/* parrainage */
+.refic{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--accbg,#fff7ed);color:var(--acc,#ea580c);flex:none}
+.refic svg{width:22px;height:22px}
+a.refcard:hover{border-color:var(--acc,#ea580c)}
+.refstats{grid-template-columns:repeat(3,1fr)!important;gap:10px}
+.refstats>div{background:#f8fafc;border-radius:12px;padding:10px 12px;min-width:0}
+@media (max-width:640px){.refcard .btn{display:none}}
+
+.pill.launch{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;padding:8px 14px}
+.pill.launch svg{width:16px;height:16px}
+.refband{display:flex;gap:14px;align-items:center;margin:22px auto 0;max-width:760px}

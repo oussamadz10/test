@@ -6,7 +6,7 @@ from blog_posts import POSTS, DATE, DATE_FR
 
 SITE = 'https://chronodevisia.fr'
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public')
-V = '8'
+V = '9'
 e = html.escape
 
 CSS = '''

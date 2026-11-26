@@ -4,6 +4,7 @@
 'use strict';
 const crypto = require('crypto');
 const S = require('../lib/server');
+const { tryReward } = require('../lib/referral');
 
 function verify(raw, header, secret) {
     const parts = Object.fromEntries(String(header || '').split(',').map((kv) => kv.split('=')));
@@ -51,6 +52,8 @@ module.exports = async (req, res) => {
             const sub = await r.json();
             sub.metadata = Object.assign({ user_id: o.client_reference_id }, sub.metadata || {});
             await applySubscription(sub);
+            const uid = sub.metadata.user_id;
+            if (uid) { try { await tryReward(uid, S.siteOf(req)); } catch (e) { console.error('[referral] ' + e.message); } }
         } else if (/^customer\.subscription\.(created|updated|deleted)$/.test(ev.type)) {
             await applySubscription(o);
         }

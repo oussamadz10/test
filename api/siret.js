@@ -3,6 +3,7 @@
 'use strict';
 const S = require('../lib/server');
 const { checkSiret } = require('../lib/siret');
+const { tryReward } = require('../lib/referral');
 
 module.exports = async (req, res) => {
     if (req.method !== 'POST') return S.send(res, 405, { error: 'Méthode non autorisée' });
@@ -26,6 +27,7 @@ module.exports = async (req, res) => {
         const patch = { siret, siret_verified: true, siret_name: c.name, siret_checked_at: new Date().toISOString() };
         if (!String(p.company_name || '').trim()) patch.company_name = c.name;
         await S.updateProfile(user.id, patch);
+        try { await tryReward(user.id, S.siteOf(req)); } catch (e) { console.error('[referral] ' + e.message); }
         return S.send(res, 200, { ok: true, name: c.name, address: c.address, individual: c.individual });
     } catch (e) { console.error('[siret] ' + e.message); return S.send(res, 500, { error: 'Vérification impossible pour le moment.', code: 'unavailable' }); }
 };

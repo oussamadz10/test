@@ -8,7 +8,7 @@ def svg(name):
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', 'public')
 SITE = 'https://chronodevisia.fr'
-V = '8'
+V = '9'
 LANGS = ['fr', 'en', 'es', 'ar']
 PATH = {'fr': '/', 'en': '/en/', 'es': '/es/', 'ar': '/ar/'}
 OG = {'fr': 'fr_FR', 'en': 'en_GB', 'es': 'es_ES', 'ar': 'ar_AR'}
@@ -165,7 +165,16 @@ T = {
 
 e = html.escape
 
+# Offre de lancement et parrainage (bandeau tarifs)
+EXTRA = {
+ 'fr': dict(launch='Offre de lancement : -50 % sur vos 3 premiers mois (formule mensuelle)', ref_t='Parrainez un artisan : 1 mois offert pour vous deux', ref_s="Chaque abonné reçoit un lien à partager. Quand l'artisan invité s'abonne, vous gagnez chacun un mois gratuit."),
+ 'en': dict(launch='Launch offer: 50% off your first 3 months (monthly plan)', ref_t='Refer a tradesperson: 1 free month for both of you', ref_s='Every subscriber gets a link to share. When the invited tradesperson subscribes, you each get a free month.'),
+ 'es': dict(launch='Oferta de lanzamiento: -50 % los 3 primeros meses (plan mensual)', ref_t='Recomienda a un profesional: 1 mes gratis para los dos', ref_s='Cada suscriptor recibe un enlace para compartir. Cuando el invitado se suscribe, cada uno gana un mes gratis.'),
+ 'ar': dict(launch='عرض الإطلاق: خصم 50٪ على أول 3 أشهر (الاشتراك الشهري)', ref_t='ادعُ حرفياً: شهر مجاني لكليكما', ref_s='كل مشترك يحصل على رابط ليشاركه. عندما يشترك الحرفي المدعو، يربح كل منكما شهراً مجانياً.'),
+}
+
 def page(l):
+    X = EXTRA[l]
     d = T[l]
     rtl = ' dir="rtl"' if l == 'ar' else ''
     url = SITE + PATH[l]
@@ -197,6 +206,7 @@ def page(l):
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{e(d['title'])}</title>
 <meta name="description" content="{e(d['desc'])}">
+<script>try{{var r=(new URLSearchParams(location.search).get('ref')||'').toUpperCase();if(/^[A-Z0-9]{{4,12}}$/.test(r))localStorage.setItem('cdRef',JSON.stringify({{c:r,t:Date.now()}}))}}catch(e){{}}</script>
 <link rel="canonical" href="{url}">
 {alts}
 <meta name="theme-color" content="#0f172a">
@@ -249,9 +259,11 @@ def page(l):
 
 <section class="sec" id="pricing"><div class="wrap">
   <h2 class="center">{e(d['p_t'])}</h2><p class="center muted">{e(d['p_s'])}</p>
+  <div class="center" style="margin-top:14px"><span class="pill acc launch">{svg('sparkles')} {e(X['launch'])}</span></div>
   <div class="center" style="margin:18px 0 28px"><div class="tog" id="tog"><button class="on" data-i="m">{e(d['monthly'])}</button><button data-i="y">{e(d['yearly'])} <span class="pill ok">{e(d['save'])}</span></button></div></div>
   <div class="grid g2 narrow" style="margin:0 auto">{plan('essentiel', False)}{plan('pro', True)}</div>
   <p class="xs muted center" style="margin-top:14px">{e(d['tax_note'])}</p>
+  <div class="card refband narrow"><span class="refic">{svg('gift')}</span><div><strong>{e(X['ref_t'])}</strong><p class="muted small" style="margin:4px 0 0">{e(X['ref_s'])}</p></div></div>
 </div></section>
 
 <section class="sec" id="faq"><div class="wrap narrow">
@@ -263,7 +275,7 @@ def page(l):
   <div class="row"><a href="/blog/">{'Guides' if l=='fr' else 'Blog (FR)'}</a><a href="/legal.html#mentions">{e(d['f_legal'])}</a><a href="/legal.html#cgv">{e(d['f_cgv'])}</a><a href="/legal.html#confidentialite">{e(d['f_priv'])}</a><a href="/legal.html#contact">{e(d['f_contact'])}</a></div>
 </div></footer>
 
-<script src="/assets/i18n.js?v=9"></script>
+<script src="/assets/i18n.js?v=10"></script>
 <script src="/assets/core.js?v={V}"></script>
 <script>
 CD.setLang({json.dumps(l)});

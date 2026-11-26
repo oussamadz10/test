@@ -122,7 +122,7 @@
             try {
                 if (mode === 'signup') {
                     if (DISPOSABLE.test(email.value)) throw new Error(T('su.disposable'));
-                    const j = await CD.auth.signUp(email.value.trim(), pass.value, { lang: CD.lang });
+                    const j = await CD.auth.signUp(email.value.trim(), pass.value, CD.ref ? { lang: CD.lang, ref: CD.ref } : { lang: CD.lang });
                     if (j.access_token) return boot();
                     form.innerHTML = ''; form.append(el('h2', { text: T('auth.checkTitle') }), el('p', { class: 'muted', text: T('auth.checkText', { email: email.value.trim() }) })); return;
                 }
@@ -132,6 +132,7 @@
         } },
             el('h2', { text: T(mode === 'signup' ? 'auth.signupTitle' : mode === 'forgot' ? 'auth.forgotTitle' : 'auth.loginTitle') }),
             mode === 'signup' ? el('p', { class: 'muted small', text: T('auth.signupSub') }) : null,
+            mode === 'signup' && CD.ref ? el('div', { class: 'alert ok' }, CD.icon('gift'), ' ', T('ref.invited')) : null,
             err, field(T('f.email'), email), mode !== 'forgot' ? field(T('f.password'), pass, mode === 'signup' ? T('auth.passHint') : null) : null,
             mode === 'signup' ? el('label', { class: 'chk', style: 'margin-bottom:14px' }, consent, el('span', {}, T('auth.accept') + ' ', el('a', { href: '/legal.html#cgv', target: '_blank', text: T('auth.terms') }))) : null,
             btn,
@@ -196,7 +197,7 @@
         if (!P.siret_verified) main.append(el('div', { class: 'alert info row between', style: 'margin:14px 0 0;gap:10px' }, el('span', {}, CD.icon('lock'), ' ', T('si.banner')), el('a', { class: 'btn btn-l btn-sm', href: '#settings' }, T('si.bannerBtn'))));
         const dash = el('div', { class: 'card dash', style: 'margin-bottom:18px' });
         const recent = el('div', { class: 'card' }, el('h3', { text: T('home.recent') }), el('div', { class: 'empty' }, el('span', { class: 'spin dk' })));
-        main.append(dash, recent);
+        main.append(dash, refTeaser(), recent);
         dashboard(dash);
         try {
             const month = new Date().toISOString().slice(0, 7);
@@ -660,14 +661,45 @@
         };
     }
 
+    // ---------- parrainage ----------
+    function refTeaser() {
+        return el('a', { class: 'card refcard row between', href: '#billing', style: 'margin-bottom:18px;text-decoration:none;color:inherit' },
+            el('div', { class: 'row', style: 'gap:12px' }, el('span', { class: 'refic' }, CD.icon('gift')), el('div', {}, el('strong', { text: T('ref.title') }), el('div', { class: 'muted small', text: T('ref.teaser') }))),
+            el('span', { class: 'btn btn-l btn-sm', text: T('ref.invite') }));
+    }
+    async function referralCard(box) {
+        box.append(el('div', { class: 'row', style: 'gap:12px;margin-bottom:6px' }, el('span', { class: 'refic' }, CD.icon('gift')), el('h3', { style: 'margin:0', text: T('ref.title') })),
+            el('p', { class: 'muted', style: 'margin:6px 0 12px', text: T('ref.how') }));
+        try {
+            const r = await CD.api('referral', {}, true);
+            const msg = T('ref.msg', { link: r.link });
+            const link = el('input', { class: 'in', readonly: true, value: r.link, onclick: (e) => e.target.select() });
+            const enc = encodeURIComponent;
+            box.append(el('div', { class: 'row', style: 'gap:8px;flex-wrap:nowrap' }, link,
+                el('button', { class: 'btn btn-p', onclick: async () => { try { await navigator.clipboard.writeText(r.link); toast(T('copied')); } catch (e) { link.select(); } } }, CD.icon('copy'), T('copy'))),
+                el('div', { class: 'row', style: 'gap:8px;margin-top:10px' },
+                    el('a', { class: 'btn btn-l btn-sm', target: '_blank', rel: 'noopener', href: 'https://wa.me/?text=' + enc(msg) }, CD.icon('phone'), 'WhatsApp'),
+                    el('a', { class: 'btn btn-l btn-sm', href: 'sms:?&body=' + enc(msg) }, CD.icon('phone-app'), 'SMS'),
+                    el('a', { class: 'btn btn-l btn-sm', href: 'mailto:?subject=' + enc(T('ref.subject')) + '&body=' + enc(msg) }, CD.icon('mail'), 'Email'),
+                    navigator.share ? el('button', { class: 'btn btn-l btn-sm', onclick: () => navigator.share({ title: 'ChronoDevis', text: msg }).catch(() => {}) }, CD.icon('link'), T('share')) : null),
+                el('div', { class: 'grid g3 refstats', style: 'margin-top:14px' },
+                    [[T('ref.sInvited'), r.invited], [T('ref.sConverted'), r.converted], [T('ref.sEarned'), r.earned + ' / ' + r.max]].map(([k, v]) =>
+                        el('div', {}, el('div', { class: 'muted xs', text: k }), el('div', { style: 'font-size:1.4rem;font-weight:800' }, el('bdi', { dir: 'ltr', text: String(v) }))))),
+                el('p', { class: 'muted xs', style: 'margin:12px 0 0', text: T('ref.rules') }));
+        } catch (e) { box.append(el('div', { class: 'alert err', text: e.message })); }
+    }
+
     // ---------- abonnement ----------
     async function billingView() {
         const a = access(P);
         let yearly = false;
         const plans = el('div', { class: 'grid g2', style: 'margin-top:16px' });
         const status = el('div', { class: 'card', style: 'margin-bottom:16px' });
-        shell('billing', el('h1', { text: T('nav.billing') }), status,
-            el('div', { class: 'tog' }, el('button', { class: 'on', text: T('monthly'), onclick: (e) => { yearly = false; tog(e.target); } }), el('button', { text: T('yearly') + ' -20 %', onclick: (e) => { yearly = true; tog(e.target); } })), plans);
+        const launch = el('div'), refBox = el('div', { class: 'card', style: 'margin-top:18px' });
+        shell('billing', el('h1', { text: T('nav.billing') }), status, launch,
+            el('div', { class: 'tog' }, el('button', { class: 'on', text: T('monthly'), onclick: (e) => { yearly = false; tog(e.target); } }), el('button', { text: T('yearly') + ' -20 %', onclick: (e) => { yearly = true; tog(e.target); } })), plans, refBox);
+        referralCard(refBox);
+        if (!P.stripe_subscription_id) CD.api('billing', { action: 'status' }, true).then((st) => { if (st.launch) launch.append(el('div', { class: 'alert ok', style: 'margin-bottom:14px' }, CD.icon('sparkles'), ' ', T('launch.app'))); }).catch(() => {});
         function tog(b) { b.parentNode.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); drawPlans(); }
         const PL = { essentiel: { m: 19, y: 182, f: ['plan.e1', 'plan.e2', 'plan.e5', 'plan.e3', 'plan.e4'] }, pro: { m: 39, y: 374, f: ['plan.p1', 'plan.p2', 'plan.p5', 'plan.p6', 'plan.p3', 'plan.p4'] } };
         function drawPlans() {
