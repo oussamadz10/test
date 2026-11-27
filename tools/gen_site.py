@@ -219,6 +219,7 @@ def page(l):
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css?v={V}">
 {''.join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in ld)}
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <header class="top"><div class="wrap">

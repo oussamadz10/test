@@ -40,6 +40,7 @@ def head(title, desc, url, ld):
 <link rel="stylesheet" href="/assets/app.css?v={V}">
 <style>{CSS}</style>
 {''.join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in ld)}
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <header class="top"><div class="wrap"><a class="logo" href="/"><img src="/icons/icon-192.png" alt="">Chrono<b>Devis</b></a><nav class="nav"><a class="lnk" href="/blog/">Guides</a><a class="btn btn-p btn-sm" href="/app/?signup=1">Essai gratuit</a></nav></div></header>
