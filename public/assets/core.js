@@ -91,6 +91,12 @@
             if (j.access_token) saveSession(j);
             return j;
         },
+        // Connexion Google / Apple : redirection vers Supabase, retour sur /app/#access_token=...
+        async oauth(provider) { const c = await CD.config(); location.href = c.supabaseUrl + '/auth/v1/authorize?provider=' + provider + '&redirect_to=' + encodeURIComponent(location.origin + '/app/'); },
+        async providers() {
+            try { const c = await CD.config(); const r = await fetch(c.supabaseUrl + '/auth/v1/settings', { headers: { apikey: c.supabaseAnonKey } }); const j = await r.json(); return (j && j.external) || {}; }
+            catch (e) { return {}; }
+        },
         async signIn(email, password) { const j = await authFetch('/token?grant_type=password', { email, password }); saveSession(j); return j; },
         async resend(email) { return authFetch('/resend?redirect_to=' + encodeURIComponent(location.origin + '/app/'), { type: 'signup', email }); },
         async recover(email) { return authFetch('/recover?redirect_to=' + encodeURIComponent(location.origin + '/app/'), { email }); },

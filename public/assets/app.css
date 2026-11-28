@@ -171,3 +171,10 @@ a.refcard:hover{border-color:var(--acc,#ea580c)}
 .pill.launch{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;padding:8px 14px}
 .pill.launch svg{width:16px;height:16px}
 .refband{display:flex;gap:14px;align-items:center;margin:22px auto 0;max-width:760px}
+
+/* connexion Google / Apple */
+.oauth{display:grid;gap:10px;margin:4px 0 6px}
+.oauth-btn{display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600}
+.oauth-apple{background:#000;color:#fff;border-color:#000}.oauth-apple:hover{background:#222}
+.or{display:flex;align-items:center;gap:10px;color:var(--mute,#64748b);font-size:.82rem;margin:8px 0 4px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line,#e2e8f0)}

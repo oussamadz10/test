@@ -42,6 +42,9 @@
         }
         $('#logout').classList.remove('hidden');
         if (P.lang && P.lang !== CD.lang && !new URLSearchParams(location.search).get('lang')) { CD.setLang(P.lang); langSel.value = P.lang; CD.applyI18n(); }
+        if (CD.ref && !P.referred_by && P.ref_code !== CD.ref && Date.now() - new Date(P.created_at).getTime() < 864e5) {
+            CD.api('referral', { action: 'claim', code: CD.ref }, true).then((r) => { if (r && r.ok) P.referred_by = r.referred_by; }).catch(() => {});
+        }
         if (!P.company_name) return onboardingView();
         if (new URLSearchParams(location.search).get('paid')) { toast(T('billing.thanks'), 5000); history.replaceState(null, '', '/app/' + location.hash); }
         countRequests();
@@ -123,6 +126,22 @@
         } });
         return el('div', {}, b);
     }
+    const GOOGLE_SVG = '<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.2 5.6c4.2-3.9 7.1-9.6 7.1-17z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.2-5.6c-2 1.4-4.7 2.3-8.7 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>';
+    const APPLE_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.1zM13.9 4.9c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>';
+    function oauthBox(mode) {
+        const box = el('div', { class: 'oauth' });
+        CD.auth.providers().then((ex) => {
+            const list = [['google', GOOGLE_SVG, T('auth.google')], ['apple', APPLE_SVG, T('auth.apple')]].filter(([k]) => ex[k]);
+            if (!list.length) return;
+            list.forEach(([k, svg, label]) => {
+                const b = el('button', { type: 'button', class: 'btn btn-l btn-block oauth-btn oauth-' + k, onclick: () => { busy(b, true); CD.auth.oauth(k); } });
+                b.innerHTML = svg; b.append(document.createTextNode(' ' + label)); box.append(b);
+            });
+            if (mode === 'signup') box.append(el('p', { class: 'muted xs', style: 'margin:6px 0 0' }, T('auth.oauthTerms') + ' ', el('a', { href: '/legal.html#cgv', target: '_blank', text: T('auth.terms') }), '.'));
+            box.append(el('div', { class: 'or' }, el('span', { text: T('auth.or') })));
+        });
+        return box;
+    }
     function checkMail(form, addr) {
         form.innerHTML = '';
         form.append(el('h2', { text: T('auth.checkTitle') }), el('p', { class: 'muted', text: T('auth.checkText', { email: addr }) }),
@@ -158,7 +177,7 @@
             el('h2', { text: T(mode === 'signup' ? 'auth.signupTitle' : mode === 'forgot' ? 'auth.forgotTitle' : 'auth.loginTitle') }),
             mode === 'signup' ? el('p', { class: 'muted small', text: T('auth.signupSub') }) : null,
             mode === 'signup' && CD.ref ? el('div', { class: 'alert ok' }, CD.icon('gift'), ' ', T('ref.invited')) : null,
-            err, field(T('f.email'), email), mode !== 'forgot' ? field(T('f.password'), pass, mode === 'signup' ? T('auth.passHint') : null) : null,
+            err, mode !== 'forgot' ? oauthBox(mode) : null, field(T('f.email'), email), mode !== 'forgot' ? field(T('f.password'), pass, mode === 'signup' ? T('auth.passHint') : null) : null,
             mode === 'signup' ? el('label', { class: 'chk', style: 'margin-bottom:14px' }, consent, el('span', {}, T('auth.accept') + ' ', el('a', { href: '/legal.html#cgv', target: '_blank', text: T('auth.terms') }))) : null,
             btn,
             el('div', { class: 'row between small', style: 'margin-top:16px' },
