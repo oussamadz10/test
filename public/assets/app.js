@@ -112,6 +112,23 @@
     }
 
     // ---------- connexion / inscription ----------
+    // Renvoi de l'email de confirmation (délai minimum imposé par le serveur : 60 s)
+    function resendBtn(addr) {
+        const b = el('button', { type: 'button', class: 'btn btn-l btn-sm', style: 'margin-top:8px', text: T('auth.resend'), onclick: async () => {
+            if (!addr) return toast(T('f.email'));
+            busy(b, true);
+            try { await CD.auth.resend(addr); toast(T('auth.resent'), 5000); }
+            catch (e) { toast(/seconds|security purposes|rate limit/i.test(e.message) ? T('auth.wait') : e.message, 6000); }
+            busy(b, false);
+        } });
+        return el('div', {}, b);
+    }
+    function checkMail(form, addr) {
+        form.innerHTML = '';
+        form.append(el('h2', { text: T('auth.checkTitle') }), el('p', { class: 'muted', text: T('auth.checkText', { email: addr }) }),
+            el('p', { class: 'muted small', text: T('auth.spam') }), resendBtn(addr),
+            el('p', { class: 'small', style: 'margin-top:16px' }, el('a', { href: '#', text: T('auth.haveAccount'), onclick: (e) => { e.preventDefault(); authView('login'); } })));
+    }
     function authView(mode) {
         root.innerHTML = '';
         const email = input('', { type: 'email', autocomplete: 'email', required: true }), pass = input('', { type: 'password', autocomplete: mode === 'signup' ? 'new-password' : 'current-password', minlength: 8 });
@@ -124,11 +141,19 @@
                     if (DISPOSABLE.test(email.value)) throw new Error(T('su.disposable'));
                     const j = await CD.auth.signUp(email.value.trim(), pass.value, CD.ref ? { lang: CD.lang, ref: CD.ref } : { lang: CD.lang });
                     if (j.access_token) return boot();
-                    form.innerHTML = ''; form.append(el('h2', { text: T('auth.checkTitle') }), el('p', { class: 'muted', text: T('auth.checkText', { email: email.value.trim() }) })); return;
+                    return checkMail(form, email.value.trim());
                 }
                 if (mode === 'forgot') { await CD.auth.recover(email.value.trim()); err.append(el('div', { class: 'alert ok', text: T('auth.linkSent') })); busy(btn, false); return; }
                 await CD.auth.signIn(email.value.trim(), pass.value); boot();
-            } catch (e) { err.append(el('div', { class: 'alert err', text: /Invalid login/i.test(e.message) ? T('auth.bad') : /confirm/i.test(e.message) ? T('auth.confirmFirst') : e.message })); busy(btn, false); }
+            } catch (e) {
+                const addr = email.value.trim();
+                if (mode === 'signup' && /sending confirmation|confirmation email/i.test(e.message)) {
+                    err.append(el('div', { class: 'alert err' }, T('auth.sendFail'), ' ', resendBtn(addr)));
+                } else if (/confirm/i.test(e.message)) {
+                    err.append(el('div', { class: 'alert err' }, T('auth.confirmFirst'), ' ', resendBtn(addr)));
+                } else err.append(el('div', { class: 'alert err', text: /Invalid login/i.test(e.message) ? T('auth.bad') : e.message }));
+                busy(btn, false);
+            }
         } },
             el('h2', { text: T(mode === 'signup' ? 'auth.signupTitle' : mode === 'forgot' ? 'auth.forgotTitle' : 'auth.loginTitle') }),
             mode === 'signup' ? el('p', { class: 'muted small', text: T('auth.signupSub') }) : null,

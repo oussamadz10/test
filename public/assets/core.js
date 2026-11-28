@@ -92,6 +92,7 @@
             return j;
         },
         async signIn(email, password) { const j = await authFetch('/token?grant_type=password', { email, password }); saveSession(j); return j; },
+        async resend(email) { return authFetch('/resend?redirect_to=' + encodeURIComponent(location.origin + '/app/'), { type: 'signup', email }); },
         async recover(email) { return authFetch('/recover?redirect_to=' + encodeURIComponent(location.origin + '/app/'), { email }); },
         async updatePassword(password) { return authFetch('/user', { password }, { method: 'PUT', token: await CD.token() }); },
         async signOut() { try { await authFetch('/logout', null, { token: CD.session && CD.session.access_token }); } catch (e) {} saveSession(null); },

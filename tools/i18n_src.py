@@ -58,6 +58,11 @@ add('auth.bad', 'Email ou mot de passe incorrect.', 'Wrong email or password.', 
 add('auth.confirmFirst', "Confirmez d'abord votre email (lien reçu à l'inscription).", 'Please confirm your email first (link sent at signup).', 'Confirma primero tu email (enlace recibido al registrarte).', 'أكّد بريدك أولاً (الرابط المرسل عند التسجيل).')
 add('auth.newPass', 'Nouveau mot de passe', 'New password', 'Nueva contraseña', 'كلمة سر جديدة'); add('auth.save', 'Enregistrer', 'Save', 'Guardar', 'حفظ')
 add('auth.passChanged', 'Mot de passe modifié.', 'Password changed.', 'Contraseña cambiada.', 'تم تغيير كلمة السر.')
+add('auth.resend', "Renvoyer l'email de confirmation", 'Resend the confirmation email', 'Reenviar el email de confirmación', 'إعادة إرسال بريد التأكيد')
+add('auth.resent', 'Email renvoyé. Pensez à vérifier vos courriers indésirables.', 'Email sent again. Check your spam folder too.', 'Email reenviado. Revisa también la carpeta de spam.', 'أُعيد إرسال البريد. تحقّق أيضاً من مجلد الرسائل غير المرغوب فيها.')
+add('auth.spam', "Rien reçu après quelques minutes ? Regardez dans les courriers indésirables (spam), puis renvoyez l'email.", 'Nothing after a few minutes? Check your spam folder, then resend the email.', '¿No llega en unos minutos? Revisa la carpeta de spam y vuelve a enviar el email.', 'لم يصلك شيء بعد دقائق؟ تحقّق من مجلد الرسائل غير المرغوب فيها، ثم أعد إرسال البريد.')
+add('auth.wait', 'Patientez une minute avant de redemander un email.', 'Please wait a minute before requesting another email.', 'Espera un minuto antes de pedir otro email.', 'انتظر دقيقة قبل طلب بريد آخر.')
+add('auth.sendFail', "Votre compte est créé, mais l'email de confirmation n'a pas pu être envoyé. Réessayez dans un instant.", 'Your account was created, but the confirmation email could not be sent. Try again in a moment.', 'Tu cuenta está creada, pero no se pudo enviar el email de confirmación. Inténtalo de nuevo en un momento.', 'تم إنشاء حسابك، لكن تعذّر إرسال بريد التأكيد. حاول مرة أخرى بعد قليل.')
 # champs
 add('f.email', 'Email', 'Email', 'Email', 'البريد الإلكتروني'); add('f.password', 'Mot de passe', 'Password', 'Contraseña', 'كلمة السر')
 add('f.name', 'Nom', 'Name', 'Nombre', 'الاسم'); add('f.company', "Nom de l'entreprise", 'Company name', 'Nombre de la empresa', 'اسم المؤسسة')
