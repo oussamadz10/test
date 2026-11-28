@@ -1,6 +1,6 @@
 // ChronoDevis AI – service worker : ouverture rapide et page hors connexion. Ne touche jamais à /api.
-var VERSION = 'chronodevis-v14';
-var CORE = ['/offline.html', '/icons/icon-192.png', '/assets/app.css?v=10', '/assets/core.js?v=11', '/assets/i18n.js?v=12', '/assets/qr.js?v=1', '/assets/app.js?v=12'];
+var VERSION = 'chronodevis-v15';
+var CORE = ['/offline.html', '/icons/icon-192.png', '/assets/app.css?v=10', '/assets/core.js?v=11', '/assets/i18n.js?v=13', '/assets/qr.js?v=1', '/assets/app.js?v=13'];
 var CDN = /^https:\/\/(cdn\.tailwindcss\.com|fonts\.googleapis\.com|fonts\.gstatic\.com)\//;
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(CORE); }).then(function () { return self.skipWaiting(); }));

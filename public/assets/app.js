@@ -29,7 +29,10 @@
     // ---------- démarrage ----------
     async function boot() {
         const h = CD.auth.fromHash();
-        if (h && h.error) toast(h.error, 6000);
+        if (h && h.error) {   // retour Google / Apple en erreur : message clair, adresse nettoyée
+            toast(/exchange external code|invalid_client|server_error/i.test(h.error) ? T('auth.oauthFail') : h.error, 7000);
+            history.replaceState(null, '', '/app/');
+        }
         if (!CD.session) { $('#logout').classList.add('hidden'); return authView(new URLSearchParams(location.search).get('signup') ? 'signup' : 'login'); }
         if (h && h.type === 'recovery') return newPasswordView();
         try {
